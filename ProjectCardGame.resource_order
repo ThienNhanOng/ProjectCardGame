@@ -1,0 +1,11 @@
+{
+  "FolderOrderSettings":[
+    {"name":"objects","order":4,"path":"folders/objects.yy",},
+    {"name":"rooms","order":2,"path":"folders/rooms.yy",},
+    {"name":"sprites","order":3,"path":"folders/sprites.yy",},
+  ],
+  "ResourceOrderSettings":[
+    {"name":"SPR_Cardback","order":1,"path":"sprites/SPR_Cardback/SPR_Cardback.yy",},
+    {"name":"SPR_Cardplaceholder","order":3,"path":"sprites/SPR_Cardplaceholder/SPR_Cardplaceholder.yy",},
+  ],
+}
