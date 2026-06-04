@@ -6,6 +6,7 @@
   ],
   "ResourceOrderSettings":[
     {"name":"SPR_Cardback","order":1,"path":"sprites/SPR_Cardback/SPR_Cardback.yy",},
-    {"name":"SPR_Cardplaceholder","order":3,"path":"sprites/SPR_Cardplaceholder/SPR_Cardplaceholder.yy",},
+    {"name":"SPR_monsterplaceholder","order":3,"path":"sprites/SPR_monsterplaceholder/SPR_monsterplaceholder.yy",},
+    {"name":"SPR_Weaponplaceholder","order":4,"path":"sprites/SPR_Weaponplaceholder/SPR_Weaponplaceholder.yy",},
   ],
 }
