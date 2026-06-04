@@ -1,10 +1,13 @@
 {
   "FolderOrderSettings":[
+    {"name":"Carddata","order":2,"path":"folders/objects/Carddata.yy",},
     {"name":"objects","order":4,"path":"folders/objects.yy",},
+    {"name":"Tools","order":1,"path":"folders/objects/Tools.yy",},
     {"name":"rooms","order":2,"path":"folders/rooms.yy",},
     {"name":"sprites","order":3,"path":"folders/sprites.yy",},
   ],
   "ResourceOrderSettings":[
+    {"name":"DebugOBJ_cordinates","order":1,"path":"objects/DebugOBJ_cordinates/DebugOBJ_cordinates.yy",},
     {"name":"SPR_Cardback","order":1,"path":"sprites/SPR_Cardback/SPR_Cardback.yy",},
     {"name":"SPR_monsterplaceholder","order":3,"path":"sprites/SPR_monsterplaceholder/SPR_monsterplaceholder.yy",},
     {"name":"SPR_Weaponplaceholder","order":4,"path":"sprites/SPR_Weaponplaceholder/SPR_Weaponplaceholder.yy",},

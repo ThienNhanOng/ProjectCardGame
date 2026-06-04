@@ -1,0 +1,75 @@
+{
+  "collection": "cardset_01",
+  "cards": [
+    {
+      "id": 1,
+      "type": "monster",
+      "level": 2,
+      "health": 3,
+      "ability": [{ "draw_cards": 1 }]
+    },
+    {
+      "id": 2,
+      "type": "monster",
+      "level": 5,
+      "health": 5,
+      "ability": [{ "upon_play_destroy_target": null }, { "heal_player": 2 }]
+    },
+    {
+      "id": 3,
+      "type": "monster",
+      "level": 10,
+      "health": 12,
+      "ability": [{ "increase_zone": 1 }, { "increase_attack": 3 }]
+    },
+    {
+      "id": 4,
+      "type": "monster",
+      "level": 13,
+      "health": 8,
+      "ability": [{ "upon_play_destroy_target": null }, { "draw_cards": 2 }]
+    },
+    {
+      "id": 5,
+      "type": "monster",
+      "level": 7,
+      "health": 9,
+      "ability": [{ "heal_on_attack": 3 }, { "heal_player": 2 }]
+    },
+    {
+      "id": 6,
+      "type": "monster",
+      "level": 15,
+      "health": 14,
+      "ability": [{ "increase_attack": 4 }, { "draw_cards": 1 }]
+    },
+    {
+      "id": 7,
+      "type": "monster",
+      "level": 3,
+      "health": 4,
+      "ability": [{ "heal_on_attack": 1 }]
+    },
+    {
+      "id": 8,
+      "type": "monster",
+      "level": 9,
+      "health": 7,
+      "ability": [{ "increase_zone": 1 }, { "draw_cards": 1 }]
+    },
+    {
+      "id": 9,
+      "type": "monster",
+      "level": 11,
+      "health": 6,
+      "ability": [{ "upon_play_destroy_target": null }, { "heal_on_attack": 2 }]
+    },
+    {
+      "id": 10,
+      "type": "monster",
+      "level": 20,
+      "health": 20,
+      "ability": [{ "upon_play_destroy_target": null }, { "increase_zone": 2 }, { "increase_attack": 5 }, { "heal_on_attack": 4 }, { "heal_player": 5 }, { "draw_cards": 2 }]
+    }
+  ]
+}
