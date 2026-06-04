@@ -1,15 +1,16 @@
 {
   "$GMObject":"",
-  "%Name":"OBJ_deck",
+  "%Name":"OBJ_Deck",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"OBJ_deck",
+  "name":"OBJ_Deck",
   "overriddenProperties":[],
   "parent":{
-    "name":"GameObjects",
-    "path":"folders/objects/GameObjects.yy",
+    "name":"DeckBuilder",
+    "path":"folders/objects/DeckBuilder.yy",
   },
   "parentObjectId":null,
   "persistent":false,

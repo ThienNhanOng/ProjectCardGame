@@ -1,15 +1,18 @@
 {
   "FolderOrderSettings":[
-    {"name":"Carddata","order":2,"path":"folders/objects/Carddata.yy",},
     {"name":"objects","order":4,"path":"folders/objects.yy",},
-    {"name":"Tools","order":1,"path":"folders/objects/Tools.yy",},
+    {"name":"DeckBuilder","order":1,"path":"folders/objects/DeckBuilder.yy",},
     {"name":"rooms","order":2,"path":"folders/rooms.yy",},
     {"name":"sprites","order":3,"path":"folders/sprites.yy",},
   ],
   "ResourceOrderSettings":[
-    {"name":"DebugOBJ_cordinates","order":1,"path":"objects/DebugOBJ_cordinates/DebugOBJ_cordinates.yy",},
+    {"name":"OBJ_CardSlot","order":4,"path":"objects/OBJ_CardSlot/OBJ_CardSlot.yy",},
+    {"name":"OBJ_Deck","order":3,"path":"objects/OBJ_Deck/OBJ_Deck.yy",},
+    {"name":"OBJ_DeckBuilder","order":2,"path":"objects/OBJ_DeckBuilder/OBJ_DeckBuilder.yy",},
+    {"name":"Room_collection","order":1,"path":"rooms/Room_collection/Room_collection.yy",},
+    {"name":"SPR_Actionplaceholder","order":5,"path":"sprites/SPR_Actionplaceholder/SPR_Actionplaceholder.yy",},
     {"name":"SPR_Cardback","order":1,"path":"sprites/SPR_Cardback/SPR_Cardback.yy",},
-    {"name":"SPR_monsterplaceholder","order":3,"path":"sprites/SPR_monsterplaceholder/SPR_monsterplaceholder.yy",},
+    {"name":"SPR_Monsterplaceholder","order":3,"path":"sprites/SPR_Monsterplaceholder/SPR_Monsterplaceholder.yy",},
     {"name":"SPR_Weaponplaceholder","order":4,"path":"sprites/SPR_Weaponplaceholder/SPR_Weaponplaceholder.yy",},
   ],
 }

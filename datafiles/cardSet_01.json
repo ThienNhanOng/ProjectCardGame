@@ -3,73 +3,199 @@
   "cards": [
     {
       "id": 1,
+      "name": "Rust Bite",
       "type": "monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
       "level": 2,
       "health": 3,
       "ability": [{ "draw_cards": 1 }]
     },
     {
       "id": 2,
+      "name": "Stone Guard",
       "type": "monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
       "level": 5,
       "health": 5,
       "ability": [{ "upon_play_destroy_target": null }, { "heal_player": 2 }]
     },
     {
       "id": 3,
+      "name": "Swift Horn",
       "type": "monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
       "level": 10,
       "health": 12,
       "ability": [{ "increase_zone": 1 }, { "increase_attack": 3 }]
     },
     {
       "id": 4,
+      "name": "Bone Snap",
       "type": "monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
       "level": 13,
       "health": 8,
-      "ability": [{ "upon_play_destroy_target": null }, { "draw_cards": 2 }]
+      "ability": [{ "destroy_target": null }, { "draw_cards": 2 }]
     },
     {
       "id": 5,
+      "name": "Red Fang",
       "type": "monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
       "level": 7,
       "health": 9,
       "ability": [{ "heal_on_attack": 3 }, { "heal_player": 2 }]
     },
     {
       "id": 6,
+      "name": "Iron Leaf",
       "type": "monster",
-      "level": 15,
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
+      "level": 7,
       "health": 14,
       "ability": [{ "increase_attack": 4 }, { "draw_cards": 1 }]
     },
     {
       "id": 7,
+      "name": "Dark Pelt",
       "type": "monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
       "level": 3,
-      "health": 4,
+      "health": 6,
       "ability": [{ "heal_on_attack": 1 }]
     },
     {
       "id": 8,
+      "name": "Wild Crest",
       "type": "monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
       "level": 9,
-      "health": 7,
-      "ability": [{ "increase_zone": 1 }, { "draw_cards": 1 }]
+      "health": 15,
+      "ability": []
     },
     {
       "id": 9,
-      "type": "monster",
-      "level": 11,
-      "health": 6,
-      "ability": [{ "upon_play_destroy_target": null }, { "heal_on_attack": 2 }]
+      "name": "King Beast",
+      "type": "special_monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
+      "level": 25,
+      "health": 45,
+      "ability": []
     },
     {
       "id": 10,
-      "type": "monster",
-      "level": 20,
+      "name": "Sky Titan",
+      "type": "special_monster",
+      "sprite": "SPR_Monsterplaceholder",
+      "select_attacker": "enemy",
+      "level": 30,
       "health": 20,
-      "ability": [{ "upon_play_destroy_target": null }, { "increase_zone": 2 }, { "increase_attack": 5 }, { "heal_on_attack": 4 }, { "heal_player": 5 }, { "draw_cards": 2 }]
+      "ability": [{ "destroy_target": null }, { "increase_zone": 2 }, { "increase_attack": 5 }, { "heal_on_attack": 4 }, { "heal_player": 5 }, { "draw_cards": 2 }]
+    },
+
+    {
+      "id": 11,
+      "name": "Short Edge",
+      "type": "weapon",
+      "sprite": "SPR_Weaponplaceholder",
+      "attack": 5,
+      "attacks_per_turn": 2
+    },
+    {
+      "id": 12,
+      "name": "Long Edge",
+      "type": "weapon",
+      "sprite": "SPR_Weaponplaceholder",
+      "attack": 7,
+      "attacks_per_turn": 1
+    },
+
+    {
+      "id": 13,
+      "name": "attack_01",
+      "type": "action",
+      "sprite": "SPR_Actionplaceholder",
+      "action": "attack",
+      "select_attacker": null,
+      "attack_target": null,
+      "attack_value": 1
+    },
+    {
+      "id": 14,
+      "name": "attack_02",
+      "type": "action",
+      "sprite": "SPR_Actionplaceholder",
+      "action": "attack",
+      "select_attacker": null,
+      "attack_target": null,
+      "attack_value": 2
+    },
+    {
+      "id": 15,
+      "name": "attack_03",
+      "type": "action",
+      "sprite": "SPR_Actionplaceholder",
+      "action": "attack",
+      "select_attacker": null,
+      "attack_target": null,
+      "attack_value": 3
+    },
+    {
+      "id": 16,
+      "name": "attack_04",
+      "type": "action",
+      "sprite": "SPR_Actionplaceholder",
+      "action": "attack",
+      "select_attacker": null,
+      "attack_target": null,
+      "attack_value": 4
+    },
+    {
+      "id": 17,
+      "name": "attack_05",
+      "type": "action",
+      "sprite": "SPR_Actionplaceholder",
+      "action": "attack",
+      "select_attacker": null,
+      "attack_target": null,
+      "attack_value": 5
+    },
+    
+    {
+      "id": 18,
+      "name": "heal_01",
+      "type": "action",
+      "sprite": "SPR_Actionplaceholder",
+      "action": "heal",
+      "target_1": null,
+      "heal_value": 5
+    },
+    {
+      "id": 19,
+      "name": "heal_02",
+      "type": "action",
+      "sprite": "SPR_Actionplaceholder",
+      "action": "heal",
+      "target_1": null,
+      "heal_value": 7
+    },
+    {
+      "id": 20,
+      "name": "heal_03",
+      "type": "action",
+      "sprite": "SPR_Actionplaceholder",
+      "action": "heal",
+      "target_1": null,
+      "heal_value": 10
     }
   ]
 }

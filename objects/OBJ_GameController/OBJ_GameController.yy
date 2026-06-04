@@ -8,8 +8,8 @@
   "name":"OBJ_GameController",
   "overriddenProperties":[],
   "parent":{
-    "name":"Tools",
-    "path":"folders/objects/Tools.yy",
+    "name":"DeckBuilder",
+    "path":"folders/objects/DeckBuilder.yy",
   },
   "parentObjectId":null,
   "persistent":false,
