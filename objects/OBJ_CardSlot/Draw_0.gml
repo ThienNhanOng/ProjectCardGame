@@ -12,11 +12,11 @@ switch (card_data.type) {
 draw_set_color(c_white);
 draw_rectangle(x, y, x + card_w, y + card_h, false);
 
-// === NAME at top ===
+// === NAME at top center ===
 draw_set_color(c_black);
 draw_set_halign(fa_center);
 draw_set_valign(fa_top);
-draw_text(x + card_w / 2, y + 5, card_data.name);
+draw_text_ext(x + card_w / 2, y + 4, card_data.name, -1, card_w - 4);
 
 // === TYPE below name ===
 switch (card_data.type) {
@@ -26,15 +26,20 @@ switch (card_data.type) {
     case "action":          draw_set_color(c_blue);   break;
 }
 draw_set_halign(fa_center);
-draw_text(x + card_w / 2, y + 20, card_data.type);
+draw_text(x + card_w / 2, y + 18, card_data.type);
 
-// === PICTURE in middle ===
+// === PICTURE centered in remaining space ===
 if (_spr != -1) {
-    var _sw     = sprite_get_width(_spr);
-    var _sh     = sprite_get_height(_spr);
-    var _scale  = min(card_w / _sw, (card_h - 50) / _sh);
-    var _draw_x = x + (card_w - _sw * _scale) / 2;
-    var _draw_y = y + 38;
+    var _sw           = sprite_get_width(_spr);
+    var _sh           = sprite_get_height(_spr);
+    var _pic_area_top = y + 34;
+    var _pic_area_h   = card_h - 50;
+    var _scale        = min((card_w - 10) / _sw, _pic_area_h / _sh);
+    
+    // since origin is Middle Center, draw at the center point of the area
+    var _draw_x = x + (card_w / 2);
+    var _draw_y = _pic_area_top + (_pic_area_h / 2);
+    
     draw_sprite_ext(_spr, 0, _draw_x, _draw_y, _scale, _scale, 0, c_white, 1);
 }
 
@@ -42,7 +47,8 @@ if (_spr != -1) {
 if (variable_struct_exists(card_data, "level")) {
     draw_set_color(c_yellow);
     draw_set_halign(fa_left);
-    draw_text(x + 4, y + card_h - 16, "Lv " + string(card_data.level));
+    draw_set_valign(fa_bottom);
+    draw_text(x + 4, y + card_h - 4, "Lv " + string(card_data.level));
 }
 
 // === COUNT BADGE top right ===
