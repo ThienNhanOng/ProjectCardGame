@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_CardSlotCreate",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_CardSlotCreate",
+  "parent":{
+    "name":"create",
+    "path":"folders/scripts/cardslot/create.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

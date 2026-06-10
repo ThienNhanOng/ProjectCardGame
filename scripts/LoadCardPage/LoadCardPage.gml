@@ -1,4 +1,3 @@
-// ===== 1. DEFINE THE FUNCTION FIRST =====
 function LoadCardPage() {
     // Clear existing cards
     with (OBJ_CardSlot) {
@@ -26,34 +25,3 @@ function LoadCardPage() {
         _slot.card_h = card_h;
     }
 }
-
-// ===== 2. DESTROY OLD CARD SLOTS =====
-with (OBJ_CardSlot) {
-    instance_destroy();
-}
-
-// ===== 3. GRID SETTINGS =====
-grid_cols_visible = 3;
-grid_rows_visible = 4;
-card_w            = 85;
-card_h            = 115;
-grid_padding_x    = 15;
-grid_padding_y    = 20;
-grid_start_x      = 60;
-grid_start_y      = 60;
-
-// ===== 4. CONTAINER SETTINGS =====
-container_x = grid_start_x - 10;
-container_y = grid_start_y - 10;
-container_w = grid_cols_visible * (card_w + grid_padding_x) + 20;
-container_h = grid_rows_visible * (card_h + grid_padding_y) + 20;
-
-// ===== 5. PAGINATION VARIABLES =====
-current_page = 0;
-cards_per_page = grid_cols_visible * grid_rows_visible;  // 12 cards per page
-
-// ===== 6. SELECTED DECK LIST =====
-selected_deck = [];
-
-// ===== 7. LOAD CARDS FOR CURRENT PAGE =====
-LoadCardPage();

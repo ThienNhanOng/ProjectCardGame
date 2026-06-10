@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_CardSlot_HandleClick",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_CardSlot_HandleClick",
+  "parent":{
+    "name":"step",
+    "path":"folders/scripts/cardslot/step.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

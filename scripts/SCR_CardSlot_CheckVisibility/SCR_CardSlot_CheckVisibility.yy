@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_CardSlot_CheckVisibility",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_CardSlot_CheckVisibility",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/cardslot/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

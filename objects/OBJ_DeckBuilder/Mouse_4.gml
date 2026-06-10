@@ -1,26 +1,15 @@
-// check if the READY button was clicked
-if (mouse_x > room_width - 150 && mouse_x < room_width - 20
-&&  mouse_y > room_height - 60 && mouse_y < room_height - 20) {
-    
-    // only proceed if player has selected at least 8 cards
-    if (array_length(selected_deck) >= 8) {
-        
-        // get reference to the deck object in room_battle
-        var _deck_obj = instance_find(OBJ_Deck, 0);
-        
-        // add every selected card into the deck
-        for (var i = 0; i < array_length(selected_deck); i++) {
-            _deck_obj.deck_AddCard(selected_deck[i]);
-        }
-        
-        // shuffle the deck before heading to battle
-        _deck_obj.deck_Shuffle();
-        
-        // go to the battle room
-        room_goto(Room_battle);
-        
-    } else {
-        // not enough cards selected yet
-        show_debug_message("Need at least 8 cards!");
+/// @desc Remove card from deck when right-clicked
+
+var _deckbuilder = OBJ_DeckBuilder;
+
+// Find and remove this card from the deck
+for (var i = 0; i < array_length(_deckbuilder.selected_deck); i++) {
+    if (_deckbuilder.selected_deck[i].id == card_data.id) {
+        array_delete(_deckbuilder.selected_deck, i, 1);
+        break;  // Remove only one copy
     }
 }
+
+// Visual feedback
+image_blend = c_white;
+alarm[0] = 5;

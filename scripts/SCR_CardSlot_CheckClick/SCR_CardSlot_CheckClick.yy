@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_CardSlot_CheckClick",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_CardSlot_CheckClick",
+  "parent":{
+    "name":"step",
+    "path":"folders/scripts/cardslot/step.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

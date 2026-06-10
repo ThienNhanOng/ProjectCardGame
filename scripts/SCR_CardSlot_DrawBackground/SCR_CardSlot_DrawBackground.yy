@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_CardSlot_DrawBackground",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_CardSlot_DrawBackground",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/cardslot/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
