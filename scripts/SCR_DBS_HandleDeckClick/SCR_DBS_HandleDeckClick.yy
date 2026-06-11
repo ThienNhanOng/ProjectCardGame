@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_DBS_HandleDeckClick",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_DBS_HandleDeckClick",
+  "parent":{
+    "name":"step",
+    "path":"folders/scripts/cardcollection/deckbuilder/step.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_DBD_DrawDeckList",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_DBD_DrawDeckList",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/cardcollection/deckbuilder/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

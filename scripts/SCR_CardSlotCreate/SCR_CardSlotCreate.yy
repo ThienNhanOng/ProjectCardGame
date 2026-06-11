@@ -6,7 +6,7 @@
   "name":"SCR_CardSlotCreate",
   "parent":{
     "name":"create",
-    "path":"folders/scripts/cardslot/create.yy",
+    "path":"folders/scripts/cardcollection/cardslot/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

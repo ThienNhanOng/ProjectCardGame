@@ -6,7 +6,7 @@
   "name":"SCR_CardSlot_CheckVisibility",
   "parent":{
     "name":"draw",
-    "path":"folders/scripts/cardslot/draw.yy",
+    "path":"folders/scripts/cardcollection/cardslot/draw.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

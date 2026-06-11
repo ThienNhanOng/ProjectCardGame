@@ -6,7 +6,7 @@
   "name":"SCR_CardSlot_VisualFeedback",
   "parent":{
     "name":"step",
-    "path":"folders/scripts/cardslot/step.yy",
+    "path":"folders/scripts/cardcollection/cardslot/step.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

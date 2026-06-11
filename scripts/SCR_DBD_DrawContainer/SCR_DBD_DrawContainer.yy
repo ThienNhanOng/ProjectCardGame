@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_DBD_DrawContainer",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_DBD_DrawContainer",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/cardcollection/deckbuilder/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

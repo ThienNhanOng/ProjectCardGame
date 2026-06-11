@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_CardSlot_HandleClick",
+  "%Name":"SCR_DBD_Draw",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_CardSlot_HandleClick",
+  "name":"SCR_DBD_Draw",
   "parent":{
-    "name":"step",
-    "path":"folders/scripts/cardslot/step.yy",
+    "name":"draw",
+    "path":"folders/scripts/cardcollection/deckbuilder/draw.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -1,199 +1,161 @@
 {
-  "collection": "cardset_01",
+  "collection": "cardsetTest_01",
   "cards": [
     {
       "id": 1,
-      "name": "Goblin Scout",
+      "name": "Goblin I",
       "type": "monster",
-      "tag": "humanoid",
+      "tag": [
+        "Goblin"
+      ],
       "sprite": "SPR_Monsterplaceholder",
-      "level": 1,
-      "health": 5,
-      "ability": [{ "draw_cards": 1 }]
+      "level": 10,
+      "health": 10,
+      "ability": [
+        {
+          "draw_cards": 1
+        }
+      ]
     },
     {
       "id": 2,
-      "name": "Goblin Warrior",
+      "name": "Goblin warrior",
       "type": "monster",
-      "tag": "humanoid",
+      "tag": [
+        "Goblin"
+      ],
       "sprite": "SPR_Monsterplaceholder",
-      "level": 2,
-      "health": 7,
-      "ability": [{ "upon_play_destroy_target": null }, { "heal_player": 2 }]
+      "level": 20,
+      "health": 10,
+      "ability": [
+        {
+          "draw_cards": 1
+        },
+        {
+          "attackIncrease": 2
+        }
+      ]
     },
     {
       "id": 3,
-      "name": "Goblin Shaman",
+      "name": "Goblin tank",
       "type": "monster",
-      "tag": "humanoid",
+      "tag": [
+        "Goblin"
+      ],
       "sprite": "SPR_Monsterplaceholder",
-      "level": 3,
-      "health": 7,
-      "ability": [{ "increase_zone": 1 }, { "increase_attack": 3 }]
-    },
-    {
-      "id": 4,
-      "name": "Goblin King",
-      "type": "monster",
-      "tag": "humanoid",
-      "sprite": "SPR_Monsterplaceholder",
-      "level": 4,
-      "health": 8,
-      "ability": [{ "destroy_target": null }, { "draw_cards": 2 }]
-    },
-
-    {
-      "id": 5,
-      "name": "Red Fang",
-      "type": "monster",
-      "tag": "beast",
-      "sprite": "SPR_Monsterplaceholder",
-      "level": 1,
-      "health": 7,
-      "ability": [{ "heal_on_attack": 3 }]
-    },
-    {
-      "id": 6,
-      "name": "Iron fang",
-      "type": "monster",
-      "tag": "beast",
-      "sprite": "SPR_Monsterplaceholder",
-      "level": 3,
-      "health": 9,
-      "ability": [{ "increase_attack": 4 }]
-    },
-    {
-      "id": 7,
-      "name": "Dark Claw",
-      "type": "monster",
-      "tag": "beast",
-      "sprite": "SPR_Monsterplaceholder",
-      "level": 5,
-      "health": 26,
+      "level": 20,
+      "health": 20,
       "ability": []
     },
     {
-      "id": 8,
-      "name": "silver fang",
+      "id": 4,
+      "name": "Goblin II",
       "type": "monster",
-      "tag": "beast",
+      "tag": [
+        "Goblin"
+      ],
       "sprite": "SPR_Monsterplaceholder",
-      "level": 7,
+      "level": 20,
       "health": 10,
-      "ability": [{ "heal_on_attack": 3 }, { "destroy_target": null }]
+      "ability": []
     },
-
+    {
+      "id": 5,
+      "name": "Goblin strike",
+      "type": "action",
+      "tag": [
+        "Goblin"
+      ],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [
+        {
+          "type": "attack",
+          "amount": 5,
+          "uses_per_turn": 1
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Multi Goblin Strike",
+      "type": "action",
+      "tag": [
+        "Goblin"
+      ],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 3,
+      "actionType": [
+        {
+          "type": "attack",
+          "amount": 5,
+          "uses_per_turn": 2
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Goblin Heal",
+      "type": "action",
+      "tag": [
+        "Goblin"
+      ],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [
+        {
+          "type": "heal",
+          "amount": 5,
+          "uses_per_turn": 5
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Goblin Sword",
+      "type": "weapon",
+      "tag": [
+        "Goblin"
+      ],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "ability": [
+        {
+          "type": "attack",
+          "amount": 5,
+          "uses_per_turn": 1
+        }
+      ]
+    },
     {
       "id": 9,
-      "name": "King Beast",
-      "type": "special_monster",
-      "tag": "beast",
-      "sprite": "SPR_Monsterplaceholder",
-      "level": 25,
-      "health": 30,
-      "ability": [{ "heal_on_attack": 3 }, { "destroy_target": null }, { "draw_cards": 2 }]
+      "name": "Goblin Shield",
+      "type": "weapon",
+      "tag": [
+        "Goblin"
+      ],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "ability": [
+        {
+          "type": "healing",
+          "amount": 5,
+          "uses_per_turn": 2
+        }
+      ]
     },
-
     {
       "id": 10,
-      "name": "Sky Titan",
-      "type": "special_monster",
-      "tag": "humanoid",
+      "name": "Goblin III",
+      "type": "monster",
+      "tag": [
+        "Goblin"
+      ],
       "sprite": "SPR_Monsterplaceholder",
       "level": 30,
-      "health": 45,
-      "ability": [{ "destroy_target": null }, { "increase_zone": 2 }]
-    },
-
-    {
-      "id": 11,
-      "name": "Short Edge",
-      "type": "weapon",
-      "sprite": "SPR_Weaponplaceholder",
-      "attack": 5,
-      "attacks_per_turn": 2
-    },
-    {
-      "id": 12,
-      "name": "Long Edge",
-      "type": "weapon",
-      "sprite": "SPR_Weaponplaceholder",
-      "attack": 7,
-      "attacks_per_turn": 1
-    },
-
-    {
-      "id": 13,
-      "name": "attack_01",
-      "type": "action",
-      "sprite": "SPR_Actionplaceholder",
-      "action": "attack",
-      "attack_target": null,
-      "attack_value": 1
-    },
-    {
-      "id": 14,
-      "name": "attack_02",
-      "type": "action",
-      "sprite": "SPR_Actionplaceholder",
-      "action": "attack",
-      "attack_target": null,
-      "attack_value": 2
-    },
-    {
-      "id": 15,
-      "name": "attack_03",
-      "type": "action",
-      "sprite": "SPR_Actionplaceholder",
-      "action": "attack",
-      "attack_target": null,
-      "attack_value": 3
-    },
-    {
-      "id": 16,
-      "name": "attack_04",
-      "type": "action",
-      "sprite": "SPR_Actionplaceholder",
-      "action": "attack",
-      "attack_target": null,
-      "attack_value": 4
-    },
-    {
-      "id": 17,
-      "name": "attack_05",
-      "type": "action",
-      "sprite": "SPR_Actionplaceholder",
-      "action": "attack",
-      "attack_target": null,
-      "attack_value": 5
-    },
-    
-    {
-      "id": 18,
-      "name": "heal_01",
-      "type": "action",
-      "sprite": "SPR_Actionplaceholder",
-      "action": "heal",
-      "target_1": null,
-      "heal_value": 5
-    },
-    {
-      "id": 19,
-      "name": "heal_02",
-      "type": "action",
-      "sprite": "SPR_Actionplaceholder",
-      "action": "heal",
-      "target_1": null,
-      "heal_value": 7
-    },
-    {
-      "id": 20,
-      "name": "heal_03",
-      "type": "action",
-      "sprite": "SPR_Actionplaceholder",
-      "action": "heal",
-      "target_1": null,
-      "heal_value": 10
+      "health": 30,
+      "ability": []
     }
   ]
 }

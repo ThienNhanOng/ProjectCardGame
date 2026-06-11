@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_DBC_InitContainer",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_DBC_InitContainer",
+  "parent":{
+    "name":"create",
+    "path":"folders/scripts/cardcollection/deckbuilder/create.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

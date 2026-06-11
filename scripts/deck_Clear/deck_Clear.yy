@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"LoadCardPage",
+  "%Name":"deck_Clear",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"LoadCardPage",
+  "name":"deck_Clear",
   "parent":{
-    "name":"scripts",
-    "path":"folders/scripts.yy",
+    "name":"create",
+    "path":"folders/scripts/cardcollection/deckbuilder/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

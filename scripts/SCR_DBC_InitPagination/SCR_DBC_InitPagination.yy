@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_DBC_InitPagination",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_DBC_InitPagination",
+  "parent":{
+    "name":"create",
+    "path":"folders/scripts/cardcollection/deckbuilder/create.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
