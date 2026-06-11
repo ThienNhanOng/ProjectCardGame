@@ -11,11 +11,14 @@ function SetupTestCollection() {
     
     // Add each card ONLY ONCE with total owned count
     // Format: AddCardToCollection(card_id, amount)
-    AddCardToCollection(1, 6);   // Card ID 1 - Goblin I - own 6 copies
-    AddCardToCollection(2, 2);   // Card ID 2 - Goblin Warrior - own 2 copies
-    AddCardToCollection(3, 1);   // Card ID 3 - Goblin Tank - own 1 copy
-    AddCardToCollection(5, 3);   // Card ID 5 - Goblin Strike (action) - own 3 copies
-    AddCardToCollection(8, 5);   // Card ID 8 - Goblin Sword (weapon) - own 5 copies
+    AddCardToCollection(1, 5);   // Card ID 1 - Goblin I - own 6 copies
+    AddCardToCollection(2, 10);   // Card ID 2 - Goblin Warrior - own 2 copies
+    AddCardToCollection(3, 3);   // Card ID 3 - Goblin Tank - own 1 copy
+    AddCardToCollection(4, 3);
+	AddCardToCollection(5, 3);   // Card ID 5 - Goblin Strike (action) - own 3 copies
+    AddCardToCollection(7, 5);
+	AddCardToCollection(8, 5);
+	AddCardToCollection(9, 5);   // Card ID 8 - Goblin Sword (weapon) - own 5 copies
     AddCardToCollection(10, 2);  // Card ID 10 - Spirit Card - own 2 copies
     
     show_debug_message("=== Test Collection Ready ===");

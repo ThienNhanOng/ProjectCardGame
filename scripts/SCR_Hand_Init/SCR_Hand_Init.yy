@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_TestCollection",
+  "%Name":"SCR_Hand_Init",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_TestCollection",
+  "name":"SCR_Hand_Init",
   "parent":{
-    "name":"cardcollection",
-    "path":"folders/scripts/cardcollection.yy",
+    "name":"create",
+    "path":"folders/scripts/hand/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

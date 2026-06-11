@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_TestCollection",
+  "%Name":"SCR_Deck_DrawDebugRow",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_TestCollection",
+  "name":"SCR_Deck_DrawDebugRow",
   "parent":{
-    "name":"cardcollection",
-    "path":"folders/scripts/cardcollection.yy",
+    "name":"draw",
+    "path":"folders/scripts/deck/draw.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

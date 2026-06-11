@@ -1,0 +1,1 @@
+SCR_Hand_Draw();

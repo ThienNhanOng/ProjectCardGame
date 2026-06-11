@@ -6,7 +6,7 @@
   "name":"deck_Clear",
   "parent":{
     "name":"create",
-    "path":"folders/scripts/cardcollection/deckbuilder/create.yy",
+    "path":"folders/scripts/deck/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_TestCollection",
+  "%Name":"SCR_Deck_createinit",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_TestCollection",
+  "name":"SCR_Deck_createinit",
   "parent":{
-    "name":"cardcollection",
-    "path":"folders/scripts/cardcollection.yy",
+    "name":"create",
+    "path":"folders/scripts/deck/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
