@@ -7,8 +7,8 @@
     {"name":"create","order":2,"path":"folders/scripts/cardcollection/cardslot/create.yy",},
     {"name":"step","order":1,"path":"folders/scripts/cardcollection/cardslot/step.yy",},
     {"name":"deckbuilder","order":1,"path":"folders/scripts/cardcollection/deckbuilder.yy",},
-    {"name":"step","order":1,"path":"folders/scripts/cardcollection/deckbuilder/step.yy",},
     {"name":"draw","order":2,"path":"folders/scripts/cardcollection/deckbuilder/draw.yy",},
+    {"name":"step","order":1,"path":"folders/scripts/cardcollection/deckbuilder/step.yy",},
     {"name":"sprites","order":1,"path":"folders/sprites.yy",},
   ],
   "ResourceOrderSettings":[
