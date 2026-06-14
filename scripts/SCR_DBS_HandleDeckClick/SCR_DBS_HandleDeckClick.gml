@@ -12,16 +12,10 @@ function SCR_DBS_HandleDeckClick() {
             // Remove from deck
             array_delete(selected_deck, i, 1);
             
-            // Return to collection (increase owned count)
-            for (var c = 0; c < array_length(global.player_collection); c++) {
-                if (global.player_collection[c].id == _removed.id) {
-                    global.player_collection[c].owned++;
-                    show_debug_message("Returned " + _removed.name + " - Now owned: " + string(global.player_collection[c].owned));
-                    break;
-                }
-            }
+            // DO NOT touch owned — available is always derived as owned - in_deck
+            show_debug_message("Returned " + _removed.name + " to collection");
             
-            // Refresh the collection - this recreates the card
+            // Refresh recalculates counts automatically
             SCR_DBC_LoadPage();
             
             break;

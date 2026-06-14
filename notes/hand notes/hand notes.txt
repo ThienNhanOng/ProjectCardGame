@@ -1,0 +1,221 @@
+Hand System Documentation
+
+
+Table of Contents
+
+
+System Overview
+Object Setup
+Script Reference
+Tuning Values
+Important Rules
+Dependencies
+
+
+
+1. System Overview
+
+The hand system manages the player's cards during battle.
+Cards flow in one direction:
+
+global.player_collection
+        ↓
+global.battle_deck  (saved by deckbuilder on ready)
+        ↓
+OBJ_Deck  (loads and shuffles battle_deck on room start)
+        ↓
+OBJ_Hand  (draws cards from OBJ_Deck into hand[])
+
+
+OBJ_Deck stores card IDs only
+OBJ_Hand stores full card data structs
+global.player_collection.owned never changes during battle
+
+
+
+2. Object Setup
+
+OBJ_Hand
+
+EventCodeCreateSCR_Hand_Init();DrawSCR_Hand_Draw();
+
+Room_battle Creation Order (top to bottom)
+
+
+OBJ_GameController  — must be first, loads card_DB
+OBJ_Deck            — must be before OBJ_Hand
+OBJ_Hand
+Everything else
+
+
+
+3. Script Reference
+
+
+SCR_Hand_Init
+
+
+Entry point for OBJ_Hand Create event
+
+
+
+
+Calls SCR_Hand_Create() to initialize variables
+Draws 5 opening cards from OBJ_Deck
+Change the number 5 to adjust opening hand size
+
+
+Depends on: SCR_Hand_Create, SCR_Hand_DrawFromDeck
+
+
+SCR_Hand_Create  (inside SCR_Hand_Functions script asset)
+
+
+Initializes all hand variables on OBJ_Hand
+
+
+
+VariableDefaultDescriptionhand_X100Leftmost x position of handhand_Y600Y position of handhand_Spacing85Normal spacing between cardshand_MaxSize7Maximum cards allowed in handhand_Count0Current number of cards in handhand[][]Array storing card data structs
+
+
+SCR_Hand_Functions  (script asset)
+
+
+Core hand management functions
+
+
+
+FunctionReturnsDescriptionhand_AddCard(_card_data)boolAdds card struct to hand. False if full.hand_RemoveCard(_index)structRemoves card at index, shifts left. Returns card.hand_GetCard(_index)structReturns card at index or undefined.hand_GetCount()intReturns hand_Count.hand_IsFull()boolTrue if hand_Count >= hand_MaxSize.hand_IsEmpty()boolTrue if hand_Count <= 0.hand_Clear()voidRemoves all cards, resets hand_Count to 0.
+
+
+SCR_Hand_DrawFromDeck
+
+
+Draws one card from OBJ_Deck into hand
+
+
+
+
+Uses 'with' scope to call OBJ_Deck functions correctly
+Returns true on success
+Returns false if: deck empty, hand full, OBJ_Deck not found
+
+
+Call this whenever the player needs to draw a card (start of turn, button press, etc.)
+
+Depends on: OBJ_Deck, deck_DrawCard, deck_GetCardData, hand_AddCard
+
+
+SCR_Hand_GetSprite(_card)
+
+
+Returns the correct sprite for a card based on its type
+
+
+
+Card TypeSpritemonsterSPR_Monsterplaceholderspecial_monsterSPR_MonsterplaceholderweaponSPR_WeaponplaceholderactionSPR_ActionplaceholderunknownSPR_Monsterplaceholder
+
+Update this function when adding new card types or replacing placeholder sprites.
+
+
+SCR_Hand_GetSpacing()
+
+
+Calculates pixel spacing between cards based on hand size
+
+
+
+
+6 or fewer cards → normal spacing (85px)
+More than 6 cards → compresses to fit all cards in the same width
+Never compresses below minimum spacing (30px)
+
+
+Returns: spacing value (real number)
+
+
+SCR_Hand_IsHovered(_index, _spacing)
+
+
+Returns true if the mouse is over the card at the given index
+
+
+
+
+Accounts for overlapping cards
+If mouse is past the start of the next card, current card is NOT hovered
+Only one card can be hovered at a time
+
+
+ParameterTypeDescription_indexintCard slot to check_spacingrealCurrent spacing from SCR_Hand_GetSpacing
+
+
+SCR_Hand_DrawCard(_index, _spacing, _hovered)
+
+
+Draws a single card with correct position and hover effects
+
+
+
+StateY OffsetScaleNormal01.0Hovered-30px1.3x
+
+
+Uses draw_sprite_ext for scaling
+Draws card name, level (if exists), and type
+Calls SCR_Hand_GetSprite for correct sprite
+
+
+ParameterTypeDescription_indexintWhich card to draw_spacingrealCurrent spacing value_hoveredboolWhether this card is being hovered
+
+
+SCR_Hand_Draw
+
+
+Main draw function — call in OBJ_Hand Draw event
+
+
+
+Runs two passes:
+
+
+Pass 1: draws all non-hovered cards
+Pass 2: draws hovered card on top of everything
+
+
+The two-pass approach ensures the hovered card always appears above overlapping cards.
+
+Depends on: SCR_Hand_GetSpacing, SCR_Hand_IsHovered, SCR_Hand_DrawCard
+
+
+4. Tuning Values
+
+ValueLocationDefaultEffectOpening hand sizeSCR_Hand_Init5How many cards dealt at battle starthand_MaxSizeSCR_Hand_Create7Max cards allowed in handhand_XSCR_Hand_Create100Hand position horizontalhand_YSCR_Hand_Create600Hand position vertical_max_visibleSCR_Hand_GetSpacing6Cards before compression kicks in_normal_spacingSCR_Hand_GetSpacing85Spacing when not compressed_min_spacingSCR_Hand_GetSpacing30Tightest cards can be squeezedHover riseSCR_Hand_DrawCard-30pxHow far card rises on hoverHover scaleSCR_Hand_DrawCard1.3How big card gets on hover
+
+
+5. Important Rules
+
+
+hand[] stores full card DATA structs (id, name, type, level, etc) — not IDs
+OBJ_Deck stores card IDs only — SCR_Hand_DrawFromDeck converts them to structs
+global.player_collection[].owned NEVER changes during battle
+hand_Count is the source of truth for how many cards are in hand
+OBJ_Deck must be higher than OBJ_Hand in Room_battle creation order
+OBJ_GameController must be first in creation order so card_DB exists
+
+
+
+6. Dependencies
+
+SCR_Hand_Draw
+    └── SCR_Hand_GetSpacing
+    └── SCR_Hand_IsHovered
+    └── SCR_Hand_DrawCard
+            └── SCR_Hand_GetSprite
+
+SCR_Hand_Init
+    └── SCR_Hand_Create  (inside SCR_Hand_Functions)
+    └── SCR_Hand_DrawFromDeck
+            └── hand_AddCard  (inside SCR_Hand_Functions)
+            └── OBJ_Deck
+                    └── deck_DrawCard
+                    └── deck_GetCardData

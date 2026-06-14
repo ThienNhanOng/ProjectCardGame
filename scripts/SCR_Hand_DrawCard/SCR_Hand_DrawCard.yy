@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Hand_DrawCard",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Hand_DrawCard",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/hand/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

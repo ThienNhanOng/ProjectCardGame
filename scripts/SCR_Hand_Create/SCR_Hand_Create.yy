@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Hand_Create",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Hand_Create",
+  "parent":{
+    "name":"create",
+    "path":"folders/scripts/hand/create.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

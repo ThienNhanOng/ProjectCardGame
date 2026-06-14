@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Hand_GetSprite",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Hand_GetSprite",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/hand/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -5,16 +5,19 @@ function SCR_CardSlot_AddToDeck() {
     if (array_length(_deckbuilder.selected_deck) >= 40) return false;
     
     for (var i = 0; i < array_length(global.player_collection); i++) {
-        if (global.player_collection[i].id == card_id && global.player_collection[i].owned > 0) {
+        if (global.player_collection[i].id == card_id) {
             
-            // Decrease owned count
-            global.player_collection[i].owned--;
+            // Count how many already in deck
+            var _in_deck = 0;
+            for (var d = 0; d < array_length(_deckbuilder.selected_deck); d++) {
+                if (_deckbuilder.selected_deck[d].id == card_id) {
+                    _in_deck++;
+                }
+            }
             
-            // CRITICAL: Update the badge display
-            count = global.player_collection[i].owned;
-            
-            // Force visual refresh
-            image_blend = c_lime;
+            // Check available without touching owned
+            var _available = global.player_collection[i].owned - _in_deck;
+            if (_available <= 0) return false;
             
             // Add to deck
             var _copy = {
@@ -24,14 +27,18 @@ function SCR_CardSlot_AddToDeck() {
             };
             array_push(_deckbuilder.selected_deck, _copy);
             
-            show_debug_message("Added " + card_data.name + " | Remaining: " + string(global.player_collection[i].owned) + " | Badge: " + string(count));
+            // Update badge display (available after this add)
+            count = _available - 1;
+            image_blend = c_lime;
+            
+            show_debug_message("Added " + card_data.name + " | Remaining: " + string(_available - 1));
             
             _deckbuilder.click_processed = true;
             
-            // Only destroy when no copies left
-            if (global.player_collection[i].owned <= 0) {
+            // Destroy slot only when no copies left to add
+            if (_available - 1 <= 0) {
                 instance_destroy();
-                show_debug_message("Card destroyed: " + card_data.name);
+                show_debug_message("Card slot destroyed: " + card_data.name);
             }
             
             return true;

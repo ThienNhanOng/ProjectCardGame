@@ -1,1 +1,1 @@
-SCR_Hand_Init();
+SCR_Hand_Init()

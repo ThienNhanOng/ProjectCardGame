@@ -2,8 +2,8 @@
 // Call this in OBJ_Deck Draw Event: SCR_Deck_DrawDebugRow();
 
 function SCR_Deck_DrawDebugRow() {
-    var _start_x = 100;
-    var _start_y = 500;
+    var _start_x = 50;
+    var _start_y = 600;
     var _card_width = 73;
     var _card_height = 101;
     var _spacing = 10;

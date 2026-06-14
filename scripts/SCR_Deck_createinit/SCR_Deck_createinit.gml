@@ -2,6 +2,7 @@
 // Call this in OBJ_Deck Create Event: SCR_Deck_Init();
 
 function SCR_Deck_createinit() {
+	
     // ===== DECK PROPERTIES =====
     deck_X = 548;
     deck_Y = 478;
@@ -12,6 +13,8 @@ function SCR_Deck_createinit() {
     deck_Count = 0;
     deck_Head = 0;
     
+	deck = []; 
+	
     // Card slots (stores card IDs)
     for (var i = 0; i < deck_Max; i++) {
         deck[i] = 0;
