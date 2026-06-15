@@ -73,6 +73,25 @@ function SCR_Board_ClearHover() {
     action_slot.hovered = false;
 }
 
+function SCR_Board_UpdateWeaponSlotAvailability() {
+    for (var i = 0; i < array_length(player_weapon_slots); i++) {
+        var _weapon_slot = player_weapon_slots[i];
+        var _monster_slot = player_monster_slots[i];
+        
+        // If monster slot exists and is occupied
+        if (_monster_slot != undefined && _monster_slot.occupied) {
+            // Make weapon slot visible and unlocked
+            _weapon_slot.visible = true;
+            _weapon_slot.locked = false;
+        } else {
+            // Hide and lock weapon slot if no monster above
+            _weapon_slot.visible = false;
+            _weapon_slot.locked = true;
+        }
+    }
+    show_debug_message("Weapon slot availability updated");
+}
+
 function SCR_Board_PlaceCard(_slot, _card) {
     if (_slot == undefined) return false;
     if (_slot.occupied) {
@@ -103,15 +122,30 @@ function SCR_Board_PlaceCard(_slot, _card) {
     _slot.card = _card;
     _slot.hovered = false;
     show_debug_message("Placed " + _card.name + " in " + _slot.type + " slot " + string(_slot.index));
+    
+    // If this was a monster slot, update weapon slot availability
+    if (_slot.type == "monster") {
+        SCR_Board_UpdateWeaponSlotAvailability();
+    }
+    
     return true;
 }
 
 function SCR_Board_RemoveCard(_slot) {
     if (_slot == undefined || !_slot.occupied) return undefined;
     var _card = _slot.card;
+    var _slot_type = _slot.type;
+    var _slot_index = _slot.index;
+    
     _slot.occupied = false;
     _slot.card = undefined;
-    show_debug_message("Removed " + _card.name + " from slot " + string(_slot.index));
+    show_debug_message("Removed " + _card.name + " from slot " + string(_slot_index));
+    
+    // If this was a monster slot, update weapon slot availability
+    if (_slot_type == "monster") {
+        SCR_Board_UpdateWeaponSlotAvailability();
+    }
+    
     return _card;
 }
 
@@ -119,9 +153,13 @@ function SCR_Board_UnlockSlot(_index) {
     if (_index >= 3 && _index < 5) {
         player_monster_slots[_index].visible = true;
         player_monster_slots[_index].locked = false;
-        player_weapon_slots[_index].visible = true;
-        player_weapon_slots[_index].locked = false;
-        show_debug_message("Unlocked extra slot: " + string(_index));
+        // Don't auto-unlock weapon slot - it will unlock when monster is placed
+        // player_weapon_slots[_index].visible = true;
+        // player_weapon_slots[_index].locked = false;
+        show_debug_message("Unlocked monster slot: " + string(_index));
+        
+        // Update weapon slot availability based on monster occupation
+        SCR_Board_UpdateWeaponSlotAvailability();
     }
 }
 

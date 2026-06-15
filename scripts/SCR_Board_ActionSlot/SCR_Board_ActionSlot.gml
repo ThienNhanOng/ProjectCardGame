@@ -13,6 +13,7 @@ function SCR_Board_ActionSlot() {
         w        : board_card_w,
         h        : board_card_h,
         visible  : true,
+        locked   : false,    // ← ADD THIS LINE
         hovered  : false
     };
     

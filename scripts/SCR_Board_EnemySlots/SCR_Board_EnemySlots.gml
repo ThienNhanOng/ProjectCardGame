@@ -16,6 +16,7 @@ function SCR_Board_EnemySlots() {
             w        : board_card_w,
             h        : board_card_h,
             visible  : false,
+            locked   : false, 
             hovered  : false
         });
     }

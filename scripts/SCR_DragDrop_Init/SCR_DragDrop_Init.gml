@@ -45,13 +45,22 @@ function SCR_DragDrop_Step() {
         
         if (mouse_check_button_released(mb_left)) {
             var _slot = SCR_Board_GetSlotAt(_mx, _my);
-            if (_slot != undefined && !_slot.occupied && !_slot.locked) {
-                if (SCR_Board_PlaceCard(_slot, drag_card)) {
-                    var _hand = instance_find(OBJ_Hand, 0);
-                    if (_hand != noone) {
-                        var _index = drag_hand_index;
-                        with (_hand) {
-                            hand_RemoveCard(_index);
+            
+            // SAFETY FIX: Check if slot has locked property, add if missing
+            if (_slot != undefined) {
+                if (!variable_struct_exists(_slot, "locked")) {
+                    show_debug_message("WARNING: Slot missing 'locked' property! Type: " + _slot.type + ", Index: " + string(_slot.index));
+                    _slot.locked = false;  // Add the missing property
+                }
+                
+                if (!_slot.occupied && !_slot.locked) {
+                    if (SCR_Board_PlaceCard(_slot, drag_card)) {
+                        var _hand = instance_find(OBJ_Hand, 0);
+                        if (_hand != noone) {
+                            var _index = drag_hand_index;
+                            with (_hand) {
+                                hand_RemoveCard(_index);
+                            }
                         }
                     }
                 }

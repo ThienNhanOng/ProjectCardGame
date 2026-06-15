@@ -1,8 +1,15 @@
 function SCR_Board_Create() {
     SCR_Board_Dimensions();
-    SCR_Board_PlayerSlots();
-    SCR_Board_EnemySlots();
-    SCR_Board_ActionSlot();
     
-    show_debug_message("Board initialized.");
+    // Use your factory definitions, NOT SCR_Board_InitSlots()
+    player_monster_slots = SCR_Board_DefineMonsterSlots();
+    player_weapon_slots = SCR_Board_DefineWeaponSlots();
+    action_slot = SCR_Board_DefineActionSlot();
+    
+    // Initialize weapon slot availability
+    SCR_Board_UpdateWeaponSlotAvailability();
+    
+    SCR_Board_EnemySlots();
+    
+    show_debug_message("Board initialized with factory slots");
 }

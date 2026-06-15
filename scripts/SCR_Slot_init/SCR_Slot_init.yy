@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Slot_init",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Slot_init",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/BoardManager/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

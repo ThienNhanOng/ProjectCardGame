@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SlotFactory",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SlotFactory",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/BoardManager/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
