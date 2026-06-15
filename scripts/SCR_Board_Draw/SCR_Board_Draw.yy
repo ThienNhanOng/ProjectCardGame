@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Board_Draw",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Board_Draw",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/BoardManager/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

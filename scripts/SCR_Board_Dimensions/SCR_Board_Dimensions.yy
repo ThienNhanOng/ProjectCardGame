@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Board_Dimensions",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Board_Dimensions",
+  "parent":{
+    "name":"boardmanager_Create",
+    "path":"folders/scripts/BoardManager/boardmanager_Create.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

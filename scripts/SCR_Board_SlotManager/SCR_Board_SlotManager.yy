@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Board_SlotManager",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Board_SlotManager",
+  "parent":{
+    "name":"step",
+    "path":"folders/scripts/BoardManager/step.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

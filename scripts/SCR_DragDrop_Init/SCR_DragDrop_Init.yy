@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_DragDrop_Init",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_DragDrop_Init",
+  "parent":{
+    "name":"step",
+    "path":"folders/scripts/BoardManager/step.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
