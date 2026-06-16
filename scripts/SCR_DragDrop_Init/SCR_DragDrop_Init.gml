@@ -5,7 +5,6 @@ function SCR_DragDrop_Init() {
     drag_y          = 0;
     is_dragging     = false;
 }
-
 function SCR_DragDrop_Step() {
     var _mx = mouse_x;
     var _my = mouse_y;
@@ -46,13 +45,10 @@ function SCR_DragDrop_Step() {
         if (mouse_check_button_released(mb_left)) {
             var _slot = SCR_Board_GetSlotAt(_mx, _my);
             
-            // SAFETY FIX: Check if slot has locked property, add if missing
             if (_slot != undefined) {
                 if (!variable_struct_exists(_slot, "locked")) {
-                    show_debug_message("WARNING: Slot missing 'locked' property! Type: " + _slot.type + ", Index: " + string(_slot.index));
-                    _slot.locked = false;  // Add the missing property
+                    _slot.locked = false;
                 }
-                
                 if (!_slot.occupied && !_slot.locked) {
                     if (SCR_Board_PlaceCard(_slot, drag_card)) {
                         var _hand = instance_find(OBJ_Hand, 0);
@@ -69,19 +65,17 @@ function SCR_DragDrop_Step() {
         }
     }
 }
-
 function SCR_DragDrop_Draw() {
     if (!is_dragging || drag_card == undefined) return;
     
     var _spr = SCR_Hand_GetSprite(drag_card);
-    draw_sprite_ext(_spr, 0, drag_x - 36, drag_y - 50, 1.1, 1.1, 0, c_white, 0.85);
+    draw_sprite_ext(_spr, 0, drag_x, drag_y, 1.1, 1.1, 0, c_white, 0.85);
     draw_set_color(c_black);
     draw_set_halign(fa_center);
-    draw_text(drag_x, drag_y - 40, drag_card.name);
+    draw_text(drag_x, drag_y - 60, drag_card.name);
     draw_set_halign(fa_left);
     draw_set_color(c_white);
 }
-
 function SCR_DragDrop_Cancel() {
     drag_card       = undefined;
     drag_hand_index = -1;
