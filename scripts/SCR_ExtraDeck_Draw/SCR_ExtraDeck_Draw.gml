@@ -13,6 +13,11 @@ function SCR_ExtraDeck_Draw() {
     draw_set_valign(fa_top);
     draw_text(extra_x, extra_y - 40, "Spirit Owned");
     
+    // Get ONLY spirit cards
+    extra_cards = SCR_DBD_GetSpiritCards();
+    extra_total_pages = ceil(array_length(extra_cards) / extra_cards_per_page);
+    if (extra_total_pages < 1) extra_total_pages = 1;
+    
     // Page counter - right aligned with the box edge
     draw_set_halign(fa_right);
     draw_text(extra_x + extra_w, extra_y - 20, "Page " + string(extra_current_page + 1) + "/" + string(extra_total_pages));
@@ -27,8 +32,11 @@ function SCR_ExtraDeck_Draw() {
         var _cx  = extra_x + (extra_w - extra_card_w) / 2;
         var _cy  = extra_y + 10 + _row * (extra_card_h + extra_gap);
         
-        // Use imported hover check
-        var _is_hovered = SCR_DeckHover_IsHovered(_cx, _cy, extra_card_w, extra_card_h);
+        // Check hover
+        var _mx = mouse_x;
+        var _my = mouse_y;
+        var _is_hovered = (_mx >= _cx && _mx <= _cx + extra_card_w &&
+                           _my >= _cy && _my <= _cy + extra_card_h);
         
         SCR_ExtraDeck_DrawCard(_cx, _cy, extra_card_w, extra_card_h, _card_data, _is_hovered);
     }

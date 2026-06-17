@@ -13,10 +13,15 @@ function SCR_DBD_GetDeckCount(_card_id) {
 }
 
 /// @description Get collection cards that have available copies (owned > in_deck)
+/// EXCLUDES spirit and special_monster cards from main deck collection
 function SCR_DBD_GetAvailableCards() {
     var _available = [];
     for (var i = 0; i < array_length(global.player_collection); i++) {
         var _card = global.player_collection[i];
+        
+        // EXCLUDE SPIRIT CARDS FROM MAIN COLLECTION
+        if (_card.type == "spirit" || _card.type == "special_monster") continue;
+        
         var _in_deck = SCR_DBD_GetDeckCount(_card.id);
         
         // Only include if there are available copies
@@ -25,6 +30,20 @@ function SCR_DBD_GetAvailableCards() {
         }
     }
     return _available;
+}
+
+/// @description Get spirit cards for extra deck (spirit owned)
+function SCR_DBD_GetSpiritCards() {
+    var _spirits = [];
+    for (var i = 0; i < array_length(global.player_collection); i++) {
+        var _card = global.player_collection[i];
+        
+        // ONLY SPIRIT CARDS
+        if (_card.type == "spirit" || _card.type == "special_monster") {
+            array_push(_spirits, _card);
+        }
+    }
+    return _spirits;
 }
 
 /// @description Rebuild the card grid with available cards only (no holes!)
@@ -44,7 +63,7 @@ function SCR_DBD_RebuildGrid() {
     var _grid_padding_x = _builder.grid_padding_x;
     var _grid_padding_y = _builder.grid_padding_y;
     
-    // Get available cards
+    // Get available cards (spirits are filtered out)
     var _available = SCR_DBD_GetAvailableCards();
     
     // Update total pages

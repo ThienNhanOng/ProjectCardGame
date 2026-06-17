@@ -10,6 +10,12 @@ function SCR_DBC_LoadPage() {
     for (var i = 0; i < array_length(_cards); i++) {
         var _card = _cards[i];
         
+        // ===== ADD THIS: SKIP SPIRIT CARDS =====
+        if (_card.type == "spirit" || _card.type == "special_monster") {
+            continue;  // Don't show spirits in main collection
+        }
+        // =======================================
+        
         var _in_deck = 0;
         for (var d = 0; d < array_length(selected_deck); d++) {
             if (selected_deck[d].id == _card.id) {
