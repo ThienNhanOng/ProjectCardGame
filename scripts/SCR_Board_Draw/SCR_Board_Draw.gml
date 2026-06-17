@@ -100,15 +100,31 @@ function SCR_Board_InitSlots() {
     show_debug_message("Board slots initialized diagonally from (19,350) to (84,442)");
 }
 
+function SCR_Board_IsSlotMouseOver(_slot) {
+    var _card_w = 73;
+    var _card_h = 101;
+    var _left   = _slot.x;
+    var _top    = _slot.y;
+    var _right  = _slot.x + _card_w;
+    var _bottom = _slot.y + _card_h;
+    
+    return (mouse_x >= _left && mouse_x <= _right &&
+            mouse_y >= _top  && mouse_y <= _bottom);
+}
+
 function SCR_Board_DrawPlacedCards() {
     var _card_w = 73;
     var _card_h = 101;
+    var _hover_scale = 1.3;
     
     for (var i = 0; i < array_length(player_monster_slots); i++) {
         var _slot = player_monster_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-        var _spr = SCR_Hand_GetSprite(_slot.card);
-        draw_sprite(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2);
+        var _spr     = SCR_Hand_GetSprite(_slot.card);
+        var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(_slot);
+        var _scale   = _hovered ? _hover_scale : 1;
+        
+        draw_sprite_ext(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_center);
         draw_text(_slot.x + _card_w / 2, _slot.y + 5, _slot.card.name);
@@ -117,16 +133,22 @@ function SCR_Board_DrawPlacedCards() {
     for (var i = 0; i < array_length(player_weapon_slots); i++) {
         var _slot = player_weapon_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-        var _spr = SCR_Hand_GetSprite(_slot.card);
-        draw_sprite(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2);
+        var _spr     = SCR_Hand_GetSprite(_slot.card);
+        var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(_slot);
+        var _scale   = _hovered ? _hover_scale : 1;
+        
+        draw_sprite_ext(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_center);
         draw_text(_slot.x + _card_w / 2, _slot.y + 5, _slot.card.name);
     }
     
     if (action_slot.occupied && action_slot.card != undefined) {
-        var _spr = SCR_Hand_GetSprite(action_slot.card);
-        draw_sprite(_spr, 0, action_slot.x + _card_w / 2, action_slot.y + _card_h / 2);
+        var _spr     = SCR_Hand_GetSprite(action_slot.card);
+        var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(action_slot);
+        var _scale   = _hovered ? _hover_scale : 1;
+        
+        draw_sprite_ext(_spr, 0, action_slot.x + _card_w / 2, action_slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_center);
         draw_text(action_slot.x + _card_w / 2, action_slot.y + 5, action_slot.card.name);
@@ -135,8 +157,11 @@ function SCR_Board_DrawPlacedCards() {
     for (var i = 0; i < array_length(enemy_slots); i++) {
         var _slot = enemy_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-        var _spr = SCR_Hand_GetSprite(_slot.card);
-        draw_sprite(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2);
+        var _spr     = SCR_Hand_GetSprite(_slot.card);
+        var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(_slot);
+        var _scale   = _hovered ? _hover_scale : 1;
+        
+        draw_sprite_ext(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_center);
         draw_text(_slot.x + _card_w / 2, _slot.y + 5, _slot.card.name);

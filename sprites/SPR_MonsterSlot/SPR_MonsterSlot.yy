@@ -44,8 +44,8 @@
   },
   "origin":4,
   "parent":{
-    "name":"group1",
-    "path":"folders/sprites/group1.yy",
+    "name":"cardsprites",
+    "path":"folders/sprites/cardsprites.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

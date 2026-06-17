@@ -16,7 +16,7 @@
     {"name":"hand","order":2,"path":"folders/scripts/hand.yy",},
     {"name":"draw","order":1,"path":"folders/scripts/hand/draw.yy",},
     {"name":"sprites","order":1,"path":"folders/sprites.yy",},
-    {"name":"group1","order":6,"path":"folders/sprites/group1.yy",},
+    {"name":"cardsprites","order":6,"path":"folders/sprites/cardsprites.yy",},
   ],
   "ResourceOrderSettings":[
     {"name":"hand notes","order":4,"path":"notes/hand notes/hand notes.yy",},

@@ -35,7 +35,7 @@
     {"$GMFolder":"","%Name":"create","folderPath":"folders/scripts/hand/create.yy","name":"create","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"draw","folderPath":"folders/scripts/hand/draw.yy","name":"draw","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"sprites","folderPath":"folders/sprites.yy","name":"sprites","resourceType":"GMFolder","resourceVersion":"2.0",},
-    {"$GMFolder":"","%Name":"group1","folderPath":"folders/sprites/group1.yy","name":"group1","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"cardsprites","folderPath":"folders/sprites/cardsprites.yy","name":"cardsprites","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
