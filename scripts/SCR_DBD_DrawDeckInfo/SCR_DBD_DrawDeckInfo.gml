@@ -1,9 +1,23 @@
 function SCR_DBD_DrawDeckInfo() {
     var _deck_size = array_length(selected_deck);
     
-    // Deck count
+    // Deck count - aligned under the collection container
     draw_set_color(c_white);
-    draw_text(20, room_height - 85, "Deck: " + string(_deck_size) + "/40");
+    draw_set_halign(fa_left);
+    draw_text(container_x, container_y + container_h + 10, "Deck: " + string(_deck_size) + "/40");
+    
+    // Divider
+    draw_text(container_x + 90, container_y + container_h + 10, "|");
+    
+    // Spirit count - to the right of the divider
+    var _spirit_owned = 0;
+    for (var i = 0; i < array_length(global.player_collection); i++) {
+        var _card = global.player_collection[i];
+        if (_card.type == "spirit") {
+            _spirit_owned += _card.owned;
+        }
+    }
+    draw_text(container_x + 105, container_y + container_h + 10, "Spirit: " + string(_spirit_owned));
     
     // Ready button
     if (_deck_size >= 8) {

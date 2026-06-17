@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_ExtraDeck_DrawCard",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_ExtraDeck_DrawCard",
+  "parent":{
+    "name":"extradeck",
+    "path":"folders/scripts/cardcollection/deckbuilder/extradeck.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

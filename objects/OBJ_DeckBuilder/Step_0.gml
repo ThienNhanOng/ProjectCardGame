@@ -3,4 +3,5 @@ click_processed = false;
 SCR_DBS_HandleScrolling();
 SCR_DBS_HandleDeckClick();
 SCR_DBS_HandleReadyButton();
+SCR_ExtraDeck_Step();
 global.mouse_left_pressed = false;

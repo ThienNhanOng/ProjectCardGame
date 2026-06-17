@@ -1,7 +1,7 @@
 function SCR_DBS_HandleScrolling() {
     var _new_page = current_page;
-    // CHANGE: Use player collection instead of card_DB.cards
     var _total_pages = ceil(array_length(global.player_collection) / cards_per_page);
+    if (_total_pages < 1) _total_pages = 1;   // ADD THIS - prevent negative clamp range
     
     // Mouse wheel
     if (mouse_wheel_up()) {
@@ -24,6 +24,6 @@ function SCR_DBS_HandleScrolling() {
     
     if (_new_page != current_page) {
         current_page = _new_page;
-        SCR_DBC_LoadPage();  // CHANGE: Use full function name
+        SCR_DBC_LoadPage();
     }
 }

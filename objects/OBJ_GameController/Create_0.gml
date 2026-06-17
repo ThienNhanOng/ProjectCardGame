@@ -22,5 +22,4 @@ function load_Collection(filename) {
         + " | Cards: " + string(array_length(_new_cards)));
 }
 
-load_Collection("cardset_01.json");
-show_debug_message("Total cards in DB: " + string(array_length(card_DB.cards)));
+SCR_LoadAllCollections();

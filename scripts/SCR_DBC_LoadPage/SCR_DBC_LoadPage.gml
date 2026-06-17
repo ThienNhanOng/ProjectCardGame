@@ -28,6 +28,11 @@ function SCR_DBC_LoadPage() {
         }
     }
     
+    // --- FIX 4: Clamp current_page so it can never go negative or out of bounds ---
+    var _max_page = max(0, ceil(array_length(_available_cards) / cards_per_page) - 1);
+    if (current_page > _max_page) current_page = _max_page;
+    if (current_page < 0) current_page = 0;
+    
     // --- FIX 2: Paginate over the FILTERED list, not the raw collection ---
     var _start = current_page * cards_per_page;
     var _end = min(_start + cards_per_page, array_length(_available_cards));
