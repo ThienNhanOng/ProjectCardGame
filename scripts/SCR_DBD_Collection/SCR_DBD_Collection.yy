@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_DBD_Collection",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_DBD_Collection",
+  "parent":{
+    "name":"create",
+    "path":"folders/scripts/cardcollection/cardslot/create.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -27,7 +27,10 @@ function SCR_ExtraDeck_Draw() {
         var _cx  = extra_x + (extra_w - extra_card_w) / 2;
         var _cy  = extra_y + 10 + _row * (extra_card_h + extra_gap);
         
-        SCR_ExtraDeck_DrawCard(_cx, _cy, extra_card_w, extra_card_h, _card_data);
+        // Use imported hover check
+        var _is_hovered = SCR_DeckHover_IsHovered(_cx, _cy, extra_card_w, extra_card_h);
+        
+        SCR_ExtraDeck_DrawCard(_cx, _cy, extra_card_w, extra_card_h, _card_data, _is_hovered);
     }
     
     draw_set_halign(fa_left);

@@ -41,6 +41,9 @@ function SCR_CardSlot_AddToDeck() {
                 show_debug_message("Card slot destroyed: " + card_data.name);
             }
             
+            // REBUILD THE GRID - fills any holes and updates the collection
+            SCR_DBD_RebuildGrid();
+            
             return true;
         }
     }

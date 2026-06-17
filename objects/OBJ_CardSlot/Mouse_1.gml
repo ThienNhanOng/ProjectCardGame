@@ -20,8 +20,8 @@ if (mouse_x > x && mouse_x < x + card_w &&
                 }
             }
             
-            // Refresh the collection view to update the card count
-            _builder.SCR_DBC_LoadPage();
+            // REBUILD THE GRID - removes holes and updates collection display
+            SCR_DBD_RebuildGrid();
             
             // Visual feedback
             image_blend = c_white;

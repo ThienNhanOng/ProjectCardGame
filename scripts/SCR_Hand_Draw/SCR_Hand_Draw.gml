@@ -7,7 +7,7 @@ function SCR_Hand_Draw() {
     
     // Calculate total width of hand and center it
     var _total_width = (_spacing * (hand_Count - 1)) + _card_w;
-    var _center_x = 600 / 2;
+    var _center_x = 600 / 2 + 35;
     var _start_x = _center_x - (_total_width / 2);
     
     // Find hovered index scanning right to left
