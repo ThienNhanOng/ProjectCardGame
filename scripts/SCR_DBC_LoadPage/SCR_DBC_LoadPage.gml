@@ -61,6 +61,7 @@ function SCR_DBC_LoadPage() {
         _slot.card_w = card_w;
         _slot.card_h = card_h;
         _slot.just_created = true;
+        _slot.depth = -_x;  // ADD THIS: Rightmost cards (higher x) have lower depth (drawn on top)
     }
     
     // --- FIX 3: Expose total pages so your UI doesn't go out of bounds ---
