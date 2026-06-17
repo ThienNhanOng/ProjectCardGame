@@ -1,7 +1,7 @@
 {
   "$GMRoom":"v1",
   "%Name":"Room_battle",
-  "creationCodeFile":"",
+  "creationCodeFile":"rooms/Room_battle/RoomCreationCode.gml",
   "inheritCode":false,
   "inheritCreationOrder":false,
   "inheritLayers":false,
@@ -44,7 +44,7 @@
     "Height":700,
     "inheritRoomSettings":false,
     "persistent":false,
-    "Width":600,
+    "Width":1280,
   },
   "sequenceId":null,
   "views":[
