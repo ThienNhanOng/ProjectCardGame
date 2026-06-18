@@ -2,6 +2,7 @@
 
 function battle_OnMonsterPlayed(_slot_index, _card) {
     battle_EnsureCardHealth(_card);
+    battle_CancelTargeting();
 
     var _traits = trait_GetFromCard(_card);
     for (var i = 0; i < array_length(_traits); i++) {
@@ -37,6 +38,8 @@ function battle_BeginMonsterOnPlayTargeting(_slot_index, _start_trait_index = 0)
         battle_BeginEnemyTargetMode(_traits[i].type);
         return;
     }
+
+    battle_CancelTargeting();
 }
 
 function battle_MonsterOnPlayContinue(_slot_index, _completed_trait_index) {
@@ -69,6 +72,8 @@ function battle_ExecuteMonsterOnPlayEnemyTrait(_player_slot, _trait_index, _enem
 }
 
 function battle_OnWeaponPlayed(_slot_index, _card) {
+    battle_CancelTargeting();
+
     var _traits = trait_GetFromCard(_card);
     var _attack = trait_FindFirst(_traits, "attack");
 
@@ -113,6 +118,8 @@ function battle_BeginWeaponOnPlayTargeting(_slot_index, _start_trait_index = 0) 
         battle_BeginEnemyTargetMode(_traits[i].type);
         return;
     }
+
+    battle_CancelTargeting();
 }
 
 function battle_WeaponOnPlayContinue(_slot_index, _completed_trait_index) {
@@ -169,6 +176,9 @@ function battle_BeginActionTargeting(_trait_index, _type) {
         case "heal":
             target_mode = "pick_player_heal";
             break;
+        case "buff_attack":
+            target_mode = "pick_player_buff";
+            break;
         default:
             battle_BeginEnemyTargetMode(_type);
             break;
@@ -185,8 +195,9 @@ function battle_ExecuteActionTraitInstant(_trait_index) {
     var _ok = false;
 
     switch (_trait.type) {
+        case "draw":
         case "draw_cards":
-            _ok = trait_Execute(_trait, trait_CreateDrawContext(_trait.amount));
+            _ok = trait_ExecuteDraw(trait_CreateDrawContext(max(1, _trait.amount)));
             break;
         case "attack_all":
             _ok = trait_Execute(_trait, trait_CreateAttackAllContext(_trait.amount));
@@ -235,7 +246,7 @@ function battle_ActionCardRequiresMonster(_card) {
     var _traits = trait_GetFromCard(_card);
     for (var i = 0; i < array_length(_traits); i++) {
         var _type = _traits[i].type;
-        if (_type == "attack" || _type == "heal") return true;
+        if (_type == "attack" || _type == "heal" || _type == "buff_attack") return true;
     }
     return false;
 }
@@ -313,7 +324,7 @@ function battle_TargetingContinueAfterAction(_last_trait_index) {
         if (!trait_ActionNeedsTargeting(_traits[i].type)) continue;
 
         var _type = _traits[i].type;
-        if ((_type == "attack" || _type == "heal") && !battle_HasPlayerMonsterOnBoard()) {
+        if ((_type == "attack" || _type == "heal" || _type == "buff_attack") && !battle_HasPlayerMonsterOnBoard()) {
             show_debug_message("Need a player monster on the board for this action");
             continue;
         }

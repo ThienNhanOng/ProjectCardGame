@@ -23,10 +23,10 @@ function monster_DrawActive(_slot, _monster) {
 
     monsterAnim_Draw(_slot, _monster, _layout);
 
-    draw_set_halign(fa_center);
+    draw_set_halign(fa_left);
     draw_set_valign(fa_top);
     draw_set_color(monster_IsElite(_monster) ? c_red : c_black);
-    draw_text(_layout.cx, _slot.y + 5, _monster.name);
+    draw_text(_slot.x + 4, _slot.y + 5, SCR_Hand_TruncateName(_monster.name, _layout.card_w - 8));
 
     monster_DrawHealthBar(_layout.health_x, _layout.health_y, _layout.health_w, _layout.health_h,
         _monster.health, _monster.max_health);

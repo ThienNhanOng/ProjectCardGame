@@ -1,40 +1,88 @@
 {
-  "collection": "enemyOrcs_01",
+  "collection": "enemySet_02",
   "enemy": [
     {
       "enemyID": 1,
-      "enemyname": "Orc Brute",
+      "enemyname": "Raider [Heal + Buff]",
       "type": "monster",
-      "tag": [
-        "Orc"
-      ],
+      "tag": ["Set2"],
       "sprite": "SPR_Monsterplaceholder",
-      "level": 10,
-      "enemyhealthvalue": 16,
-      "enemyattackvalue": 5,
-      "elite": true,
+      "level": 11,
+      "enemyhealthvalue": 14,
+      "enemyattackvalue": 3,
       "enemyability": [
-        {
-          "type": "none"
-        }
+        { "type": "heal", "value": 2 },
+        { "type": "buff_attack", "value": 1 }
       ]
     },
     {
       "enemyID": 2,
-      "enemyname": "Orc Shaman",
+      "enemyname": "Raider [Attack All + Heal All]",
       "type": "monster",
-      "tag": [
-        "Orc"
-      ],
+      "tag": ["Set2"],
       "sprite": "SPR_Monsterplaceholder",
-      "level": 10,
+      "level": 11,
+      "enemyhealthvalue": 12,
+      "enemyattackvalue": 2,
+      "enemyability": [
+        { "type": "attack_all", "value": 1 },
+        { "type": "heal_all", "value": 2 }
+      ]
+    },
+    {
+      "enemyID": 3,
+      "enemyname": "Raider [Silence + Burn]",
+      "type": "monster",
+      "tag": ["Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 11,
+      "enemyhealthvalue": 11,
+      "enemyattackvalue": 2,
+      "enemyability": [
+        { "type": "silence", "value": 1 },
+        { "type": "stasis", "dot": "burn", "value": 1, "duration": 2 }
+      ]
+    },
+    {
+      "enemyID": 4,
+      "enemyname": "Raider [Heal All + Buff]",
+      "type": "monster",
+      "tag": ["Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 11,
+      "enemyhealthvalue": 13,
+      "enemyattackvalue": 2,
+      "enemyability": [
+        { "type": "heal_all", "value": 2 },
+        { "type": "buff_attack", "value": 2 }
+      ]
+    },
+    {
+      "enemyID": 5,
+      "enemyname": "Raider [Destroy + Heal]",
+      "type": "monster",
+      "tag": ["Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 11,
       "enemyhealthvalue": 10,
+      "enemyattackvalue": 2,
+      "enemyability": [
+        { "type": "destroy", "value": 1 },
+        { "type": "heal", "value": 2 }
+      ]
+    },
+    {
+      "enemyID": 6,
+      "enemyname": "Raider [Poison + Attack All]",
+      "type": "monster",
+      "tag": ["Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 11,
+      "enemyhealthvalue": 12,
       "enemyattackvalue": 3,
       "enemyability": [
-        {
-          "type": "heal",
-          "value": 4
-        }
+        { "type": "stasis", "dot": "poison", "value": 1, "duration": 3 },
+        { "type": "attack_all", "value": 1 }
       ]
     }
   ]

@@ -16,8 +16,14 @@ function SCR_CardSlot_AddToDeck() {
             }
             
             // Check available without touching owned
-            var _available = global.player_collection[i].owned - _in_deck;
-            if (_available <= 0) return false;
+            var _owned = variable_struct_exists(global.player_collection[i], "owned")
+                ? global.player_collection[i].owned : 0;
+            var _available = _owned - _in_deck;
+            if (_available <= 0) {
+                show_debug_message("No copies left for " + card_data.name
+                    + " (owned " + string(_owned) + ", in deck " + string(_in_deck) + ")");
+                return false;
+            }
             
             // Add to deck
             var _copy = {

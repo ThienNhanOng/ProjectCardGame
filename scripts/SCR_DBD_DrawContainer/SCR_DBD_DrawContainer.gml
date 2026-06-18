@@ -16,8 +16,7 @@ function SCR_DBD_DrawContainer() {
     draw_text(container_x, container_y - 20, "Card Collection");
     
     // Page info - FIXED: Use player collection
-    var _total_pages = ceil(array_length(global.player_collection) / cards_per_page);
-    if (_total_pages < 1) _total_pages = 1;
+    var _total_pages = SCR_DBD_GetCollectionPageCount(cards_per_page);
     
     draw_set_color(c_white);
     draw_set_halign(fa_right);

@@ -130,9 +130,9 @@ function SCR_Board_DrawPlacedCards() {
 
         draw_sprite_ext(_spr, 0, _cx, _cy, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
-        draw_set_halign(fa_center);
+        draw_set_halign(fa_left);
         draw_set_valign(fa_top);
-        draw_text(_cx, _slot.y + 5, _slot.card.name);
+        draw_text(_slot.x + 4, _slot.y + 5, SCR_Hand_TruncateName(_slot.card.name, _card_w - 8));
 
         var _bar_pad = 4;
         var _bar_y = _slot.y + _card_h + 4;
@@ -156,8 +156,9 @@ function SCR_Board_DrawPlacedCards() {
         
         draw_sprite_ext(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
-        draw_set_halign(fa_center);
-        draw_text(_slot.x + _card_w / 2, _slot.y + 5, _slot.card.name);
+        draw_set_halign(fa_left);
+        draw_set_valign(fa_top);
+        draw_text(_slot.x + 4, _slot.y + 5, SCR_Hand_TruncateName(_slot.card.name, _card_w - 8));
     }
     
     if (action_slot.occupied && action_slot.card != undefined) {
@@ -167,8 +168,9 @@ function SCR_Board_DrawPlacedCards() {
         
         draw_sprite_ext(_spr, 0, action_slot.x + _card_w / 2, action_slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
-        draw_set_halign(fa_center);
-        draw_text(action_slot.x + _card_w / 2, action_slot.y + 5, action_slot.card.name);
+        draw_set_halign(fa_left);
+        draw_set_valign(fa_top);
+        draw_text(action_slot.x + 4, action_slot.y + 5, SCR_Hand_TruncateName(action_slot.card.name, _card_w - 8));
     }
     
     // Enemy slots are drawn by OBJ_MonsterManager

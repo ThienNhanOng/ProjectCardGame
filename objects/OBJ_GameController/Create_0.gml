@@ -22,7 +22,9 @@ function load_Collection(filename) {
     var _collection = json_parse(_json_str);
     var _new_cards  = _collection.cards;
     for (var i = 0; i < array_length(_new_cards); i++) {
-        array_push(card_DB.cards, card_NormalizeDefinition(_new_cards[i]));
+        var _card = card_NormalizeDefinition(_new_cards[i]);
+        _card.collection = _collection.collection;
+        array_push(card_DB.cards, _card);
     }
     show_debug_message("Loaded: " + _collection.collection
         + " | Cards: " + string(array_length(_new_cards)));
@@ -88,7 +90,9 @@ function load_MixedContent(_filename) {
 
     if (variable_struct_exists(_data, "cards") && is_array(_data.cards)) {
         for (var i = 0; i < array_length(_data.cards); i++) {
-            array_push(card_DB.cards, card_NormalizeDefinition(_data.cards[i]));
+            var _card = card_NormalizeDefinition(_data.cards[i]);
+            _card.collection = _data.collection;
+            array_push(card_DB.cards, _card);
             _card_count++;
         }
     }

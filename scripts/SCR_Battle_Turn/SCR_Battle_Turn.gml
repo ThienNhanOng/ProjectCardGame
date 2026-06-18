@@ -27,7 +27,10 @@ function battle_BeginNextPlayerTurn() {
     battle_ResetTurnUses();
 
     var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board != noone) status_TickPlayerDoTs(_board);
+    if (_board != noone) {
+        status_TickPlayerDoTs(_board);
+        status_DecrementPlayerSilence(_board);
+    }
 
     SCR_Hand_DrawFromDeck();
     show_debug_message("=== Player turn " + string(turn_number) + " | Drew 1 card ===");

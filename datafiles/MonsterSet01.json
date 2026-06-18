@@ -1,54 +1,71 @@
 {
-  "collection": "enemyGoblins_01",
+  "collection": "enemySet_01",
   "enemy": [
     {
       "enemyID": 1,
-      "enemyname": "Goblin Soldier",
+      "enemyname": "Grunt [Heal 3]",
       "type": "monster",
-      "tag": ["Goblin"],
+      "tag": ["Set1"],
       "sprite": "SPR_Monsterplaceholder",
       "level": 10,
       "enemyhealthvalue": 12,
-      "enemyattackvalue": 4,
-      "enemyability": [
-        {
-          "type": "buff_attack",
-          "value": 2
-        }
-      ]
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "heal", "value": 3 }]
     },
     {
       "enemyID": 2,
-      "enemyname": "Goblin Mage",
+      "enemyname": "Grunt [Buff ATK 2]",
       "type": "monster",
-      "tag": ["Goblin"],
+      "tag": ["Set1"],
       "sprite": "SPR_Monsterplaceholder",
       "level": 10,
-      "enemyhealthvalue": 8,
-      "enemyattackvalue": 2,
-      "enemyability": [
-        {
-          "type": "heal",
-          "value": 3
-        }
-      ]
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "buff_attack", "value": 2 }]
     },
     {
       "enemyID": 3,
-      "enemyname": "Goblin Commander",
+      "enemyname": "Grunt [Attack All 2]",
       "type": "monster",
-      "tag": ["Goblin"],
+      "tag": ["Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 11,
+      "enemyattackvalue": 2,
+      "enemyability": [{ "type": "attack_all", "value": 2 }]
+    },
+    {
+      "enemyID": 4,
+      "enemyname": "Grunt [Silence 2]",
+      "type": "monster",
+      "tag": ["Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 2,
+      "enemyability": [{ "type": "silence", "value": 2 }]
+    },
+    {
+      "enemyID": 5,
+      "enemyname": "Grunt [Burn]",
+      "type": "monster",
+      "tag": ["Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 9,
+      "enemyattackvalue": 2,
+      "enemyability": [{ "type": "stasis", "dot": "burn", "value": 2, "duration": 2 }]
+    },
+    {
+      "enemyID": 6,
+      "enemyname": "Grunt [None]",
+      "type": "monster",
+      "tag": ["Set1"],
       "sprite": "SPR_Monsterplaceholder",
       "level": 10,
       "enemyhealthvalue": 14,
-      "enemyattackvalue": 3,
-      "elite": true,
-      "enemyability": [
-        {
-          "type": "buff_attack",
-          "value": 2
-        }
-      ]
+      "enemyattackvalue": 4,
+      "enemyability": [{ "type": "none" }]
     }
   ]
 }

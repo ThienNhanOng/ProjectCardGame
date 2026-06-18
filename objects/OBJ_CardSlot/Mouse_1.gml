@@ -10,17 +10,7 @@ if (mouse_x > x && mouse_x < x + card_w &&
     for (var i = 0; i < array_length(_builder.selected_deck); i++) {
         if (_builder.selected_deck[i].id == card_id) {
             array_delete(_builder.selected_deck, i, 1);
-            
-            // RETURN THE CARD TO COLLECTION
-            for (var c = 0; c < array_length(global.player_collection); c++) {
-                if (global.player_collection[c].id == card_id) {
-                    global.player_collection[c].owned++;
-                    show_debug_message("Returned " + card_data.name + " to collection - Now owned: " + string(global.player_collection[c].owned));
-                    break;
-                }
-            }
-            
-            // REBUILD THE GRID - removes holes and updates collection display
+            show_debug_message("Returned " + card_data.name + " to collection");
             SCR_DBD_RebuildGrid();
             
             // Visual feedback

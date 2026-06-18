@@ -16,8 +16,9 @@ function trait_Execute(_trait, _ctx) {
             _ctx.amount = _trait.amount;
             return trait_ExecuteBuffAttack(_ctx);
 
+        case "draw":
         case "draw_cards":
-            _ctx.amount = _trait.amount;
+            _ctx.amount = (_trait.amount > 0) ? _trait.amount : 1;
             return trait_ExecuteDraw(_ctx);
 
         case "attack_all":

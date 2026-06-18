@@ -4,7 +4,7 @@ function SCR_DBS_HandleDeckClick() {
     for (var i = 0; i < array_length(selected_deck); i++) {
         var _y = 80 + (i * 18);
         
-        if (mouse_x > room_width - 180 && mouse_x < room_width - 20 &&
+        if (mouse_x > room_width - 300 && mouse_x < room_width - 20 &&
             mouse_y > _y - 9 && mouse_y < _y + 9) {
             
             var _removed = selected_deck[i];

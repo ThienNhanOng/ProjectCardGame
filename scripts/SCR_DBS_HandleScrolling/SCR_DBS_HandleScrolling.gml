@@ -1,7 +1,6 @@
 function SCR_DBS_HandleScrolling() {
     var _new_page = current_page;
-    var _total_pages = ceil(array_length(global.player_collection) / cards_per_page);
-    if (_total_pages < 1) _total_pages = 1;   // ADD THIS - prevent negative clamp range
+    var _total_pages = SCR_DBD_GetCollectionPageCount(cards_per_page);
     
     // Mouse wheel
     if (mouse_wheel_up()) {

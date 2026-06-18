@@ -5,7 +5,7 @@ function SCR_Monster_Init() {
     monster_queue = [];
     hovered_enemy_slot = -1;
 
-    var _battle_file = "Battle_TraitDemo.json";
+    var _battle_file = "Battle01.json";
     if (variable_global_exists("battle_config_file")) {
         _battle_file = global.battle_config_file;
     }

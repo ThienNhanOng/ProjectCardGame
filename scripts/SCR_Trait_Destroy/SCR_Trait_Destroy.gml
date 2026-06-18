@@ -41,7 +41,7 @@ function trait_ExecuteDestroy(_ctx) {
         return battle_DestroyPlayerMonster(_ctx.target_player_slot);
     }
 
-    return trait_DestroyEnemyCount(_ctx.amount);
+    return false;
 }
 
 function trait_DestroyEnemyCount(_count) {

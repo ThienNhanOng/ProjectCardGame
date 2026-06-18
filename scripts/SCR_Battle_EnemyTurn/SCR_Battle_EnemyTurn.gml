@@ -56,6 +56,7 @@ function battle_EnemyPickBuffTarget(_source_slot) {
 
 function battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _trait) {
     if (_trait == undefined) return false;
+    if (status_IsSilenced(_monster)) return false;
 
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return false;
@@ -179,14 +180,26 @@ function battle_EnemyAttack(_enemy_slot_index, _monster) {
 }
 
 function battle_EnemyTakeTurn(_enemy_slot_index, _monster) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board != noone
+        && _enemy_slot_index >= 0
+        && _enemy_slot_index < array_length(_board.enemy_slots)) {
+        var _live_slot = _board.enemy_slots[_enemy_slot_index];
+        if (_live_slot.occupied && _live_slot.card != undefined) {
+            _monster = _live_slot.card;
+        }
+    }
+
     if (_monster == undefined || !_monster.alive) return;
 
+    if (status_IsSilenced(_monster)) {
+        battle_EnemyLog_Skipped(_enemy_slot_index, _monster, "silenced — skipped turn");
+        show_debug_message(_monster.name + " is silenced and skips this enemy phase");
+        return;
+    }
+
     if (monster_IsElite(_monster)) {
-        if (status_IsSilenced(_monster)) {
-            battle_EnemyLog_Skipped(_enemy_slot_index, _monster, "silenced");
-        } else {
-            battle_EnemyUseAllEffects(_enemy_slot_index, _monster);
-        }
+        battle_EnemyUseAllEffects(_enemy_slot_index, _monster);
         battle_EnemyAttack(_enemy_slot_index, _monster);
         return;
     }
@@ -211,7 +224,6 @@ function battle_RunEnemyTurn() {
         var _slot = _board.enemy_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
         battle_EnemyTakeTurn(i, _slot.card);
+        status_TickSilence(_slot.card);
     }
-
-    status_DecrementEnemySilence(_board, _mm);
 }

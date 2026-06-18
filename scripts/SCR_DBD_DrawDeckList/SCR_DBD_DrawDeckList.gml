@@ -1,5 +1,6 @@
 function SCR_DBD_DrawDeckList() {
-    var _list_x = room_width - 180;
+    var _list_x = room_width - 300;
+    var _list_w = 270;
     
     // Count duplicates in the deck
     var _deck_counts = {};
@@ -53,7 +54,8 @@ function SCR_DBD_DrawDeckList() {
         _total_cards += _card.count;
         
         // Reuse existing format but show count like "Goblin strike x3"
-        draw_text(_list_x, _y, string(i + 1) + ". " + _card.name + " x" + string(_card.count));
+        var _line = string(i + 1) + ". " + _card.name + " x" + string(_card.count);
+        draw_text(_list_x, _y, SCR_Hand_TruncateName(_line, _list_w));
     }
     
     // Total counter - reuse existing

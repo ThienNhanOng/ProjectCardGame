@@ -28,12 +28,13 @@ function monster_CreateInstance(_wave_entry) {
         health: _def.enemyhealthvalue,
         base_attack: _def.enemyattackvalue,
         attack: _def.enemyattackvalue,
-        ability: _def.enemyability,
+        ability: status_CloneAbilityArray(_def.enemyability),
         alive: true,
         animation: variable_struct_exists(_def, "animation") ? _def.animation : "",
         elite: variable_struct_exists(_def, "elite") && _def.elite,
         status_effects: [],
-        silenced_turns: 0
+        silenced_turns: 0,
+        silenced_ability_backup: undefined
     };
 }
 
@@ -46,6 +47,8 @@ function SCR_Monster_GetSprite(_monster) {
 }
 
 function SCR_Monster_GetAbilityText(_monster) {
+    if (status_IsSilenced(_monster)) return "none";
+
     var _traits = trait_GetFromMonster(_monster);
     if (array_length(_traits) <= 0) return "none";
     if (_traits[0].type == "none") return "none";

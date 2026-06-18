@@ -1,96 +1,101 @@
 // ===== TEST COLLECTION MANAGER =====
-// This file manages the player's card collection for testing
+// Cards must exist in card_DB (JSON) AND be granted here before deck builder shows them.
 
-// Global collection variable
 global.player_collection = [];
 
-// Setup test collection - add cards you want to test
-function SetupTestCollection() {
-    // Clear existing collection
-    global.player_collection = [];
-    
-    // Add each card ONLY ONCE with total owned count
-    // Format: AddCardToCollection(card_id, amount)
-    AddCardToCollection(1, 5);   // Card ID 1 - Goblin I - own 6 copies
-    AddCardToCollection(2, 10);   // Card ID 2 - Goblin Warrior - own 2 copies
-    AddCardToCollection(3, 3);   // Card ID 3 - Goblin Tank - own 1 copy
-    AddCardToCollection(4, 3);
-	AddCardToCollection(5, 5);   // Card ID 5 - Goblin Strike (action) - own 3 copies
-    AddCardToCollection(7, 5);
-	AddCardToCollection(8, 5);
-	AddCardToCollection(9, 5);   // Card ID 8 - Goblin Sword (weapon) - own 5 copies
-    AddCardToCollection(10, 2);  // Card ID 10 - Spirit Card - own 2 copies
+function collection_CopyDefinition(_template) {
+    if (_template == undefined) return undefined;
 
-    // Trait demo sets (ids 101-109 monsters, 201-209 actions, 301+ mix)
-    AddCardToCollection(101, 3);
-    AddCardToCollection(102, 3);
-    AddCardToCollection(103, 3);
-    AddCardToCollection(104, 3);
-    AddCardToCollection(105, 3);
-    AddCardToCollection(106, 3);
-    AddCardToCollection(107, 3);
-    AddCardToCollection(108, 3);
-    AddCardToCollection(109, 3);
-    AddCardToCollection(201, 3);
-    AddCardToCollection(202, 3);
-    AddCardToCollection(203, 3);
-    AddCardToCollection(204, 3);
-    AddCardToCollection(205, 3);
-    AddCardToCollection(206, 3);
-    AddCardToCollection(207, 3);
-    AddCardToCollection(208, 3);
-    AddCardToCollection(209, 3);
-    AddCardToCollection(301, 2);
-    AddCardToCollection(302, 2);
-    AddCardToCollection(303, 2);
-    AddCardToCollection(311, 2);
-    AddCardToCollection(312, 2);
-    AddCardToCollection(313, 2);
-    
+    var _card = {};
+    var _keys = variable_struct_get_names(_template);
+    for (var i = 0; i < array_length(_keys); i++) {
+        var _key = _keys[i];
+        if (_key == "owned") continue;
+        _card[$ _key] = _template[$ _key];
+    }
+    return _card;
+}
+
+function collection_FindDefinition(_card_id, _collection = "") {
+    var _fallback = undefined;
+
+    for (var i = 0; i < array_length(card_DB.cards); i++) {
+        var _def = card_DB.cards[i];
+        if (_def.id != _card_id) continue;
+
+        if (_fallback == undefined) _fallback = _def;
+
+        if (_collection != ""
+            && variable_struct_exists(_def, "collection")
+            && _def.collection == _collection) {
+            return _def;
+        }
+    }
+
+    return _fallback;
+}
+
+function SetupTestCollection() {
+    global.player_collection = [];
+
+    AddAllFromSet("cardsetTest_01", 3);
+
     show_debug_message("=== Test Collection Ready ===");
     show_debug_message("Total card types: " + string(array_length(global.player_collection)));
-    
-    // Debug: Show collection contents
+
     for (var i = 0; i < array_length(global.player_collection); i++) {
-        show_debug_message("  " + global.player_collection[i].name + " | ID:" + string(global.player_collection[i].id) + " | Owned:" + string(global.player_collection[i].owned));
+        show_debug_message("  " + global.player_collection[i].name
+            + " | ID:" + string(global.player_collection[i].id)
+            + " | Owned:" + string(global.player_collection[i].owned));
     }
 }
 
-// Add a card to collection (prevents duplicates)
-function AddCardToCollection(_card_id, _amount) {
-    // FIRST: Check if card already exists in collection
-    for (var c = 0; c < array_length(global.player_collection); c++) {
-        if (global.player_collection[c].id == _card_id) {
-            // Add to existing entry
-            global.player_collection[c].owned += _amount;
-            show_debug_message("Added " + _amount + " more to existing: " + global.player_collection[c].name);
-            return true;
-        }
-    }
-    
-    // SECOND: Find card in master database and add new
+/// @desc Grant every card from a JSON collection file to the player
+function AddAllFromSet(_collection_name, _amount) {
+    var _added = 0;
     for (var i = 0; i < array_length(card_DB.cards); i++) {
-        if (card_DB.cards[i].id == _card_id) {
-            // Copy the ENTIRE card as-is (all properties preserved)
-            var _new_card = card_DB.cards[i];
-            // Just add the owned property
-            _new_card.owned = _amount;
-            array_push(global.player_collection, _new_card);
-            show_debug_message("Added NEW: " + _new_card.name + " x" + string(_amount));
-            return true;
-        }
+        var _def = card_DB.cards[i];
+        if (!variable_struct_exists(_def, "collection")) continue;
+        if (_def.collection != _collection_name) continue;
+        AddCardToCollection(_def.id, _amount, _collection_name);
+        _added++;
     }
-    
-    show_debug_message("ERROR: Card ID " + string(_card_id) + " not found in database!");
-    return false;
+    show_debug_message("Granted " + string(_added) + " card types from " + _collection_name + " x" + string(_amount));
 }
 
-// Get the player's collection
+function AddCardToCollection(_card_id, _amount, _collection = "") {
+    for (var c = 0; c < array_length(global.player_collection); c++) {
+        if (global.player_collection[c].id != _card_id) continue;
+        if (_collection != ""
+            && variable_struct_exists(global.player_collection[c], "collection")
+            && global.player_collection[c].collection != _collection) {
+            continue;
+        }
+
+        global.player_collection[c].owned += _amount;
+        show_debug_message("Added " + string(_amount) + " more to existing: " + global.player_collection[c].name);
+        return true;
+    }
+
+    var _template = collection_FindDefinition(_card_id, _collection);
+    if (_template == undefined) {
+        show_debug_message("ERROR: Card ID " + string(_card_id)
+            + (_collection != "" ? " in " + _collection : "")
+            + " not found in database!");
+        return false;
+    }
+
+    var _new_card = collection_CopyDefinition(_template);
+    _new_card.owned = _amount;
+    array_push(global.player_collection, _new_card);
+    show_debug_message("Added NEW: " + _new_card.name + " x" + string(_amount));
+    return true;
+}
+
 function GetPlayerCollection() {
     return global.player_collection;
 }
 
-// Get owned count for a specific card
 function GetCardOwned(_card_id) {
     for (var i = 0; i < array_length(global.player_collection); i++) {
         if (global.player_collection[i].id == _card_id) {
@@ -100,43 +105,22 @@ function GetCardOwned(_card_id) {
     return 0;
 }
 
-// Decrease owned count (when adding to deck)
-function DecreaseCardOwned(_card_id) {
-    for (var i = 0; i < array_length(global.player_collection); i++) {
-        if (global.player_collection[i].id == _card_id && global.player_collection[i].owned > 0) {
-            global.player_collection[i].owned--;
-            show_debug_message("Decreased " + global.player_collection[i].name + " - Now owned: " + string(global.player_collection[i].owned));
-            return true;
-        }
-    }
-    return false;
+function GetCardAvailable(_card_id) {
+    return GetCardOwned(_card_id) - SCR_DBD_GetDeckCount(_card_id);
 }
 
-// Increase owned count (when removing from deck)
-function IncreaseCardOwned(_card_id) {
-    for (var i = 0; i < array_length(global.player_collection); i++) {
-        if (global.player_collection[i].id == _card_id) {
-            global.player_collection[i].owned++;
-            show_debug_message("Increased " + global.player_collection[i].name + " - Now owned: " + string(global.player_collection[i].owned));
-            return true;
-        }
-    }
-    return false;
-}
-
-// Clear entire collection (for testing)
 function ClearCollection() {
     global.player_collection = [];
     show_debug_message("Collection cleared!");
 }
 
-// Debug: Print current collection
 function DebugPrintCollection() {
     show_debug_message("=== CURRENT COLLECTION ===");
     for (var i = 0; i < array_length(global.player_collection); i++) {
-        show_debug_message(string(i) + ". " + global.player_collection[i].name + 
-                          " (ID:" + string(global.player_collection[i].id) + 
-                          ") Owned: " + string(global.player_collection[i].owned));
+        show_debug_message(string(i) + ". " + global.player_collection[i].name
+            + " (ID:" + string(global.player_collection[i].id)
+            + ") Owned: " + string(global.player_collection[i].owned)
+            + " Available: " + string(GetCardAvailable(global.player_collection[i].id)));
     }
     show_debug_message("Total card types: " + string(array_length(global.player_collection)));
 }

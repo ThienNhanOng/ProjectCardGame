@@ -44,10 +44,12 @@ function SCR_ExtraDeck_DrawCard(_x, _y, _w, _h, _card_data) {
     }
     
     // Name
+    var _pad = 4;
+    var _name = SCR_Hand_TruncateName(_card_data.name, _scaled_w - _pad * 2);
     draw_set_color(c_blue);
-    draw_set_halign(fa_center);
+    draw_set_halign(fa_left);
     draw_set_valign(fa_top);
-    draw_text(_draw_x + _scaled_w / 2, _draw_y + 3, _card_data.name);
+    draw_text(_draw_x + _pad, _draw_y + 3, _name);
     
     // Type
     var _type_text = _card_data.type;

@@ -136,6 +136,20 @@ function battle_ExecuteActionStasis(_trait_index, _enemy_slot_index) {
     return true;
 }
 
+function battle_ExecuteActionBuff(_trait_index, _player_slot_index) {
+    if (!battle_CanUseActionTrait(_trait_index)) return false;
+
+    var _traits = battle_GetActionTraits();
+    if (_trait_index >= array_length(_traits)) return false;
+    if (_traits[_trait_index].type != "buff_attack") return false;
+
+    var _ctx = trait_CreateBuffAttackContext(_traits[_trait_index].amount, "player", _player_slot_index);
+    if (!trait_Execute(_traits[_trait_index], _ctx)) return false;
+
+    battle_ConsumeActionTrait(_trait_index);
+    return true;
+}
+
 function battle_MonsterAbilityAttack(_enemy_slot_index, _trait_index) {
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return false;

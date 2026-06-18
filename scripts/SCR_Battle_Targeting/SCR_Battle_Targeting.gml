@@ -46,7 +46,10 @@ function battle_GetEnemySlotAt(_mx, _my) {
 
 function battle_HandleEnemyTargetPick(_enemy_slot) {
     if (pending_trait_source == "monster_on_play") {
+        var _saved_mode = target_mode;
+        target_mode = "none";
         if (!battle_ExecuteMonsterOnPlayEnemyTrait(pending_monster_slot, pending_monster_trait_index, _enemy_slot)) {
+            target_mode = _saved_mode;
             return;
         }
         battle_MonsterOnPlayContinue(pending_monster_slot, pending_monster_trait_index);
@@ -54,7 +57,10 @@ function battle_HandleEnemyTargetPick(_enemy_slot) {
     }
 
     if (pending_trait_source == "weapon_on_play") {
+        var _saved_weapon_mode = target_mode;
+        target_mode = "none";
         if (!battle_ExecuteWeaponOnPlayEnemyTrait(pending_weapon_slot, pending_monster_trait_index, _enemy_slot)) {
+            target_mode = _saved_weapon_mode;
             return;
         }
         battle_WeaponOnPlayContinue(pending_weapon_slot, pending_monster_trait_index);
@@ -63,18 +69,27 @@ function battle_HandleEnemyTargetPick(_enemy_slot) {
 
     switch (target_mode) {
         case "pick_enemy_destroy":
+            target_mode = "none";
             if (battle_ExecuteActionDestroy(pending_action_trait_index, _enemy_slot)) {
                 battle_TargetingContinueAfterAction(pending_action_trait_index);
+            } else {
+                target_mode = "pick_enemy_destroy";
             }
             break;
         case "pick_enemy_silence":
+            target_mode = "none";
             if (battle_ExecuteActionSilence(pending_action_trait_index, _enemy_slot)) {
                 battle_TargetingContinueAfterAction(pending_action_trait_index);
+            } else {
+                target_mode = "pick_enemy_silence";
             }
             break;
         case "pick_enemy_stasis":
+            target_mode = "none";
             if (battle_ExecuteActionStasis(pending_action_trait_index, _enemy_slot)) {
                 battle_TargetingContinueAfterAction(pending_action_trait_index);
+            } else {
+                target_mode = "pick_enemy_stasis";
             }
             break;
     }
@@ -104,6 +119,16 @@ function SCR_Battle_Targeting_Step() {
         if (_heal_slot < 0) return;
 
         if (battle_ExecuteActionHeal(pending_action_trait_index, _heal_slot)) {
+            battle_TargetingContinueAfterAction(pending_action_trait_index);
+        }
+        return;
+    }
+
+    if (target_mode == "pick_player_buff") {
+        var _buff_slot = battle_GetPlayerMonsterSlotAt(mouse_x, mouse_y);
+        if (_buff_slot < 0) return;
+
+        if (battle_ExecuteActionBuff(pending_action_trait_index, _buff_slot)) {
             battle_TargetingContinueAfterAction(pending_action_trait_index);
         }
         return;
@@ -160,6 +185,17 @@ function SCR_Battle_Targeting_Draw() {
             if (!_hslot.visible || !_hslot.occupied) continue;
             draw_set_color(c_aqua);
             draw_rectangle(_hslot.x, _hslot.y, _hslot.x + _hslot.w, _hslot.y + _hslot.h, true);
+        }
+    }
+
+    if (target_mode == "pick_player_buff") {
+        draw_text(room_width / 2, 8, "Choose your monster to buff ATK");
+
+        for (var b = 0; b < array_length(_board.player_monster_slots); b++) {
+            var _bslot = _board.player_monster_slots[b];
+            if (!_bslot.visible || !_bslot.occupied) continue;
+            draw_set_color(c_aqua);
+            draw_rectangle(_bslot.x, _bslot.y, _bslot.x + _bslot.w, _bslot.y + _bslot.h, true);
         }
     }
 

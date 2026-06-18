@@ -11,7 +11,7 @@ function trait_CreateSilenceContext(_turns, _target_side, _target_slot) {
 }
 
 function trait_ExecuteSilence(_ctx) {
-    if (_ctx.amount <= 0) _ctx.amount = 1;
+    _ctx.amount = floor(max(1, real(_ctx.amount)));
 
     if (_ctx.target_side == "enemy" && _ctx.target_enemy_slot >= 0) {
         return battle_SilenceEnemyMonster(_ctx.target_enemy_slot, _ctx.amount);
@@ -35,8 +35,9 @@ function battle_SilenceEnemyMonster(_slot_index, _turns) {
 
     if (!status_SilenceUnit(_slot.card, _turns)) return false;
 
-    battle_StatusLog_Silence("enemy", _slot_index, _slot.card.name, _turns);
-    show_debug_message("Silenced " + _slot.card.name + " for " + string(_turns) + " turn(s)");
+    battle_StatusLog_Silence("enemy", _slot_index, _slot.card.name, _slot.card.silenced_turns);
+    show_debug_message("Silenced " + _slot.card.name + " for " + string(_slot.card.silenced_turns)
+        + " enemy turn(s) | ability set to none");
     return true;
 }
 

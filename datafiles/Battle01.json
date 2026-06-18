@@ -1,9 +1,12 @@
 {
   "battle": "battle01",
-  "active_slots": 2,
+  "active_slots": 3,
   "wave": [
-    { "collection": "enemyGoblins_01", "enemyID": 3 },
-    { "collection": "enemyOrcs_01", "enemyID": 1 },
-
+    { "collection": "enemySet_01", "enemyID": 1 },
+    { "collection": "enemySet_01", "enemyID": 2 },
+    { "collection": "enemySet_02", "enemyID": 1 },
+    { "collection": "enemySet_02", "enemyID": 2 },
+    { "collection": "enemySet_03", "enemyID": 1 },
+    { "collection": "enemySet_03", "enemyID": 2 }
   ]
 }

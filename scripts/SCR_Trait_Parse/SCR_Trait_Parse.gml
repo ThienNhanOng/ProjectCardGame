@@ -39,6 +39,11 @@ function trait_NormalizeEntry(_raw) {
 
     if (variable_struct_exists(_raw, "duration")) _duration = _raw.duration;
 
+    if (_type == "silence") {
+        if (variable_struct_exists(_raw, "turns")) _amount = _raw.turns;
+        else if (_amount <= 0) _amount = 1;
+    }
+
     if (variable_struct_exists(_raw, "uses_per_turn")) _uses = _raw.uses_per_turn;
 
     return {
@@ -89,12 +94,12 @@ function trait_FindFirst(_traits, _type) {
 }
 
 function trait_ActionNeedsTargeting(_type) {
-    return _type == "attack" || _type == "heal" || _type == "destroy"
-        || _type == "silence" || _type == "stasis";
+    return _type == "attack" || _type == "heal" || _type == "buff_attack"
+        || _type == "destroy" || _type == "silence" || _type == "stasis";
 }
 
 function trait_ActionIsAuto(_type) {
-    return _type == "draw_cards" || _type == "attack_all" || _type == "heal_all" || _type == "add";
+    return trait_IsDrawType(_type) || _type == "attack_all" || _type == "heal_all" || _type == "add";
 }
 
 function trait_OnPlayNeedsEnemyTarget(_type) {
@@ -112,7 +117,7 @@ function trait_GetDisplayText(_trait) {
         case "draw_cards": return "Draw " + string(_trait.amount);
         case "destroy": return "Destroy " + string(_trait.amount);
         case "add": return "Add id " + string(_trait.card_id);
-        case "silence": return "Silence " + string(max(1, _trait.amount)) + " turn(s)";
+        case "silence": return "Silence 1 target (" + string(max(1, _trait.amount)) + " enemy turn(s))";
         case "stasis":
             var _dot = (_trait.dot_type != "") ? _trait.dot_type : "?";
             return "Stasis " + _dot;
@@ -128,8 +133,9 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
             return false;
         case "heal":
             return trait_Execute(_trait, trait_CreateHealContext(_trait.amount, "player", _player_slot));
+        case "draw":
         case "draw_cards":
-            return trait_Execute(_trait, trait_CreateDrawContext(_trait.amount));
+            return trait_ExecuteDraw(trait_CreateDrawContext(max(1, _trait.amount)));
         case "attack_all":
             return trait_Execute(_trait, trait_CreateAttackAllContext(_trait.amount));
         case "heal_all":
@@ -141,8 +147,7 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
         case "stasis":
             return false;
         case "buff_attack":
-            show_debug_message("On-play buff_attack pending for player monsters");
-            return false;
+            return trait_Execute(_trait, trait_CreateBuffAttackContext(_trait.amount, "player", _player_slot));
         default:
             show_debug_message("On-play trait pending: " + _trait.type);
             return false;

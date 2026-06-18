@@ -21,7 +21,9 @@ function SCR_Deck_createinit() {
     }
     
     // Load deck from global variable (saved from deckbuilder)
-    if (variable_global_exists("battle_deck") && array_length(global.battle_deck) > 0) {
+    if (variable_global_exists("battle_deck")
+        && is_array(global.battle_deck)
+        && array_length(global.battle_deck) > 0) {
         for (var i = 0; i < array_length(global.battle_deck); i++) {
             deck_AddCard(global.battle_deck[i]);
         }
@@ -122,6 +124,7 @@ function card_CreateRuntimeInstance(_template) {
     _card.max_health = _base_hp;
     _card.status_effects = [];
     _card.silenced_turns = 0;
+    _card.silenced_ability_backup = undefined;
     return _card;
 }
 
