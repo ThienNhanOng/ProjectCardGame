@@ -80,6 +80,55 @@ function deck_GetCardData(card_id) {
     return undefined;
 }
 
+/// @desc Store immutable base HP from JSON so runtime damage cannot corrupt the DB template
+function card_NormalizeDefinition(_raw) {
+    if (_raw == undefined) return undefined;
+
+    var _card = {};
+    var _keys = variable_struct_get_names(_raw);
+    for (var i = 0; i < array_length(_keys); i++) {
+        var _key = _keys[i];
+        if (_key == "max_health") continue;
+        _card[$ _key] = _raw[$ _key];
+    }
+
+    var _base_hp = variable_struct_exists(_raw, "health") ? _raw.health : 10;
+    _card.base_health = _base_hp;
+    return _card;
+}
+
+function card_GetDefinitionHealth(_template) {
+    if (_template == undefined) return 10;
+    if (variable_struct_exists(_template, "base_health")) return _template.base_health;
+    if (variable_struct_exists(_template, "health")) return _template.health;
+    return 10;
+}
+
+/// @desc Shallow-copy a DB card so runtime stats (HP, etc.) are per-instance
+function card_CreateRuntimeInstance(_template) {
+    if (_template == undefined) return undefined;
+
+    var _card = {};
+    var _keys = variable_struct_get_names(_template);
+    for (var i = 0; i < array_length(_keys); i++) {
+        var _key = _keys[i];
+        if (_key == "health" || _key == "max_health") continue;
+        _card[$ _key] = _template[$ _key];
+    }
+
+    var _base_hp = card_GetDefinitionHealth(_template);
+    _card.base_health = _base_hp;
+    _card.health = _base_hp;
+    _card.max_health = _base_hp;
+    _card.status_effects = [];
+    _card.silenced_turns = 0;
+    return _card;
+}
+
+function deck_CreateRuntimeCard(_card_id) {
+    return card_CreateRuntimeInstance(deck_GetCardData(_card_id));
+}
+
 function deck_GetCardName(card_id) {
     var _card = deck_GetCardData(card_id);
     if (_card != undefined) {

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_MonsterAnim_OrcShaman",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_MonsterAnim_OrcShaman",
+  "parent":{
+    "name":"OrcShaman",
+    "path":"folders/scripts/MonsterSystem/animations/OrcShaman.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

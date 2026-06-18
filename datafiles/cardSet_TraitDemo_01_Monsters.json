@@ -1,0 +1,95 @@
+{
+  "collection": "traitDemo_playerMonsters",
+  "cards": [
+    {
+      "id": 101,
+      "name": "Goblin [Draw 1]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 12,
+      "ability": [{ "type": "draw", "amount": 1 }]
+    },
+    {
+      "id": 102,
+      "name": "Goblin [Heal 3]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 12,
+      "ability": [{ "type": "heal", "amount": 3 }]
+    },
+    {
+      "id": 103,
+      "name": "Goblin [Heal All 2]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 14,
+      "ability": [{ "type": "heal_all", "amount": 2 }]
+    },
+    {
+      "id": 104,
+      "name": "Goblin [Attack All 2]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "attack_all", "amount": 2 }]
+    },
+    {
+      "id": 105,
+      "name": "Goblin [Destroy 1]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "destroy", "amount": 1 }]
+    },
+    {
+      "id": 106,
+      "name": "Goblin [Add Sword]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "add", "id": 8 }]
+    },
+    {
+      "id": 107,
+      "name": "Goblin [Silence 2]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "silence", "amount": 2 }]
+    },
+    {
+      "id": 108,
+      "name": "Goblin [Stasis Burn]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "stasis", "dot": "burn" }]
+    },
+    {
+      "id": 109,
+      "name": "Goblin [Stasis Poison]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "stasis", "dot": "poison", "amount": 1, "duration": 3 }]
+    }
+  ]
+}

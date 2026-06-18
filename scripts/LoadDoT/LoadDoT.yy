@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"LoadDoT",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"LoadDoT",
+  "parent":{
+    "name":"load",
+    "path":"folders/scripts/MonsterSystem/load.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

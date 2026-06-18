@@ -61,13 +61,53 @@ function battle_DamagePlayerMonster(_slot_index, _amount) {
 
     battle_EnsureCardHealth(_slot.card);
     _slot.card.health = max(0, _slot.card.health - _amount);
-    show_debug_message("Player slot " + string(_slot_index) + " took " + string(_amount) + " damage");
+    show_debug_message("Player slot " + string(_slot_index) + " took " + string(_amount) + " damage"
+        + " | HP: " + string(_slot.card.health) + "/" + string(_slot.card.max_health));
+
+    if (_slot.card.health <= 0) {
+        battle_DestroyPlayerMonster(_slot_index);
+    }
+    return true;
+}
+
+function battle_DestroyPlayerMonster(_slot_index) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return false;
+    if (_slot_index < 0 || _slot_index >= array_length(_board.player_monster_slots)) return false;
+
+    var _monster_slot = _board.player_monster_slots[_slot_index];
+    if (!_monster_slot.occupied || _monster_slot.card == undefined) return false;
+
+    var _name = _monster_slot.card.name;
+
+    with (_board) {
+        var _weapon_slot = player_weapon_slots[_slot_index];
+        if (_weapon_slot.occupied && _weapon_slot.card != undefined) {
+            SCR_Board_RemoveCard(_weapon_slot);
+        }
+        SCR_Board_RemoveCard(_monster_slot);
+    }
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm != noone) {
+        with (_bm) {
+            if (_slot_index == pending_player_slot) battle_CancelTargeting();
+            if (_slot_index < array_length(weapon_attacks_used)) {
+                weapon_attacks_used[_slot_index] = false;
+            }
+        }
+    }
+
+    show_debug_message(_name + " destroyed in player slot " + string(_slot_index));
     return true;
 }
 
 function battle_EnsureCardHealth(_card) {
+    if (_card == undefined) return;
+
+    var _base = card_GetDefinitionHealth(_card);
     if (!variable_struct_exists(_card, "max_health")) {
-        _card.max_health = variable_struct_exists(_card, "health") ? _card.health : 10;
+        _card.max_health = _base;
     }
     if (!variable_struct_exists(_card, "health")) {
         _card.health = _card.max_health;

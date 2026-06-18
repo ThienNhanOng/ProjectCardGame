@@ -1,0 +1,6 @@
+{
+  "dot_type": "electrocuted",
+  "label": "Electrocuted",
+  "damage_per_tick": 3,
+  "default_duration": 2
+}

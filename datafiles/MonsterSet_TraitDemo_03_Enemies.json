@@ -1,0 +1,104 @@
+{
+  "collection": "traitDemo_enemies",
+  "enemy": [
+    {
+      "enemyID": 101,
+      "enemyname": "Enemy [None]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 12,
+      "enemyattackvalue": 4,
+      "enemyability": [{ "type": "none" }]
+    },
+    {
+      "enemyID": 102,
+      "enemyname": "Enemy [Heal 3]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 2,
+      "enemyability": [{ "type": "heal", "value": 3 }]
+    },
+    {
+      "enemyID": 103,
+      "enemyname": "Enemy [Buff ATK 2]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "buff_attack", "value": 2 }]
+    },
+    {
+      "enemyID": 104,
+      "enemyname": "Enemy [Heal All 2]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 12,
+      "enemyattackvalue": 2,
+      "enemyability": [{ "type": "heal_all", "value": 2 }]
+    },
+    {
+      "enemyID": 105,
+      "enemyname": "Enemy [Attack All 2]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "attack_all", "value": 2 }]
+    },
+    {
+      "enemyID": 106,
+      "enemyname": "Enemy [Destroy 1]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 8,
+      "enemyattackvalue": 2,
+      "enemyability": [{ "type": "destroy", "value": 1 }]
+    },
+    {
+      "enemyID": 107,
+      "enemyname": "Enemy [Silence 2]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 2,
+      "enemyability": [{ "type": "silence", "value": 2 }]
+    },
+    {
+      "enemyID": 108,
+      "enemyname": "Enemy [Stasis Poison]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 9,
+      "enemyattackvalue": 2,
+      "enemyability": [{ "type": "stasis", "dot": "poison" }]
+    },
+    {
+      "enemyID": 109,
+      "enemyname": "Enemy [Stasis Shock]",
+      "type": "monster",
+      "tag": ["Demo"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 9,
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "stasis", "dot": "electrocuted", "value": 2, "duration": 2 }]
+    }
+  ]
+}

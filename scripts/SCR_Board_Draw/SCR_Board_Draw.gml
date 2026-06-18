@@ -123,11 +123,28 @@ function SCR_Board_DrawPlacedCards() {
         var _spr     = SCR_Hand_GetSprite(_slot.card);
         var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(_slot);
         var _scale   = _hovered ? _hover_scale : 1;
-        
-        draw_sprite_ext(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
+        var _cx      = _slot.x + _card_w / 2;
+        var _cy      = _slot.y + _card_h / 2;
+
+        battle_EnsureCardHealth(_slot.card);
+
+        draw_sprite_ext(_spr, 0, _cx, _cy, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_center);
-        draw_text(_slot.x + _card_w / 2, _slot.y + 5, _slot.card.name);
+        draw_set_valign(fa_top);
+        draw_text(_cx, _slot.y + 5, _slot.card.name);
+
+        var _bar_pad = 4;
+        var _bar_y = _slot.y + _card_h + 4;
+        monster_DrawHealthBar(_slot.x + _bar_pad, _bar_y, _card_w - _bar_pad * 2, 8,
+            _slot.card.health, _slot.card.max_health);
+
+        var _pstatus = status_GetDisplayText(_slot.card);
+        if (_pstatus != "") {
+            draw_set_color(c_orange);
+            draw_set_halign(fa_center);
+            draw_text(_cx, _bar_y + 12, _pstatus);
+        }
     }
     
     for (var i = 0; i < array_length(player_weapon_slots); i++) {

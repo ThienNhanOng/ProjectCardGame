@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_MonsterAnim_GoblinCommander",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_MonsterAnim_GoblinCommander",
+  "parent":{
+    "name":"GoblinCommander",
+    "path":"folders/scripts/MonsterSystem/animations/GoblinCommander.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

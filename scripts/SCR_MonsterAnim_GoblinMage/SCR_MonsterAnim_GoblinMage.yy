@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_MonsterAnim_GoblinMage",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_MonsterAnim_GoblinMage",
+  "parent":{
+    "name":"GoblinMage",
+    "path":"folders/scripts/MonsterSystem/animations/GoblinMage.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

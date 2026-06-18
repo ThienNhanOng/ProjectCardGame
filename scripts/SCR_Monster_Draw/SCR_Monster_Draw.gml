@@ -11,30 +11,42 @@ function monster_DrawHealthBar(_x, _y, _w, _h, _current, _max) {
 
     draw_set_color(c_white);
     draw_set_halign(fa_center);
-    draw_text(_x + _w / 2, _y - 1, string(_current) + "/" + string(_max));
-    draw_set_halign(fa_left);
+    draw_set_valign(fa_middle);
+    draw_text(_x + _w / 2, _y + _h / 2, string(_current) + "/" + string(_max));
+    draw_set_valign(fa_top);
 }
 
 function monster_DrawActive(_slot, _monster) {
-    var _card_w = _slot.w;
-    var _card_h = _slot.h;
-    var _spr = SCR_Monster_GetSprite(_monster);
+    var _layout = monster_GetSlotLayout(_slot);
 
-    draw_sprite_ext(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2, 1, 1, 0, c_white, 1);
+    draw_sprite_ext(SPR_MonsterSlot, 0, _layout.cx, _layout.cy, 1, 1, 0, c_white, 1);
+
+    monsterAnim_Draw(_slot, _monster, _layout);
 
     draw_set_halign(fa_center);
-    draw_set_color(c_black);
-    draw_text(_slot.x + _card_w / 2, _slot.y + 5, _monster.name);
+    draw_set_valign(fa_top);
+    draw_set_color(monster_IsElite(_monster) ? c_red : c_black);
+    draw_text(_layout.cx, _slot.y + 5, _monster.name);
 
+    monster_DrawHealthBar(_layout.health_x, _layout.health_y, _layout.health_w, _layout.health_h,
+        _monster.health, _monster.max_health);
+
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_top);
     draw_set_color(c_maroon);
-    draw_text(_slot.x + _card_w / 2, _slot.y + _card_h - 28, "ATK " + string(_monster.attack));
+    draw_text(_layout.stats_cx, _layout.atk_y, "ATK " + string(_monster.attack));
 
     draw_set_color(c_navy);
-    draw_text(_slot.x + _card_w / 2, _slot.y + _card_h - 16, SCR_Monster_GetAbilityText(_monster));
+    draw_text(_layout.stats_cx, _layout.ability_y, SCR_Monster_GetAbilityText(_monster));
 
-    monster_DrawHealthBar(_slot.x, _slot.y + _card_h + 4, _card_w, 8, _monster.health, _monster.max_health);
+    var _status = status_GetDisplayText(_monster);
+    if (_status != "") {
+        draw_set_color(c_orange);
+        draw_text(_layout.stats_cx, _layout.ability_y + 14, _status);
+    }
 
     draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
     draw_set_color(c_white);
 }
 

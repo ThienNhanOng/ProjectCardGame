@@ -15,11 +15,37 @@ function SetupTestCollection() {
     AddCardToCollection(2, 10);   // Card ID 2 - Goblin Warrior - own 2 copies
     AddCardToCollection(3, 3);   // Card ID 3 - Goblin Tank - own 1 copy
     AddCardToCollection(4, 3);
-	AddCardToCollection(5, 3);   // Card ID 5 - Goblin Strike (action) - own 3 copies
+	AddCardToCollection(5, 5);   // Card ID 5 - Goblin Strike (action) - own 3 copies
     AddCardToCollection(7, 5);
 	AddCardToCollection(8, 5);
 	AddCardToCollection(9, 5);   // Card ID 8 - Goblin Sword (weapon) - own 5 copies
     AddCardToCollection(10, 2);  // Card ID 10 - Spirit Card - own 2 copies
+
+    // Trait demo sets (ids 101-109 monsters, 201-209 actions, 301+ mix)
+    AddCardToCollection(101, 3);
+    AddCardToCollection(102, 3);
+    AddCardToCollection(103, 3);
+    AddCardToCollection(104, 3);
+    AddCardToCollection(105, 3);
+    AddCardToCollection(106, 3);
+    AddCardToCollection(107, 3);
+    AddCardToCollection(108, 3);
+    AddCardToCollection(109, 3);
+    AddCardToCollection(201, 3);
+    AddCardToCollection(202, 3);
+    AddCardToCollection(203, 3);
+    AddCardToCollection(204, 3);
+    AddCardToCollection(205, 3);
+    AddCardToCollection(206, 3);
+    AddCardToCollection(207, 3);
+    AddCardToCollection(208, 3);
+    AddCardToCollection(209, 3);
+    AddCardToCollection(301, 2);
+    AddCardToCollection(302, 2);
+    AddCardToCollection(303, 2);
+    AddCardToCollection(311, 2);
+    AddCardToCollection(312, 2);
+    AddCardToCollection(313, 2);
     
     show_debug_message("=== Test Collection Ready ===");
     show_debug_message("Total card types: " + string(array_length(global.player_collection)));

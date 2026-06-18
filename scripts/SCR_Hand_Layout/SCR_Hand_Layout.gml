@@ -89,3 +89,20 @@ function SCR_Hand_PickCardIndex(_mx, _my, _count, _spacing, _hand_y) {
     }
     return -1;
 }
+
+function SCR_Hand_TruncateName(_name, _max_width) {
+    if (string_width(_name) <= _max_width) return _name;
+
+    var _short = _name;
+    while (string_length(_short) > 1 && string_width(_short + "...") > _max_width) {
+        _short = string_copy(_short, 1, string_length(_short) - 1);
+    }
+    return _short + "...";
+}
+
+function SCR_Hand_GetCardNameLabel(_name, _box, _hovered) {
+    var _pad = 6;
+    var _max_w = (_box.right - _box.left) - _pad * 2;
+    if (_hovered) return _name;
+    return SCR_Hand_TruncateName(_name, _max_w);
+}

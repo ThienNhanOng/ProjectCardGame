@@ -12,6 +12,7 @@
       "level": 10,
       "enemyhealthvalue": 16,
       "enemyattackvalue": 5,
+      "elite": true,
       "enemyability": [
         {
           "type": "none"

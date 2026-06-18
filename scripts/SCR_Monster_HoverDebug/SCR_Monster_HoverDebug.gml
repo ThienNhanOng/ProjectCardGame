@@ -1,15 +1,14 @@
 /// @desc Debug hover + hitbox overlay for enemy monsters
 
 function monster_GetHitbox(_slot) {
-    var _health_bar_gap = 4;
-    var _health_bar_h = 8;
+    var _layout = monster_GetSlotLayout(_slot);
 
     return {
         card_left: _slot.x,
         card_top: _slot.y,
         card_right: _slot.x + _slot.w,
         card_bottom: _slot.y + _slot.h,
-        full_bottom: _slot.y + _slot.h + _health_bar_gap + _health_bar_h
+        full_bottom: _layout.full_bottom
     };
 }
 
@@ -48,14 +47,13 @@ function SCR_Monster_DrawHoverDebug() {
         var _hovered = (i == hovered_enemy_slot);
 
         if (!_slot.occupied || _slot.card == undefined) {
-            draw_sprite_ext(SPR_MonsterSlot, 0, _slot.x + _slot.w / 2, _slot.y + _slot.h / 2, 1, 1, 0, c_white, 0.35);
+            var _layout = monster_GetSlotLayout(_slot);
+            draw_sprite_ext(SPR_MonsterSlot, 0, _layout.cx, _layout.cy, 1, 1, 0, c_white, 0.35);
         }
 
-        // Full bounds (card + health bar)
         draw_set_color(_hovered ? c_lime : c_yellow);
         draw_rectangle(_box.card_left, _box.card_top, _box.card_right, _box.full_bottom, true);
 
-        // Card-only hitbox
         draw_set_color(_hovered ? c_red : c_aqua);
         draw_rectangle(_box.card_left, _box.card_top, _box.card_right, _box.card_bottom, true);
 

@@ -14,6 +14,7 @@ function SCR_DragDrop_Step() {
     if (_bm != noone) {
         with (_bm) {
             _targeting = battle_IsTargeting();
+            if (!battle_IsPlayerPhase()) return;
         }
     }
     

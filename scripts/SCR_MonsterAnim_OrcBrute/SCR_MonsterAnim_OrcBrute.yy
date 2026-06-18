@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_MonsterAnim_OrcBrute",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_MonsterAnim_OrcBrute",
+  "parent":{
+    "name":"OrcBrute",
+    "path":"folders/scripts/MonsterSystem/animations/OrcBrute.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

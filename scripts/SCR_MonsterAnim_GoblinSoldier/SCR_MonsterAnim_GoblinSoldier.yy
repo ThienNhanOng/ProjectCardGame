@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_MonsterAnim_GoblinSoldier",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_MonsterAnim_GoblinSoldier",
+  "parent":{
+    "name":"GoblinSoldier",
+    "path":"folders/scripts/MonsterSystem/animations/GoblinSoldier.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

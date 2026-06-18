@@ -5,16 +5,15 @@
       "enemyID": 1,
       "enemyname": "Goblin Soldier",
       "type": "monster",
-      "tag": [
-        "Goblin"
-      ],
+      "tag": ["Goblin"],
       "sprite": "SPR_Monsterplaceholder",
       "level": 10,
       "enemyhealthvalue": 12,
       "enemyattackvalue": 4,
       "enemyability": [
         {
-          "type": "none"
+          "type": "buff_attack",
+          "value": 2
         }
       ]
     },
@@ -22,9 +21,7 @@
       "enemyID": 2,
       "enemyname": "Goblin Mage",
       "type": "monster",
-      "tag": [
-        "Goblin"
-      ],
+      "tag": ["Goblin"],
       "sprite": "SPR_Monsterplaceholder",
       "level": 10,
       "enemyhealthvalue": 8,
@@ -40,13 +37,12 @@
       "enemyID": 3,
       "enemyname": "Goblin Commander",
       "type": "monster",
-      "tag": [
-        "Goblin"
-      ],
+      "tag": ["Goblin"],
       "sprite": "SPR_Monsterplaceholder",
       "level": 10,
       "enemyhealthvalue": 14,
       "enemyattackvalue": 3,
+      "elite": true,
       "enemyability": [
         {
           "type": "buff_attack",

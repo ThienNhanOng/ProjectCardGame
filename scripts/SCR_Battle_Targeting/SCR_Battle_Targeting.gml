@@ -9,6 +9,9 @@ function battle_CancelTargeting() {
     pending_trait_source = "none";
     pending_action_trait_index = -1;
     pending_player_slot = -1;
+    pending_monster_slot = -1;
+    pending_monster_trait_index = -1;
+    pending_weapon_slot = -1;
 }
 
 function battle_GetPlayerMonsterSlotAt(_mx, _my) {
@@ -41,14 +44,40 @@ function battle_GetEnemySlotAt(_mx, _my) {
     return -1;
 }
 
-function battle_TargetingContinueActionTrait(_trait_index, _next_mode) {
-    if (battle_CanUseActionTrait(_trait_index) && battle_HasPlayerMonsterOnBoard()) {
-        pending_player_slot = -1;
-        target_mode = _next_mode;
+function battle_HandleEnemyTargetPick(_enemy_slot) {
+    if (pending_trait_source == "monster_on_play") {
+        if (!battle_ExecuteMonsterOnPlayEnemyTrait(pending_monster_slot, pending_monster_trait_index, _enemy_slot)) {
+            return;
+        }
+        battle_MonsterOnPlayContinue(pending_monster_slot, pending_monster_trait_index);
         return;
     }
-    battle_CancelTargeting();
-    battle_ClearActionSlotIfFinished();
+
+    if (pending_trait_source == "weapon_on_play") {
+        if (!battle_ExecuteWeaponOnPlayEnemyTrait(pending_weapon_slot, pending_monster_trait_index, _enemy_slot)) {
+            return;
+        }
+        battle_WeaponOnPlayContinue(pending_weapon_slot, pending_monster_trait_index);
+        return;
+    }
+
+    switch (target_mode) {
+        case "pick_enemy_destroy":
+            if (battle_ExecuteActionDestroy(pending_action_trait_index, _enemy_slot)) {
+                battle_TargetingContinueAfterAction(pending_action_trait_index);
+            }
+            break;
+        case "pick_enemy_silence":
+            if (battle_ExecuteActionSilence(pending_action_trait_index, _enemy_slot)) {
+                battle_TargetingContinueAfterAction(pending_action_trait_index);
+            }
+            break;
+        case "pick_enemy_stasis":
+            if (battle_ExecuteActionStasis(pending_action_trait_index, _enemy_slot)) {
+                battle_TargetingContinueAfterAction(pending_action_trait_index);
+            }
+            break;
+    }
 }
 
 function SCR_Battle_Targeting_Step() {
@@ -75,8 +104,17 @@ function SCR_Battle_Targeting_Step() {
         if (_heal_slot < 0) return;
 
         if (battle_ExecuteActionHeal(pending_action_trait_index, _heal_slot)) {
-            battle_TargetingContinueActionTrait(pending_action_trait_index, "pick_player_heal");
+            battle_TargetingContinueAfterAction(pending_action_trait_index);
         }
+        return;
+    }
+
+    if (target_mode == "pick_enemy_destroy"
+        || target_mode == "pick_enemy_silence"
+        || target_mode == "pick_enemy_stasis") {
+        var _enemy_slot = battle_GetEnemySlotAt(mouse_x, mouse_y);
+        if (_enemy_slot < 0) return;
+        battle_HandleEnemyTargetPick(_enemy_slot);
         return;
     }
 
@@ -89,7 +127,7 @@ function SCR_Battle_Targeting_Step() {
             _ok = battle_WeaponAttack(pending_player_slot, _enemy_slot);
             if (_ok) battle_CancelTargeting();
         } else if (battle_ExecuteActionAttack(pending_action_trait_index, pending_player_slot, _enemy_slot)) {
-            battle_TargetingContinueActionTrait(pending_action_trait_index, "pick_player_monster");
+            battle_TargetingContinueAfterAction(pending_action_trait_index);
         }
     }
 }
@@ -125,22 +163,27 @@ function SCR_Battle_Targeting_Draw() {
         }
     }
 
+    if (target_mode == "pick_enemy_destroy") {
+        draw_text(room_width / 2, 8, "Choose an enemy to destroy");
+        battle_TargetingDrawEnemyHighlights(_board, c_red);
+    }
+
+    if (target_mode == "pick_enemy_silence") {
+        draw_text(room_width / 2, 8, "Choose an enemy to silence");
+        battle_TargetingDrawEnemyHighlights(_board, c_purple);
+    }
+
+    if (target_mode == "pick_enemy_stasis") {
+        draw_text(room_width / 2, 8, "Choose an enemy for stasis (DoT)");
+        battle_TargetingDrawEnemyHighlights(_board, c_orange);
+    }
+
     if (target_mode == "pick_enemy") {
         var _prompt = (pending_trait_source == "weapon")
             ? "Choose an enemy to attack"
             : "Choose an enemy to attack";
         draw_text(room_width / 2, 8, _prompt);
-
-        var _mm = instance_find(OBJ_MonsterManager, 0);
-        if (_mm != noone) {
-            for (var j = 0; j < _mm.active_slot_count; j++) {
-                var _eslot = _board.enemy_slots[j];
-                if (!_eslot.visible || !_eslot.occupied) continue;
-                var _box = monster_GetHitbox(_eslot);
-                draw_set_color(c_red);
-                draw_rectangle(_box.card_left, _box.card_top, _box.card_right, _box.full_bottom, true);
-            }
-        }
+        battle_TargetingDrawEnemyHighlights(_board, c_red);
 
         if (pending_player_slot >= 0) {
             var _ps = _board.player_monster_slots[pending_player_slot];
@@ -151,4 +194,17 @@ function SCR_Battle_Targeting_Draw() {
 
     draw_set_halign(fa_left);
     draw_set_color(c_white);
+}
+
+function battle_TargetingDrawEnemyHighlights(_board, _color) {
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_mm == noone) return;
+
+    draw_set_color(_color);
+    for (var j = 0; j < _mm.active_slot_count; j++) {
+        var _eslot = _board.enemy_slots[j];
+        if (!_eslot.visible || !_eslot.occupied) continue;
+        var _box = monster_GetHitbox(_eslot);
+        draw_rectangle(_box.card_left, _box.card_top, _box.card_right, _box.full_bottom, true);
+    }
 }

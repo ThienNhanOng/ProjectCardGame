@@ -1,0 +1,6 @@
+{
+  "dot_type": "burn",
+  "label": "Burn",
+  "damage_per_tick": 2,
+  "default_duration": 3
+}

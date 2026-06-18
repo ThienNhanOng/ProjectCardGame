@@ -5,7 +5,7 @@ function SCR_Monster_Init() {
     monster_queue = [];
     hovered_enemy_slot = -1;
 
-    var _battle_file = "Battle01.json";
+    var _battle_file = "Battle_TraitDemo.json";
     if (variable_global_exists("battle_config_file")) {
         _battle_file = global.battle_config_file;
     }
@@ -18,6 +18,8 @@ function SCR_Monster_Init() {
 
     battle_name = _config.battle;
     active_slot_count = _config.active_slots;
+
+    battle_EnemyLog_Init();
 
     for (var i = 0; i < array_length(_config.wave); i++) {
         array_push(monster_queue, _config.wave[i]);

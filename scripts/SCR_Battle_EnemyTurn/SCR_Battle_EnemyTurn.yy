@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Battle_EnemyTurn",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Battle_EnemyTurn",
+  "parent":{
+    "name":"turn",
+    "path":"folders/scripts/BattleManager/turn.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

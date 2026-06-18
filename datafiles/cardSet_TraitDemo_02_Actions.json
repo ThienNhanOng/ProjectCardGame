@@ -1,0 +1,86 @@
+{
+  "collection": "traitDemo_actions",
+  "cards": [
+    {
+      "id": 201,
+      "name": "Action [Attack 4]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "attack", "amount": 4, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 202,
+      "name": "Action [Heal 3]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "heal", "amount": 3, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 203,
+      "name": "Action [Draw 2]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [{ "type": "draw", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 204,
+      "name": "Action [Attack All 3]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 3,
+      "actionType": [{ "type": "attack_all", "amount": 3, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 205,
+      "name": "Action [Heal All 2]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 3,
+      "actionType": [{ "type": "heal_all", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 206,
+      "name": "Action [Destroy 1]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 4,
+      "actionType": [{ "type": "destroy", "amount": 1, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 207,
+      "name": "Action [Add Sword]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "add", "id": 8, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 208,
+      "name": "Action [Silence 2]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "silence", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 209,
+      "name": "Action [Stasis Burn]",
+      "type": "action",
+      "tag": ["Demo"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "stasis", "dot": "burn", "amount": 2, "duration": 3, "uses_per_turn": 1 }]
+    }
+  ]
+}

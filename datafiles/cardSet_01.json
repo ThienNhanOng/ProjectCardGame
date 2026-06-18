@@ -10,7 +10,7 @@
       ],
       "sprite": "SPR_Monsterplaceholder",
       "level": 10,
-      "health": 10,
+      "health": 1000,
       "ability": [
         {
           "draw_cards": 1
@@ -57,7 +57,7 @@
       ],
       "sprite": "SPR_Monsterplaceholder",
       "level": 20,
-      "health": 10,
+      "health": 1000,
       "ability": []
     },
     {
@@ -107,8 +107,7 @@
         {
           "type": "heal",
           "amount": 5,
-          "uses_per_turn": 5
-        }
+          "uses_per_turn": 2        }
       ]
     },
     {

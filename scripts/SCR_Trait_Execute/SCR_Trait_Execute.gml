@@ -12,6 +12,44 @@ function trait_Execute(_trait, _ctx) {
             _ctx.amount = _trait.amount;
             return trait_ExecuteHeal(_ctx);
 
+        case "buff_attack":
+            _ctx.amount = _trait.amount;
+            return trait_ExecuteBuffAttack(_ctx);
+
+        case "draw_cards":
+            _ctx.amount = _trait.amount;
+            return trait_ExecuteDraw(_ctx);
+
+        case "attack_all":
+            _ctx.amount = _trait.amount;
+            return trait_ExecuteAttackAll(_ctx);
+
+        case "heal_all":
+            _ctx.amount = _trait.amount;
+            return trait_ExecuteHealAll(_ctx);
+
+        case "destroy":
+            if (_ctx.amount <= 0) _ctx.amount = _trait.amount;
+            return trait_ExecuteDestroy(_ctx);
+
+        case "add":
+            _ctx.card_id = _trait.card_id;
+            return trait_ExecuteAddHand(_ctx);
+
+        case "silence":
+            if (_ctx.amount <= 0) _ctx.amount = max(1, _trait.amount);
+            return trait_ExecuteSilence(_ctx);
+
+        case "stasis":
+            _ctx.dot_type = _trait.dot_type;
+            if (!variable_struct_exists(_ctx, "amount") || _ctx.amount <= 0) {
+                _ctx.amount = _trait.amount;
+            }
+            if (!variable_struct_exists(_ctx, "duration") || _ctx.duration <= 0) {
+                _ctx.duration = _trait.duration;
+            }
+            return trait_ExecuteStasis(_ctx);
+
         default:
             show_debug_message("Trait not implemented yet: " + string(_trait.type));
             return false;

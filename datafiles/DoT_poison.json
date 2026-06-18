@@ -1,0 +1,6 @@
+{
+  "dot_type": "poison",
+  "label": "Poisoned",
+  "damage_per_tick": 1,
+  "default_duration": 4
+}

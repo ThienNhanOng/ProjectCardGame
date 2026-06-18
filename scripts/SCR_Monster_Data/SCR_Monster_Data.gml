@@ -26,22 +26,28 @@ function monster_CreateInstance(_wave_entry) {
         level: _def.level,
         max_health: _def.enemyhealthvalue,
         health: _def.enemyhealthvalue,
+        base_attack: _def.enemyattackvalue,
         attack: _def.enemyattackvalue,
         ability: _def.enemyability,
-        alive: true
+        alive: true,
+        animation: variable_struct_exists(_def, "animation") ? _def.animation : "",
+        elite: variable_struct_exists(_def, "elite") && _def.elite,
+        status_effects: [],
+        silenced_turns: 0
     };
 }
 
+function monster_IsElite(_monster) {
+    return _monster != undefined && variable_struct_exists(_monster, "elite") && _monster.elite;
+}
+
 function SCR_Monster_GetSprite(_monster) {
-    if (variable_struct_exists(_monster, "sprite_name")) {
-        var _idx = asset_get_index(_monster.sprite_name);
-        if (_idx != -1) return _idx;
-    }
-    return SPR_Monsterplaceholder;
+    return SCR_Monster_ResolveSprite(_monster);
 }
 
 function SCR_Monster_GetAbilityText(_monster) {
     var _traits = trait_GetFromMonster(_monster);
-    if (array_length(_traits) <= 0) return "No ability";
+    if (array_length(_traits) <= 0) return "none";
+    if (_traits[0].type == "none") return "none";
     return trait_GetDisplayText(_traits[0]);
 }
