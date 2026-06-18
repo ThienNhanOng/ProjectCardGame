@@ -112,6 +112,34 @@ function SCR_Board_IsSlotMouseOver(_slot) {
             mouse_y >= _top  && mouse_y <= _bottom);
 }
 
+function SCR_Board_DrawPlayerMonsterOverlay(_slot, _card_w, _card_h) {
+    if (_slot == undefined || !_slot.visible || !_slot.occupied || _slot.card == undefined) return;
+
+    battle_EnsureCardHealth(_slot.card);
+
+    var _cx = _slot.x + _card_w / 2;
+    var _bar_pad = 4;
+    // Sit above the weapon slot (weapon y overlaps the bottom of the monster card)
+    var _bar_y = _slot.y + _card_h - 26;
+    monster_DrawHealthBar(_slot.x + _bar_pad, _bar_y, _card_w - _bar_pad * 2, 8,
+        _slot.card.health, _slot.card.max_health);
+
+    var _attack_gain = card_GetAttackBuff(_slot.card);
+    card_DrawAttackGainBadge(_slot.x, _slot.y, _card_w, _card_h, _attack_gain);
+
+    var _pstatus = status_GetDisplayText(_slot.card);
+    if (_pstatus != "") {
+        draw_set_color(c_orange);
+        draw_set_halign(fa_center);
+        draw_set_valign(fa_top);
+        draw_text(_cx, _bar_y - 12, _pstatus);
+    }
+
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_color(c_white);
+}
+
 function SCR_Board_DrawPlacedCards() {
     var _card_w = 73;
     var _card_h = 101;
@@ -126,25 +154,11 @@ function SCR_Board_DrawPlacedCards() {
         var _cx      = _slot.x + _card_w / 2;
         var _cy      = _slot.y + _card_h / 2;
 
-        battle_EnsureCardHealth(_slot.card);
-
         draw_sprite_ext(_spr, 0, _cx, _cy, _scale, _scale, 0, c_white, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_left);
         draw_set_valign(fa_top);
         draw_text(_slot.x + 4, _slot.y + 5, SCR_Hand_TruncateName(_slot.card.name, _card_w - 8));
-
-        var _bar_pad = 4;
-        var _bar_y = _slot.y + _card_h + 4;
-        monster_DrawHealthBar(_slot.x + _bar_pad, _bar_y, _card_w - _bar_pad * 2, 8,
-            _slot.card.health, _slot.card.max_health);
-
-        var _pstatus = status_GetDisplayText(_slot.card);
-        if (_pstatus != "") {
-            draw_set_color(c_orange);
-            draw_set_halign(fa_center);
-            draw_text(_cx, _bar_y + 12, _pstatus);
-        }
     }
     
     for (var i = 0; i < array_length(player_weapon_slots); i++) {
@@ -159,6 +173,26 @@ function SCR_Board_DrawPlacedCards() {
         draw_set_halign(fa_left);
         draw_set_valign(fa_top);
         draw_text(_slot.x + 4, _slot.y + 5, SCR_Hand_TruncateName(_slot.card.name, _card_w - 8));
+
+        var _weapon_atk = weapon_GetAttackAmount(_slot.card);
+        card_DrawAttackGainBadge(_slot.x, _slot.y, _card_w, _card_h, _weapon_atk);
+
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone) {
+            with (_bm) {
+                if (battle_CanWeaponAttack(i)) {
+                    draw_set_color(c_yellow);
+                    draw_rectangle(_slot.x - 2, _slot.y - 2, _slot.x + _card_w + 2, _slot.y + _card_h + 2, true);
+                } else if (i < array_length(weapon_attacks_used) && weapon_attacks_used[i]) {
+                    draw_set_color(c_gray);
+                    draw_text(_slot.x + _card_w / 2, _slot.y + _card_h + 2, "used");
+                }
+            }
+        }
+    }
+
+    for (var m = 0; m < array_length(player_monster_slots); m++) {
+        SCR_Board_DrawPlayerMonsterOverlay(player_monster_slots[m], _card_w, _card_h);
     }
     
     if (action_slot.occupied && action_slot.card != undefined) {

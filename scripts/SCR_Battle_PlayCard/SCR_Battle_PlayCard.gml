@@ -73,18 +73,9 @@ function battle_ExecuteMonsterOnPlayEnemyTrait(_player_slot, _trait_index, _enem
 
 function battle_OnWeaponPlayed(_slot_index, _card) {
     battle_CancelTargeting();
+    weapon_EnsureAttackData(_card);
 
     var _traits = trait_GetFromCard(_card);
-    var _attack = trait_FindFirst(_traits, "attack");
-
-    if (_attack != undefined && battle_CanWeaponAttack(_slot_index)) {
-        pending_trait_source = "weapon";
-        pending_action_trait_index = -1;
-        pending_player_slot = _slot_index;
-        target_mode = "pick_enemy";
-        return;
-    }
-
     for (var i = 0; i < array_length(_traits); i++) {
         var _trait = _traits[i];
         if (_trait.type == "attack") continue;

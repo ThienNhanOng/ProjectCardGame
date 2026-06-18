@@ -1,5 +1,33 @@
 /// @desc Shared buff_attack trait — increases target monster attack stat
 
+function card_GainAttack(_card, _amount) {
+    if (_card == undefined || _amount <= 0) return;
+
+    if (!variable_struct_exists(_card, "attack")) _card.attack = 0;
+    if (!variable_struct_exists(_card, "attack_buff")) _card.attack_buff = 0;
+
+    _card.attack += _amount;
+    _card.attack_buff += _amount;
+}
+
+function card_GetAttackBuff(_card) {
+    if (_card == undefined) return 0;
+    if (!variable_struct_exists(_card, "attack_buff")) return 0;
+    return max(0, floor(_card.attack_buff));
+}
+
+function card_DrawAttackGainBadge(_x, _y, _w, _h, _amount) {
+    if (_amount <= 0) return;
+
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_set_color(c_red);
+    draw_text(_x + _w / 2, _y + _h / 2 + 2, "+" + string(_amount));
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_color(c_white);
+}
+
 function trait_ExecuteBuffAttack(_ctx) {
     if (_ctx.amount <= 0) return false;
 
@@ -33,7 +61,8 @@ function battle_BuffEnemyMonster(_slot_index, _amount) {
     var _slot = _board.enemy_slots[_slot_index];
     if (!_slot.occupied || _slot.card == undefined || !_slot.card.alive) return false;
 
-    _slot.card.attack += _amount;
+    if (!variable_struct_exists(_slot.card, "attack_buff")) _slot.card.attack_buff = 0;
+    card_GainAttack(_slot.card, _amount);
     show_debug_message("Buffed enemy slot " + string(_slot_index)
         + " ATK +" + string(_amount) + " -> " + string(_slot.card.attack));
     return true;
@@ -47,8 +76,7 @@ function battle_BuffPlayerMonster(_slot_index, _amount) {
     var _slot = _board.player_monster_slots[_slot_index];
     if (!_slot.visible || !_slot.occupied || _slot.card == undefined) return false;
 
-    if (!variable_struct_exists(_slot.card, "attack")) _slot.card.attack = 0;
-    _slot.card.attack += _amount;
+    card_GainAttack(_slot.card, _amount);
     show_debug_message("Buffed player slot " + string(_slot_index)
         + " ATK +" + string(_amount) + " -> " + string(_slot.card.attack));
     return true;

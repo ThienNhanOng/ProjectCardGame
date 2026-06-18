@@ -215,16 +215,25 @@ function SCR_Battle_Targeting_Draw() {
     }
 
     if (target_mode == "pick_enemy") {
-        var _prompt = (pending_trait_source == "weapon")
-            ? "Choose an enemy to attack"
-            : "Choose an enemy to attack";
-        draw_text(room_width / 2, 8, _prompt);
+        if (pending_trait_source == "weapon") {
+            draw_text(room_width / 2, 8, "Choose an enemy to attack with your weapon");
+        } else {
+            draw_text(room_width / 2, 8, "Choose an enemy to attack");
+        }
         battle_TargetingDrawEnemyHighlights(_board, c_red);
 
         if (pending_player_slot >= 0) {
             var _ps = _board.player_monster_slots[pending_player_slot];
             draw_set_color(c_lime);
             draw_rectangle(_ps.x, _ps.y, _ps.x + _ps.w, _ps.y + _ps.h, true);
+
+            if (pending_trait_source == "weapon") {
+                var _ws = _board.player_weapon_slots[pending_player_slot];
+                if (_ws.visible && _ws.occupied) {
+                    draw_set_color(c_yellow);
+                    draw_rectangle(_ws.x, _ws.y, _ws.x + _ws.w, _ws.y + _ws.h, true);
+                }
+            }
         }
     }
 

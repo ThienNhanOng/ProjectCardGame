@@ -34,7 +34,8 @@ function monster_CreateInstance(_wave_entry) {
         elite: variable_struct_exists(_def, "elite") && _def.elite,
         status_effects: [],
         silenced_turns: 0,
-        silenced_ability_backup: undefined
+        silenced_ability_backup: undefined,
+        attack_buff: 0
     };
 }
 

@@ -36,6 +36,8 @@ function monster_DrawActive(_slot, _monster) {
     draw_set_color(c_maroon);
     draw_text(_layout.stats_cx, _layout.atk_y, "ATK " + string(_monster.attack));
 
+    card_DrawAttackGainBadge(_slot.x, _slot.y, _layout.card_w, _layout.card_h, card_GetAttackBuff(_monster));
+
     draw_set_color(c_navy);
     draw_text(_layout.stats_cx, _layout.ability_y, SCR_Monster_GetAbilityText(_monster));
 

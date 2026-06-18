@@ -291,21 +291,21 @@
     },
     {
       "id": 33,
-      "name": "Action I [Silence 1T]",
-      "type": "action",
-      "tag": ["Goblin"],
-      "sprite": "SPR_Actionplaceholder",
-      "cost": 2,
-      "actionType": [{ "type": "silence", "amount": 1, "uses_per_turn": 1 }]
-    },
-    {
-      "id": 34,
-      "name": "Action II [Silence 2T]",
+      "name": "Action I [Silence I]",
       "type": "action",
       "tag": ["Goblin"],
       "sprite": "SPR_Actionplaceholder",
       "cost": 2,
       "actionType": [{ "type": "silence", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 34,
+      "name": "Action II [Silence II]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "silence", "amount": 2, "uses_per_turn": 2 }]
     },
     {
       "id": 35,
@@ -368,6 +368,7 @@
       "tag": ["Goblin"],
       "sprite": "SPR_Weaponplaceholder",
       "equip": true,
+      "attack": 5,
       "ability": [{ "type": "attack", "amount": 5, "uses_per_turn": 1 }]
     },
     {
@@ -377,6 +378,7 @@
       "tag": ["Goblin"],
       "sprite": "SPR_Weaponplaceholder",
       "equip": true,
+      "attack": 8,
       "ability": [{ "type": "attack", "amount": 8, "uses_per_turn": 1 }]
     },
     {

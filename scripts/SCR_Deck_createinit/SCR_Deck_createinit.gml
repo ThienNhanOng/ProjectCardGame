@@ -96,6 +96,11 @@ function card_NormalizeDefinition(_raw) {
 
     var _base_hp = variable_struct_exists(_raw, "health") ? _raw.health : 10;
     _card.base_health = _base_hp;
+
+    if (_card.type == "weapon") {
+        weapon_EnsureAttackData(_card);
+    }
+
     return _card;
 }
 
@@ -125,6 +130,12 @@ function card_CreateRuntimeInstance(_template) {
     _card.status_effects = [];
     _card.silenced_turns = 0;
     _card.silenced_ability_backup = undefined;
+    _card.attack_buff = 0;
+
+    if (_card.type == "weapon") {
+        weapon_EnsureAttackData(_card);
+    }
+
     return _card;
 }
 
