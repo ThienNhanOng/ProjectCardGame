@@ -69,3 +69,151 @@ function SCR_Battle_UI_Draw() {
     draw_set_valign(fa_top);
     draw_set_color(c_white);
 }
+
+function battle_GetPreviewPanelLayout() {
+    var _field_right = sprite_get_width(SPR_Field);
+    var _field_bottom = sprite_get_height(SPR_Field);
+    var _gap = 10;
+    var _y = 38;
+    var _bottom_pad = 12;
+    return {
+        x: _field_right + _gap,
+        y: _y,
+        w: 250,
+        h: max(420, _field_bottom - _y - _bottom_pad)
+    };
+}
+
+function battle_IsEnemyPreviewCard(_card) {
+    return (_card != undefined && variable_struct_exists(_card, "base_attack"));
+}
+
+function battle_GetPreviewSummaryLines(_card) {
+    if (battle_IsEnemyPreviewCard(_card)) {
+        var _lines = [];
+        array_push(_lines, "Type: enemy");
+        if (monster_IsElite(_card)) array_push(_lines, "Elite");
+        var _atk = variable_struct_exists(_card, "attack") ? _card.attack : _card.base_attack;
+        array_push(_lines, "ATK: " + string(_atk));
+        battle_EnsureCardHealth(_card);
+        array_push(_lines, "HP: " + string(_card.health) + "/" + string(_card.max_health));
+        var _buff = card_GetAttackBuff(_card);
+        if (_buff > 0) array_push(_lines, "Buff: +" + string(_buff));
+        var _status = status_GetDisplayText(_card);
+        if (_status != "") array_push(_lines, _status);
+        return _lines;
+    }
+
+    var _lines = SCR_DBD_GetCardSummaryLines(_card);
+
+    if (variable_struct_exists(_card, "health") && variable_struct_exists(_card, "max_health")) {
+        battle_EnsureCardHealth(_card);
+        for (var i = 0; i < array_length(_lines); i++) {
+            if (string_copy(_lines[i], 1, 3) == "HP:") {
+                _lines[i] = "HP: " + string(_card.health) + "/" + string(_card.max_health);
+                break;
+            }
+        }
+    }
+
+    var _player_buff = card_GetAttackBuff(_card);
+    if (_player_buff > 0) array_push(_lines, "Buff: +" + string(_player_buff));
+
+    var _player_status = status_GetDisplayText(_card);
+    if (_player_status != "") array_push(_lines, _player_status);
+
+    return _lines;
+}
+
+function battle_GetPreviewAbilityLines(_card) {
+    if (battle_IsEnemyPreviewCard(_card)) {
+        if (status_IsSilenced(_card)) {
+            return ["Silenced — cannot use abilities"];
+        }
+
+        var _traits = trait_GetFromMonster(_card);
+        var _lines = [];
+        for (var t = 0; t < array_length(_traits); t++) {
+            if (_traits[t].type == "none") continue;
+            array_push(_lines, SCR_DBD_FormatTraitLine(_traits[t]));
+        }
+        if (array_length(_lines) <= 0) array_push(_lines, "None");
+        return _lines;
+    }
+
+    return SCR_DBD_GetCardAbilityLines(_card);
+}
+
+function battle_FindHoveredPreviewCard() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board != noone && _board.is_dragging) return undefined;
+
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_mm != noone && _board != noone) {
+        for (var e = 0; e < _mm.active_slot_count; e++) {
+            var _eslot = _board.enemy_slots[e];
+            if (!_eslot.visible || !_eslot.occupied || _eslot.card == undefined || !_eslot.card.alive) continue;
+            if (monster_IsMouseOverSlot(_eslot)) return _eslot.card;
+        }
+    }
+
+    if (_board != noone) {
+        var _found = undefined;
+        with (_board) {
+            if (action_slot.visible && action_slot.occupied && action_slot.card != undefined
+                && SCR_Board_IsSlotMouseOver(action_slot)) {
+                _found = action_slot.card;
+            }
+
+            if (_found == undefined) {
+                for (var w = 0; w < array_length(player_weapon_slots); w++) {
+                    var _wslot = player_weapon_slots[w];
+                    if (!_wslot.visible || !_wslot.occupied || _wslot.card == undefined) continue;
+                    if (SCR_Board_IsSlotMouseOver(_wslot)) {
+                        _found = _wslot.card;
+                        break;
+                    }
+                }
+            }
+
+            if (_found == undefined) {
+                for (var m = 0; m < array_length(player_monster_slots); m++) {
+                    var _mslot = player_monster_slots[m];
+                    if (!_mslot.visible || !_mslot.occupied || _mslot.card == undefined) continue;
+                    if (SCR_Board_IsSlotMouseOver(_mslot)) {
+                        _found = _mslot.card;
+                        break;
+                    }
+                }
+            }
+        }
+        if (_found != undefined) return _found;
+    }
+
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand != noone && _hand.hand_Count > 0) {
+        var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
+        var _idx = SCR_Hand_PickCardIndex(mouse_x, mouse_y, _hand.hand_Count, _spacing, _hand.hand_Y);
+        if (_idx >= 0) return _hand.hand[_idx];
+    }
+
+    return undefined;
+}
+
+function battle_DrawHoverPreview() {
+    var _card = battle_FindHoveredPreviewCard();
+    if (_card == undefined) return;
+
+    var _title_color = c_white;
+    if (battle_IsEnemyPreviewCard(_card) && monster_IsElite(_card)) {
+        _title_color = c_red;
+    }
+
+    SCR_DBD_DrawCardPreviewPanel(
+        battle_GetPreviewPanelLayout(),
+        _card,
+        battle_GetPreviewSummaryLines(_card),
+        battle_GetPreviewAbilityLines(_card),
+        _title_color
+    );
+}

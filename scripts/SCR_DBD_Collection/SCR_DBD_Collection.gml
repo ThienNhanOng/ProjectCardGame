@@ -262,8 +262,25 @@ function SCR_DBD_FormatTraitLine(_trait) {
     return _text;
 }
 
+function SCR_DBD_GetCardAbilityLines(_card) {
+    var _traits = trait_GetFromCard(_card);
+    var _lines = [];
+
+    for (var t = 0; t < array_length(_traits); t++) {
+        if (_traits[t].type == "none") continue;
+        array_push(_lines, SCR_DBD_FormatTraitLine(_traits[t]));
+    }
+
+    if (array_length(_lines) <= 0) array_push(_lines, "None");
+    return _lines;
+}
+
 function SCR_DBD_GetCardPreviewSprite(_card) {
     if (_card == undefined) return noone;
+
+    if (variable_struct_exists(_card, "base_attack")) {
+        return SCR_Monster_GetSprite(_card);
+    }
 
     switch (_card.type) {
         case "monster":
@@ -335,11 +352,14 @@ function SCR_DBD_FindHoveredPreviewCard() {
     return undefined;
 }
 
-function SCR_DBD_DrawHoverPreview() {
-    var _card = SCR_DBD_FindHoveredPreviewCard();
-    if (_card == undefined) return;
+function SCR_DBD_ShouldShowPreviewTags(_card) {
+    if (_card == undefined) return true;
+    if (variable_struct_exists(_card, "base_attack")) return false;
+    if (_card.type == "monster" || _card.type == "special_monster") return false;
+    return true;
+}
 
-    var _panel = SCR_DBD_GetPreviewPanelLayout();
+function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_lines, _title_color = c_white) {
     var _pad = 12;
     var _line_h = 16;
 
@@ -357,13 +377,16 @@ function SCR_DBD_DrawHoverPreview() {
 
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
-    draw_set_color(c_white);
+    draw_set_color(_title_color);
     draw_text_ext(_cx, _cy, _card.name, _line_h + 2, _inner_w);
     _cy += string_height_ext(_card.name, _line_h + 2, _inner_w) + 8;
 
-    draw_set_color(c_aqua);
-    draw_text_ext(_cx, _cy, "Tags: " + SCR_DBD_FormatCardTags(_card), _line_h, _inner_w);
-    _cy += string_height_ext("Tags: " + SCR_DBD_FormatCardTags(_card), _line_h, _inner_w) + 10;
+    if (SCR_DBD_ShouldShowPreviewTags(_card)) {
+        var _tags_line = "Tags: " + SCR_DBD_FormatCardTags(_card);
+        draw_set_color(c_aqua);
+        draw_text_ext(_cx, _cy, _tags_line, _line_h, _inner_w);
+        _cy += string_height_ext(_tags_line, _line_h, _inner_w) + 10;
+    }
 
     var _img_w = min(108, floor(_inner_w * 0.38));
     var _img_h = 136;
@@ -388,7 +411,6 @@ function SCR_DBD_DrawHoverPreview() {
     draw_set_color(c_yellow);
     draw_text(_summary_x, _cy, "Summary");
     var _sum_y = _cy + _line_h + 2;
-    var _summary_lines = SCR_DBD_GetCardSummaryLines(_card);
     draw_set_color(c_ltgray);
     for (var s = 0; s < array_length(_summary_lines); s++) {
         draw_text_ext(_summary_x, _sum_y, _summary_lines[s], _line_h, _summary_w);
@@ -405,19 +427,26 @@ function SCR_DBD_DrawHoverPreview() {
     draw_text(_cx, _cy, "Ability");
     _cy += _line_h + 4;
 
-    var _traits = trait_GetFromCard(_card);
     draw_set_color(c_white);
-    if (array_length(_traits) <= 0) {
-        draw_text_ext(_cx, _cy, "None", _line_h, _inner_w);
-    } else {
-        for (var t = 0; t < array_length(_traits); t++) {
-            var _ability_line = "• " + SCR_DBD_FormatTraitLine(_traits[t]);
-            draw_text_ext(_cx, _cy, _ability_line, _line_h, _inner_w);
-            _cy += string_height_ext(_ability_line, _line_h, _inner_w) + 4;
-        }
+    for (var t = 0; t < array_length(_ability_lines); t++) {
+        var _ability_line = "• " + _ability_lines[t];
+        draw_text_ext(_cx, _cy, _ability_line, _line_h, _inner_w);
+        _cy += string_height_ext(_ability_line, _line_h, _inner_w) + 4;
     }
 
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
     draw_set_color(c_white);
+}
+
+function SCR_DBD_DrawHoverPreview() {
+    var _card = SCR_DBD_FindHoveredPreviewCard();
+    if (_card == undefined) return;
+
+    SCR_DBD_DrawCardPreviewPanel(
+        SCR_DBD_GetPreviewPanelLayout(),
+        _card,
+        SCR_DBD_GetCardSummaryLines(_card),
+        SCR_DBD_GetCardAbilityLines(_card)
+    );
 }

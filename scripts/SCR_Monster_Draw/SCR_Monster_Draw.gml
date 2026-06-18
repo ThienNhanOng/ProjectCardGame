@@ -38,13 +38,10 @@ function monster_DrawActive(_slot, _monster) {
 
     card_DrawAttackGainBadge(_slot.x, _slot.y, _layout.card_w, _layout.card_h, card_GetAttackBuff(_monster));
 
-    draw_set_color(c_navy);
-    draw_text(_layout.stats_cx, _layout.ability_y, SCR_Monster_GetAbilityText(_monster));
-
     var _status = status_GetDisplayText(_monster);
     if (_status != "") {
         draw_set_color(c_orange);
-        draw_text(_layout.stats_cx, _layout.ability_y + 14, _status);
+        draw_text(_layout.stats_cx, _layout.status_y, _status);
     }
 
     draw_set_halign(fa_left);

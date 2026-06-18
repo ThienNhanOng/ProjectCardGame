@@ -10,7 +10,7 @@ function monster_GetSlotLayout(_slot) {
     var _health_pad_x = 4;
     var _health_y = _slot.y + _card_h + _stats_pad;
     var _atk_y = _health_y + _health_h + 16;
-    var _ability_y = _atk_y + 16;
+    var _status_y = _atk_y + 16;
 
     return {
         cx: _cx,
@@ -24,8 +24,8 @@ function monster_GetSlotLayout(_slot) {
         health_h: _health_h,
         stats_cx: _slot.x + _health_pad_x + (_card_w - _health_pad_x * 2) / 2,
         atk_y: _atk_y,
-        ability_y: _ability_y,
-        full_bottom: _ability_y + 14 + 2
+        status_y: _status_y,
+        full_bottom: _status_y + 16
     };
 }
 
