@@ -1,6 +1,6 @@
 function SCR_CardSlot_CheckVisibility() {
-    var _deckbuilder = OBJ_DeckBuilder;
-    
+    var _deckbuilder = instance_find(OBJ_DeckBuilder, 0);
+
     if (_deckbuilder == noone) {
         show_debug_message("ERROR: Cannot find OBJ_DeckBuilder!");
         return false;

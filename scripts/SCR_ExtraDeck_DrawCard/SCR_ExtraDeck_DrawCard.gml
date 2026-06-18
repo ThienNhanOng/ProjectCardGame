@@ -63,12 +63,13 @@ function SCR_ExtraDeck_DrawCard(_x, _y, _w, _h, _card_data) {
     draw_set_halign(fa_center);
     draw_text(_draw_x + _scaled_w / 2, _draw_y + 16, _type_text);
     
-    // Level - matches SCR_CardSlot_DrawLevel exactly
-    if (variable_struct_exists(_card_data, "level")) {
-        draw_set_color(c_green);
+    // Spirit tier label (extra deck is spirits only)
+    var _label = card_GetTierLabel(_card_data);
+    if (_label != "") {
+        draw_set_color(card_GetTierLabelColor(_card_data));
         draw_set_halign(fa_left);
         draw_set_valign(fa_bottom);
-        draw_text(_draw_x + 26, _draw_y + _scaled_h - 0, "Lv " + string(_card_data.level));
+        draw_text(_draw_x + 8, _draw_y + _scaled_h, _label);
     }
     
     // Owned count badge - matches SCR_CardSlot_DrawCountBadge exactly

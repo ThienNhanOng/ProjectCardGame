@@ -1,14 +1,75 @@
-/// @desc Enemy turn — each monster uses an effect OR attacks (elite: both)
+/// @desc Enemy turn — support abilities when useful, otherwise attack (elite: worthwhile effects + attack)
 
-function battle_EnemyHasEffect(_monster) {
+function battle_EnemyNeedsHeal() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_board == noone || _mm == noone) return false;
+
+    for (var i = 0; i < _mm.active_slot_count; i++) {
+        var _slot = _board.enemy_slots[i];
+        if (!_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
+        if (_slot.card.health < _slot.card.max_health) return true;
+    }
+    return false;
+}
+
+function battle_EnemyEffectIsWorthUsing(_enemy_slot_index, _monster, _trait) {
+    if (_trait == undefined) return false;
+
+    switch (_trait.type) {
+        case "heal":
+        case "heal_all":
+            return battle_EnemyNeedsHeal();
+
+        case "buff_attack":
+            var _board = instance_find(OBJ_BoardManager, 0);
+            var _mm = instance_find(OBJ_MonsterManager, 0);
+            if (_board == noone || _mm == noone) return false;
+
+            var _target = battle_EnemyPickBuffTarget(_enemy_slot_index);
+            var _slot = _board.enemy_slots[_target];
+            if (!_slot.occupied || _slot.card == undefined) return false;
+            // Skip buff spam — attack instead once this enemy already has a buff bonus
+            return card_GetAttackBuff(_slot.card) <= 0;
+
+        case "attack_all":
+        case "destroy":
+        case "silence":
+        case "stasis":
+            return battle_PlayerMonsterCount() > 0;
+
+        default:
+            return false;
+    }
+}
+
+function battle_EnemyTryUseOneEffect(_enemy_slot_index, _monster) {
     if (status_IsSilenced(_monster)) return false;
 
     var _traits = trait_GetFromMonster(_monster);
     for (var i = 0; i < array_length(_traits); i++) {
         var _type = _traits[i].type;
-        if (_type != "none" && _type != "attack") return true;
+        if (_type == "none" || _type == "attack") continue;
+        if (!battle_EnemyEffectIsWorthUsing(_enemy_slot_index, _monster, _traits[i])) continue;
+        if (battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _traits[i])) return true;
     }
     return false;
+}
+
+function battle_EnemyUseWorthwhileEffects(_enemy_slot_index, _monster) {
+    if (status_IsSilenced(_monster)) return false;
+
+    var _traits = trait_GetFromMonster(_monster);
+    var _used = false;
+
+    for (var i = 0; i < array_length(_traits); i++) {
+        var _type = _traits[i].type;
+        if (_type == "none" || _type == "attack") continue;
+        if (!battle_EnemyEffectIsWorthUsing(_enemy_slot_index, _monster, _traits[i])) continue;
+        if (battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _traits[i])) _used = true;
+    }
+
+    return _used;
 }
 
 function battle_EnemyPickHealTarget(_preferred_slot) {
@@ -146,21 +207,6 @@ function battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _trait) {
     }
 }
 
-function battle_EnemyUseAllEffects(_enemy_slot_index, _monster) {
-    if (status_IsSilenced(_monster)) return false;
-
-    var _traits = trait_GetFromMonster(_monster);
-    var _used = false;
-
-    for (var i = 0; i < array_length(_traits); i++) {
-        var _type = _traits[i].type;
-        if (_type == "none" || _type == "attack") continue;
-        if (battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _traits[i])) _used = true;
-    }
-
-    return _used;
-}
-
 function battle_EnemyAttack(_enemy_slot_index, _monster) {
     var _target = battle_PickRandomPlayerMonsterSlot();
     if (_target < 0) {
@@ -199,14 +245,12 @@ function battle_EnemyTakeTurn(_enemy_slot_index, _monster) {
     }
 
     if (monster_IsElite(_monster)) {
-        battle_EnemyUseAllEffects(_enemy_slot_index, _monster);
+        battle_EnemyUseWorthwhileEffects(_enemy_slot_index, _monster);
         battle_EnemyAttack(_enemy_slot_index, _monster);
         return;
     }
 
-    if (battle_EnemyHasEffect(_monster)) {
-        battle_EnemyUseAllEffects(_enemy_slot_index, _monster);
-    } else {
+    if (!battle_EnemyTryUseOneEffect(_enemy_slot_index, _monster)) {
         battle_EnemyAttack(_enemy_slot_index, _monster);
     }
 }

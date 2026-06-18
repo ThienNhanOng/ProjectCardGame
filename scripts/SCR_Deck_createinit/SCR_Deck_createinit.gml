@@ -111,6 +111,37 @@ function card_GetDefinitionHealth(_template) {
     return 10;
 }
 
+/// @desc Deck-builder label: spirit keeps Lv; other cards show common or cultivated
+function card_GetTierLabel(_card) {
+    if (_card == undefined) return "";
+
+    if (_card.type == "spirit" || _card.type == "special_monster") {
+        if (variable_struct_exists(_card, "level")) {
+            return "Lv " + string(_card.level);
+        }
+        return "";
+    }
+
+    var _name = _card.name;
+    if (string_pos(" II ", _name) > 0 || string_pos(" II[", _name) > 0) {
+        return "cultivated";
+    }
+    return "common";
+}
+
+function card_GetTierLabelColor(_card) {
+    if (_card == undefined) return c_white;
+
+    if (_card.type == "spirit" || _card.type == "special_monster") {
+        return c_green;
+    }
+
+    if (card_GetTierLabel(_card) == "cultivated") {
+        return c_yellow;
+    }
+    return c_ltgray;
+}
+
 /// @desc Shallow-copy a DB card so runtime stats (HP, etc.) are per-instance
 function card_CreateRuntimeInstance(_template) {
     if (_template == undefined) return undefined;
