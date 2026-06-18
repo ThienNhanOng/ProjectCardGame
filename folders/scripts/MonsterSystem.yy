@@ -1,0 +1,8 @@
+{
+  "$GMFolder":"",
+  "%Name":"MonsterSystem",
+  "folderPath":"folders/scripts/MonsterSystem.yy",
+  "name":"MonsterSystem",
+  "resourceType":"GMFolder",
+  "resourceVersion":"2.0",
+}

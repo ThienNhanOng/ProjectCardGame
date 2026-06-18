@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Monster_Data",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Monster_Data",
+  "parent":{
+    "name":"data",
+    "path":"folders/scripts/MonsterSystem/data.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

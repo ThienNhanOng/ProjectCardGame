@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Monster_Draw",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Monster_Draw",
+  "parent":{
+    "name":"draw",
+    "path":"folders/scripts/MonsterSystem/draw.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

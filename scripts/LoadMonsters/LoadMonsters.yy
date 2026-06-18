@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"LoadMonsters",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"LoadMonsters",
+  "parent":{
+    "name":"load",
+    "path":"folders/scripts/MonsterSystem/load.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

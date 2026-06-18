@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Monster_Queue",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Monster_Queue",
+  "parent":{
+    "name":"queue",
+    "path":"folders/scripts/MonsterSystem/queue.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

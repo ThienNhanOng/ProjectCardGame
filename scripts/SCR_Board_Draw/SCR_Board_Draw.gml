@@ -154,18 +154,7 @@ function SCR_Board_DrawPlacedCards() {
         draw_text(action_slot.x + _card_w / 2, action_slot.y + 5, action_slot.card.name);
     }
     
-    for (var i = 0; i < array_length(enemy_slots); i++) {
-        var _slot = enemy_slots[i];
-        if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-        var _spr     = SCR_Hand_GetSprite(_slot.card);
-        var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(_slot);
-        var _scale   = _hovered ? _hover_scale : 1;
-        
-        draw_sprite_ext(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
-        draw_set_color(c_black);
-        draw_set_halign(fa_center);
-        draw_text(_slot.x + _card_w / 2, _slot.y + 5, _slot.card.name);
-    }
+    // Enemy slots are drawn by OBJ_MonsterManager
     
     draw_set_halign(fa_left);
     draw_set_color(c_white);

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Battle_Attack",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Battle_Attack",
+  "parent":{
+    "name":"turn",
+    "path":"folders/scripts/BattleManager/turn.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

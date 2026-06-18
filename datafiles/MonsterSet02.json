@@ -1,0 +1,40 @@
+{
+  "collection": "enemyOrcs_01",
+  "enemy": [
+    {
+      "enemyID": 1,
+      "enemyname": "Orc Brute",
+      "type": "monster",
+      "tag": [
+        "Orc"
+      ],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 16,
+      "enemyattackvalue": 5,
+      "enemyability": [
+        {
+          "type": "none"
+        }
+      ]
+    },
+    {
+      "enemyID": 2,
+      "enemyname": "Orc Shaman",
+      "type": "monster",
+      "tag": [
+        "Orc"
+      ],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 3,
+      "enemyability": [
+        {
+          "type": "heal",
+          "value": 4
+        }
+      ]
+    }
+  ]
+}

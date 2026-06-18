@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Battle_Init",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Battle_Init",
+  "parent":{
+    "name":"create",
+    "path":"folders/scripts/BattleManager/create.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

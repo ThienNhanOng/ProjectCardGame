@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Trait_Attack",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Trait_Attack",
+  "parent":{
+    "name":"effects",
+    "path":"folders/scripts/Traits/effects.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

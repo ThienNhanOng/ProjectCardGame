@@ -112,6 +112,14 @@ function SCR_Board_PlaceCard(_slot, _card) {
             break;
         case "action":
             _valid = (_card.type == "action");
+            if (_valid) {
+                var _bm = instance_find(OBJ_BattleManager, 0);
+                if (_bm != noone) {
+                    with (_bm) {
+                        if (!battle_CanPlayActionCard(_card)) return false;
+                    }
+                }
+            }
             break;
     }
     if (!_valid) {
@@ -122,6 +130,8 @@ function SCR_Board_PlaceCard(_slot, _card) {
     _slot.card = _card;
     _slot.hovered = false;
     show_debug_message("Placed " + _card.name + " in " + _slot.type + " slot " + string(_slot.index));
+    
+    battle_NotifyCardPlaced(_slot, _card);
     
     // If this was a monster slot, update weapon slot availability
     if (_slot.type == "monster") {

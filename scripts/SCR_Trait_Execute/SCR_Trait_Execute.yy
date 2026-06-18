@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Trait_Execute",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Trait_Execute",
+  "parent":{
+    "name":"core",
+    "path":"folders/scripts/Traits/core.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Battle_Targeting",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Battle_Targeting",
+  "parent":{
+    "name":"step",
+    "path":"folders/scripts/BattleManager/step.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

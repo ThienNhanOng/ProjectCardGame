@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Monster_Init",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Monster_Init",
+  "parent":{
+    "name":"create",
+    "path":"folders/scripts/MonsterSystem/create.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

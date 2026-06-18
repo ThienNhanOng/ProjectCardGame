@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Battle_Load",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Battle_Load",
+  "parent":{
+    "name":"load",
+    "path":"folders/scripts/MonsterSystem/load.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

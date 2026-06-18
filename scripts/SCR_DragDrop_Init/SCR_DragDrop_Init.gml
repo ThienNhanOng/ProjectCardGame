@@ -8,36 +8,40 @@ function SCR_DragDrop_Init() {
 function SCR_DragDrop_Step() {
     var _mx = mouse_x;
     var _my = mouse_y;
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    var _targeting = false;
+
+    if (_bm != noone) {
+        with (_bm) {
+            _targeting = battle_IsTargeting();
+        }
+    }
     
     if (mouse_check_button_pressed(mb_left) && !is_dragging) {
+        if (_targeting) return;
+
         var _hand = instance_find(OBJ_Hand, 0);
         if (_hand == noone) return;
-        
+
         var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
-        var _card_w  = 73;
-        var _card_h  = 101;
-        var _total_width = (_spacing * (_hand.hand_Count - 1)) + _card_w;
-        var _start_x = (600 / 2) - (_total_width / 2);
-        
-        for (var i = _hand.hand_Count - 1; i >= 0; i--) {
-            var _cx = _start_x + (i * _spacing);
-            var _cy = _hand.hand_Y;
-            var _right = (i < _hand.hand_Count - 1) ? _start_x + ((i + 1) * _spacing) : _cx + _card_w;
-            
-            if (_mx >= _cx && _mx < _right &&
-                _my >= _cy && _my <= _cy + _card_h) {
-                drag_card       = _hand.hand[i];
-                drag_hand_index = i;
-                drag_x          = _mx;
-                drag_y          = _my;
-                is_dragging     = true;
-                show_debug_message("Dragging: " + drag_card.name);
-                break;
-            }
+        var _picked = SCR_Hand_PickCardIndex(_mx, _my, _hand.hand_Count, _spacing, _hand.hand_Y);
+
+        if (_picked >= 0) {
+            drag_card       = _hand.hand[_picked];
+            drag_hand_index = _picked;
+            drag_x          = _mx;
+            drag_y          = _my;
+            is_dragging     = true;
+            show_debug_message("Dragging: " + drag_card.name);
         }
     }
     
     if (is_dragging) {
+        if (_targeting) {
+            if (mouse_check_button_released(mb_left)) SCR_DragDrop_Cancel();
+            return;
+        }
+
         drag_x = _mx;
         drag_y = _my;
         SCR_Board_UpdateHover(_mx, _my, drag_card);
