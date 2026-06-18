@@ -174,3 +174,250 @@ function SCR_DBD_RebuildGrid() {
         SCR_DBC_LoadPage();
     }
 }
+
+function SCR_DBD_GetPreviewPanelLayout() {
+    var _list = SCR_DBD_GetDeckListLayout();
+    var _x1 = extra_x + extra_w + 10;
+    var _x2 = _list.list_x - 10;
+    return {
+        x: _x1,
+        y: container_y,
+        w: max(160, _x2 - _x1),
+        h: container_h
+    };
+}
+
+function SCR_DBD_ResolveCardDefinition(_card_id) {
+    for (var i = 0; i < array_length(global.player_collection); i++) {
+        if (global.player_collection[i].id == _card_id) {
+            return global.player_collection[i];
+        }
+    }
+    return collection_FindDefinition(_card_id);
+}
+
+function SCR_DBD_FormatCardTags(_card) {
+    if (_card == undefined) return "—";
+    if (!variable_struct_exists(_card, "tag") || !is_array(_card.tag) || array_length(_card.tag) <= 0) {
+        return "—";
+    }
+
+    var _text = _card.tag[0];
+    for (var i = 1; i < array_length(_card.tag); i++) {
+        _text += ", " + _card.tag[i];
+    }
+    return _text;
+}
+
+function SCR_DBD_GetCardSummaryLines(_card) {
+    var _lines = [];
+    if (_card == undefined) return _lines;
+
+    var _type_text = _card.type;
+    if (_type_text == "special_monster") _type_text = "spirit";
+    array_push(_lines, "Type: " + _type_text);
+
+    var _tier = card_GetTierLabel(_card);
+    if (_tier != "") array_push(_lines, _tier);
+
+    if (_card.type == "monster" || _card.type == "spirit" || _card.type == "special_monster") {
+        if (variable_struct_exists(_card, "health")) {
+            array_push(_lines, "HP: " + string(_card.health));
+        }
+        if ((_card.type == "spirit" || _card.type == "special_monster")
+            && variable_struct_exists(_card, "owned")) {
+            array_push(_lines, "Owned: " + string(_card.owned));
+        }
+    }
+
+    if (_card.type == "weapon") {
+        var _atk = variable_struct_exists(_card, "attack") ? _card.attack : 0;
+        array_push(_lines, "Attack: " + string(_atk));
+    }
+
+    if (_card.type == "action" && variable_struct_exists(_card, "cost")) {
+        array_push(_lines, "Cost: " + string(_card.cost));
+    }
+
+    return _lines;
+}
+
+function SCR_DBD_FormatTraitLine(_trait) {
+    if (_trait == undefined) return "None";
+
+    var _text = trait_GetDisplayText(_trait);
+
+    if (_trait.type == "add" && _trait.card_id >= 0) {
+        _text = "Add " + deck_GetCardName(_trait.card_id);
+    } else if (_trait.type == "stasis") {
+        var _dot = (_trait.dot_type != "") ? _trait.dot_type : "?";
+        _text = "Stasis " + _dot + " " + string(_trait.amount)
+            + " dmg / " + string(max(1, _trait.duration)) + " turn(s)";
+    }
+
+    if (_trait.uses_per_turn > 1) {
+        _text += "  (" + string(_trait.uses_per_turn) + "x per turn)";
+    }
+
+    return _text;
+}
+
+function SCR_DBD_GetCardPreviewSprite(_card) {
+    if (_card == undefined) return noone;
+
+    switch (_card.type) {
+        case "monster":
+        case "spirit":
+        case "special_monster":
+            return SPR_Monsterplaceholder;
+        case "weapon":
+            return SPR_Weaponplaceholder;
+        case "action":
+            return SPR_Actionplaceholder;
+    }
+    return noone;
+}
+
+function SCR_DBD_GetSpiritCardRowBounds(_row_index) {
+    var _cx = extra_x + (extra_w - extra_card_w) / 2;
+    var _cy = extra_y + 10 + _row_index * (extra_card_h + extra_gap);
+    return {
+        x: _cx,
+        y: _cy,
+        w: extra_card_w,
+        h: extra_card_h
+    };
+}
+
+function SCR_DBD_FindHoveredSpiritCard() {
+    if (mouse_x < extra_x || mouse_x >= extra_x + extra_w
+        || mouse_y < extra_y || mouse_y >= extra_y + extra_h) {
+        return undefined;
+    }
+
+    var _cards = SCR_DBD_GetSpiritCards();
+    var _start = extra_current_page * extra_cards_per_page;
+    var _end = min(_start + extra_cards_per_page, array_length(_cards));
+
+    for (var i = _start; i < _end; i++) {
+        var _row = i - _start;
+        var _bounds = SCR_DBD_GetSpiritCardRowBounds(_row);
+        if (mouse_x >= _bounds.x && mouse_x < _bounds.x + _bounds.w
+            && mouse_y >= _bounds.y && mouse_y < _bounds.y + _bounds.h) {
+            return _cards[i];
+        }
+    }
+
+    return undefined;
+}
+
+function SCR_DBD_FindHoveredPreviewCard() {
+    var _spirit = SCR_DBD_FindHoveredSpiritCard();
+    if (_spirit != undefined) return _spirit;
+
+    var _layout = SCR_DBD_GetDeckListLayout();
+    var _entries = SCR_DBD_GetDeckListSummary(selected_deck);
+    for (var i = 0; i < array_length(_entries); i++) {
+        var _bounds = SCR_DBD_GetDeckListRowBounds(_layout, i);
+        if (_bounds.y > room_height - 100) break;
+        if (SCR_DBD_IsDeckListRowHovered(_bounds)) {
+            return SCR_DBD_ResolveCardDefinition(_entries[i].id);
+        }
+    }
+
+    var _slot = SCR_DBS_FindCollectionCardUnderMouse();
+    if (_slot != noone) {
+        var _data = undefined;
+        with (_slot) { _data = card_data; }
+        return _data;
+    }
+
+    return undefined;
+}
+
+function SCR_DBD_DrawHoverPreview() {
+    var _card = SCR_DBD_FindHoveredPreviewCard();
+    if (_card == undefined) return;
+
+    var _panel = SCR_DBD_GetPreviewPanelLayout();
+    var _pad = 12;
+    var _line_h = 16;
+
+    draw_set_alpha(0.72);
+    draw_set_color(make_color_rgb(28, 28, 32));
+    draw_rectangle(_panel.x, _panel.y, _panel.x + _panel.w, _panel.y + _panel.h, false);
+    draw_set_alpha(1);
+
+    draw_set_color(make_color_rgb(150, 150, 160));
+    draw_rectangle(_panel.x, _panel.y, _panel.x + _panel.w, _panel.y + _panel.h, true);
+
+    var _cx = _panel.x + _pad;
+    var _cy = _panel.y + _pad;
+    var _inner_w = _panel.w - (_pad * 2);
+
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_color(c_white);
+    draw_text_ext(_cx, _cy, _card.name, _line_h + 2, _inner_w);
+    _cy += string_height_ext(_card.name, _line_h + 2, _inner_w) + 8;
+
+    draw_set_color(c_aqua);
+    draw_text_ext(_cx, _cy, "Tags: " + SCR_DBD_FormatCardTags(_card), _line_h, _inner_w);
+    _cy += string_height_ext("Tags: " + SCR_DBD_FormatCardTags(_card), _line_h, _inner_w) + 10;
+
+    var _img_w = min(108, floor(_inner_w * 0.38));
+    var _img_h = 136;
+    var _summary_x = _cx + _img_w + 10;
+    var _summary_w = max(80, _inner_w - _img_w - 10);
+
+    draw_set_color(make_color_rgb(18, 18, 22));
+    draw_rectangle(_cx, _cy, _cx + _img_w, _cy + _img_h, false);
+    draw_set_color(make_color_rgb(90, 90, 95));
+    draw_rectangle(_cx, _cy, _cx + _img_w, _cy + _img_h, true);
+
+    var _spr = SCR_DBD_GetCardPreviewSprite(_card);
+    if (_spr != noone) {
+        var _spr_w = sprite_get_width(_spr);
+        var _spr_h = sprite_get_height(_spr);
+        var _area_w = _img_w - 10;
+        var _area_h = _img_h - 10;
+        var _scale = min(_area_w / _spr_w, _area_h / _spr_h);
+        draw_sprite_ext(_spr, 0, _cx + (_img_w * 0.5), _cy + (_img_h * 0.5), _scale, _scale, 0, c_white, 1);
+    }
+
+    draw_set_color(c_yellow);
+    draw_text(_summary_x, _cy, "Summary");
+    var _sum_y = _cy + _line_h + 2;
+    var _summary_lines = SCR_DBD_GetCardSummaryLines(_card);
+    draw_set_color(c_ltgray);
+    for (var s = 0; s < array_length(_summary_lines); s++) {
+        draw_text_ext(_summary_x, _sum_y, _summary_lines[s], _line_h, _summary_w);
+        _sum_y += _line_h + 2;
+    }
+
+    _cy += _img_h + 12;
+
+    draw_set_color(make_color_rgb(80, 80, 90));
+    draw_line(_cx, _cy, _cx + _inner_w, _cy);
+    _cy += 10;
+
+    draw_set_color(c_yellow);
+    draw_text(_cx, _cy, "Ability");
+    _cy += _line_h + 4;
+
+    var _traits = trait_GetFromCard(_card);
+    draw_set_color(c_white);
+    if (array_length(_traits) <= 0) {
+        draw_text_ext(_cx, _cy, "None", _line_h, _inner_w);
+    } else {
+        for (var t = 0; t < array_length(_traits); t++) {
+            var _ability_line = "• " + SCR_DBD_FormatTraitLine(_traits[t]);
+            draw_text_ext(_cx, _cy, _ability_line, _line_h, _inner_w);
+            _cy += string_height_ext(_ability_line, _line_h, _inner_w) + 4;
+        }
+    }
+
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_color(c_white);
+}

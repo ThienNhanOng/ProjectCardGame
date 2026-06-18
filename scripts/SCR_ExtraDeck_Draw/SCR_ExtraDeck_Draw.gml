@@ -29,16 +29,9 @@ function SCR_ExtraDeck_Draw() {
     for (var i = _start; i < _end; i++) {
         var _card_data = extra_cards[i];
         var _row = i - _start;
-        var _cx  = extra_x + (extra_w - extra_card_w) / 2;
-        var _cy  = extra_y + 10 + _row * (extra_card_h + extra_gap);
-        
-        // Check hover
-        var _mx = mouse_x;
-        var _my = mouse_y;
-        var _is_hovered = (_mx >= _cx && _mx <= _cx + extra_card_w &&
-                           _my >= _cy && _my <= _cy + extra_card_h);
-        
-        SCR_ExtraDeck_DrawCard(_cx, _cy, extra_card_w, extra_card_h, _card_data, _is_hovered);
+        var _bounds = SCR_DBD_GetSpiritCardRowBounds(_row);
+
+        SCR_ExtraDeck_DrawCard(_bounds.x, _bounds.y, _bounds.w, _bounds.h, _card_data);
     }
     
     draw_set_halign(fa_left);
