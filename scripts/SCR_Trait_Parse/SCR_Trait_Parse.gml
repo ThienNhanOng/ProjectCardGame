@@ -72,6 +72,19 @@ function trait_GetFromCard(_card) {
         }
     }
 
+    // Legacy cardSet_02 action cards: "action": "heal", "heal_value": 5
+    if (array_length(_traits) == 0
+        && _card.type == "action"
+        && variable_struct_exists(_card, "action")) {
+        var _legacy = { type: string(_card.action), amount: 0, uses_per_turn: 1 };
+        if (_legacy.type == "heal" && variable_struct_exists(_card, "heal_value")) {
+            _legacy.amount = _card.heal_value;
+        } else if (_legacy.type == "attack" && variable_struct_exists(_card, "attack_value")) {
+            _legacy.amount = _card.attack_value;
+        }
+        array_push(_traits, trait_NormalizeEntry(_legacy));
+    }
+
     return _traits;
 }
 
@@ -106,6 +119,10 @@ function trait_OnPlayNeedsEnemyTarget(_type) {
     return _type == "destroy" || _type == "silence" || _type == "stasis";
 }
 
+function trait_OnPlayNeedsPlayerTarget(_type) {
+    return _type == "heal";
+}
+
 function trait_GetDisplayText(_trait) {
     if (_trait == undefined) return "None";
     switch (_trait.type) {
@@ -132,7 +149,7 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
         case "attack":
             return false;
         case "heal":
-            return trait_Execute(_trait, trait_CreateHealContext(_trait.amount, "player", _player_slot));
+            return false;
         case "draw":
         case "draw_cards":
             return trait_ExecuteDraw(trait_CreateDrawContext(max(1, _trait.amount)));

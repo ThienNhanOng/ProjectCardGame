@@ -118,6 +118,20 @@ function SCR_Battle_Targeting_Step() {
         var _heal_slot = battle_GetPlayerMonsterSlotAt(mouse_x, mouse_y);
         if (_heal_slot < 0) return;
 
+        if (pending_trait_source == "monster_on_play") {
+            if (battle_ExecuteMonsterOnPlayHealTrait(pending_monster_slot, pending_monster_trait_index, _heal_slot)) {
+                battle_MonsterOnPlayContinue(pending_monster_slot, pending_monster_trait_index);
+            }
+            return;
+        }
+
+        if (pending_trait_source == "weapon_on_play") {
+            if (battle_ExecuteWeaponOnPlayHealTrait(pending_weapon_slot, pending_monster_trait_index, _heal_slot)) {
+                battle_WeaponOnPlayContinue(pending_weapon_slot, pending_monster_trait_index);
+            }
+            return;
+        }
+
         if (battle_ExecuteActionHeal(pending_action_trait_index, _heal_slot)) {
             battle_TargetingContinueAfterAction(pending_action_trait_index);
         }

@@ -8,14 +8,8 @@ function battle_OnMonsterPlayed(_slot_index, _card) {
     for (var i = 0; i < array_length(_traits); i++) {
         var _trait = _traits[i];
         if (_trait.type == "attack") continue;
-
-        if (trait_ActionIsAuto(_trait.type)) {
-            trait_ExecuteOnPlay(_trait, _slot_index);
-        } else if (_trait.type == "heal") {
-            trait_Execute(_trait, trait_CreateHealContext(_trait.amount, "player", _slot_index));
-        } else if (!trait_OnPlayNeedsEnemyTarget(_trait.type)) {
-            trait_ExecuteOnPlay(_trait, _slot_index);
-        }
+        if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)) continue;
+        trait_ExecuteOnPlay(_trait, _slot_index);
     }
 
     battle_BeginMonsterOnPlayTargeting(_slot_index);
@@ -30,13 +24,14 @@ function battle_BeginMonsterOnPlayTargeting(_slot_index, _start_trait_index = 0)
 
     var _traits = trait_GetFromCard(_slot.card);
     for (var i = _start_trait_index; i < array_length(_traits); i++) {
-        if (!trait_OnPlayNeedsEnemyTarget(_traits[i].type)) continue;
-
-        pending_trait_source = "monster_on_play";
-        pending_monster_slot = _slot_index;
-        pending_monster_trait_index = i;
-        battle_BeginEnemyTargetMode(_traits[i].type);
-        return;
+        var _type = _traits[i].type;
+        if (trait_OnPlayNeedsEnemyTarget(_type) || trait_OnPlayNeedsPlayerTarget(_type)) {
+            pending_trait_source = "monster_on_play";
+            pending_monster_slot = _slot_index;
+            pending_monster_trait_index = i;
+            battle_BeginOnPlayTargetMode(_type);
+            return;
+        }
     }
 
     battle_CancelTargeting();
@@ -71,6 +66,21 @@ function battle_ExecuteMonsterOnPlayEnemyTrait(_player_slot, _trait_index, _enem
     return false;
 }
 
+function battle_ExecuteMonsterOnPlayHealTrait(_player_slot, _trait_index, _target_player_slot) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return false;
+
+    var _slot = _board.player_monster_slots[_player_slot];
+    if (!_slot.occupied || _slot.card == undefined) return false;
+
+    var _traits = trait_GetFromCard(_slot.card);
+    if (_trait_index >= array_length(_traits)) return false;
+    if (_traits[_trait_index].type != "heal") return false;
+
+    var _trait = _traits[_trait_index];
+    return trait_Execute(_trait, trait_CreateHealContext(_trait.amount, "player", _target_player_slot));
+}
+
 function battle_OnWeaponPlayed(_slot_index, _card) {
     battle_CancelTargeting();
     weapon_EnsureAttackData(_card);
@@ -79,14 +89,8 @@ function battle_OnWeaponPlayed(_slot_index, _card) {
     for (var i = 0; i < array_length(_traits); i++) {
         var _trait = _traits[i];
         if (_trait.type == "attack") continue;
-
-        if (trait_ActionIsAuto(_trait.type)) {
-            trait_ExecuteOnPlay(_trait, _slot_index);
-        } else if (_trait.type == "heal") {
-            trait_Execute(_trait, trait_CreateHealContext(_trait.amount, "player", _slot_index));
-        } else if (!trait_OnPlayNeedsEnemyTarget(_trait.type)) {
-            trait_ExecuteOnPlay(_trait, _slot_index);
-        }
+        if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)) continue;
+        trait_ExecuteOnPlay(_trait, _slot_index);
     }
 
     battle_BeginWeaponOnPlayTargeting(_slot_index);
@@ -101,13 +105,14 @@ function battle_BeginWeaponOnPlayTargeting(_slot_index, _start_trait_index = 0) 
 
     var _traits = trait_GetFromCard(_weapon_slot.card);
     for (var i = _start_trait_index; i < array_length(_traits); i++) {
-        if (!trait_OnPlayNeedsEnemyTarget(_traits[i].type)) continue;
-
-        pending_trait_source = "weapon_on_play";
-        pending_weapon_slot = _slot_index;
-        pending_monster_trait_index = i;
-        battle_BeginEnemyTargetMode(_traits[i].type);
-        return;
+        var _type = _traits[i].type;
+        if (trait_OnPlayNeedsEnemyTarget(_type) || trait_OnPlayNeedsPlayerTarget(_type)) {
+            pending_trait_source = "weapon_on_play";
+            pending_weapon_slot = _slot_index;
+            pending_monster_trait_index = i;
+            battle_BeginOnPlayTargetMode(_type);
+            return;
+        }
     }
 
     battle_CancelTargeting();
@@ -137,6 +142,37 @@ function battle_ExecuteWeaponOnPlayEnemyTrait(_weapon_column, _trait_index, _ene
             return trait_Execute(_trait, trait_CreateStasisContext(_trait.dot_type, _trait.amount, _trait.duration, "enemy", _enemy_slot));
     }
     return false;
+}
+
+function battle_ExecuteWeaponOnPlayHealTrait(_weapon_column, _trait_index, _target_player_slot) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return false;
+
+    var _weapon_slot = _board.player_weapon_slots[_weapon_column];
+    if (!_weapon_slot.occupied || _weapon_slot.card == undefined) return false;
+
+    var _traits = trait_GetFromCard(_weapon_slot.card);
+    if (_trait_index >= array_length(_traits)) return false;
+    if (_traits[_trait_index].type != "heal") return false;
+
+    var _trait = _traits[_trait_index];
+    return trait_Execute(_trait, trait_CreateHealContext(_trait.amount, "player", _target_player_slot));
+}
+
+function battle_BeginOnPlayTargetMode(_trait_type) {
+    if (trait_OnPlayNeedsPlayerTarget(_trait_type)) {
+        battle_BeginPlayerTargetMode(_trait_type);
+        return;
+    }
+    battle_BeginEnemyTargetMode(_trait_type);
+}
+
+function battle_BeginPlayerTargetMode(_trait_type) {
+    switch (_trait_type) {
+        case "heal": target_mode = "pick_player_heal"; break;
+        case "buff_attack": target_mode = "pick_player_buff"; break;
+        default: battle_CancelTargeting(); break;
+    }
 }
 
 function battle_BeginEnemyTargetMode(_trait_type) {
@@ -171,7 +207,7 @@ function battle_BeginActionTargeting(_trait_index, _type) {
             target_mode = "pick_player_buff";
             break;
         default:
-            battle_BeginEnemyTargetMode(_type);
+            battle_BeginOnPlayTargetMode(_type);
             break;
     }
 }
