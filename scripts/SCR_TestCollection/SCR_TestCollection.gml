@@ -42,7 +42,7 @@ function collection_GetMaxDeckCopies(_card) {
     switch (_card.type) {
         case "monster":
         case "weapon":
-            return 3;
+            return 4;
         case "action":
             return 4;
         default:

@@ -84,6 +84,7 @@ function battle_DestroyPlayerMonster(_slot_index) {
     if (_bm != noone) {
         with (_bm) {
             battle_CloseZonesOwnedByMonster(_slot_index);
+            battle_ClearResourceEffectsFromSlot(_slot_index);
             if (_slot_index == pending_player_slot) battle_CancelTargeting();
             if (_slot_index < array_length(weapon_attacks_used)) {
                 weapon_attacks_used[_slot_index] = 0;

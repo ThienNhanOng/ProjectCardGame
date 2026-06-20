@@ -19,6 +19,7 @@ function battle_StartBattle() {
     turn_number = 1;
     battle_phase = "player";
     battle_ResetTurnUses();
+    battle_RefreshResourcesForTurn();
     show_debug_message("=== Player turn 1 ===");
 }
 
@@ -26,6 +27,7 @@ function battle_BeginNextPlayerTurn() {
     turn_number++;
     battle_phase = "player";
     battle_ResetTurnUses();
+    battle_RefreshResourcesForTurn();
 
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board != noone) {
@@ -45,6 +47,7 @@ function battle_EndTurn() {
     }
 
     battle_CancelTargeting();
+    battle_ClearTurnResourceAddBuffs();
     battle_phase = "enemy";
     show_debug_message("=== Enemy turn ===");
     battle_RunEnemyTurn();

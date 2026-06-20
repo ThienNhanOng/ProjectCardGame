@@ -33,9 +33,21 @@ function trait_GetTraitSearchTags(_trait) {
     return [];
 }
 
-function deck_GetUniqueBattleDeckCardIds() {
+function deck_GetUniqueBattleDeckCardIds(_destination = "") {
     var _ids = [];
     var _seen = {};
+
+    if (_destination == "extra_deck") {
+        for (var e = 0; e < extra_deck_Count; e++) {
+            var _extra_id = extra_deck[e];
+            if (_extra_id <= 0) continue;
+            var _extra_key = string(_extra_id);
+            if (variable_struct_exists(_seen, _extra_key)) continue;
+            _seen[$ _extra_key] = true;
+            array_push(_ids, _extra_id);
+        }
+        return _ids;
+    }
 
     for (var i = 0; i < deck_Count; i++) {
         var _card_id = deck[i];
@@ -50,7 +62,7 @@ function deck_GetUniqueBattleDeckCardIds() {
 
 function deck_FindIdsByIndeckTags(_tags, _destination = "") {
     var _ids = [];
-    var _deck_ids = deck_GetUniqueBattleDeckCardIds();
+    var _deck_ids = deck_GetUniqueBattleDeckCardIds(_destination);
 
     for (var i = 0; i < array_length(_deck_ids); i++) {
         var _def = deck_GetCardData(_deck_ids[i]);
@@ -130,10 +142,42 @@ function trait_GetTagDestinationLabel(_destination) {
     }
 }
 
+function trait_ParseApplyCost(_raw) {
+    if (_raw == undefined || !variable_struct_exists(_raw, "cost")) return 0;
+
+    var _entry = card_NormalizeCostEntry(_raw.cost);
+    if (_entry != undefined) {
+        if (card_CostEntryIsTribute(_entry)) return max(0, _entry.amount);
+        return max(0, _entry.amount);
+    }
+
+    return 0;
+}
+
+function card_DB_FindAllIdsForDestination(_destination = "hand") {
+    var _ids = [];
+    if (!variable_global_exists("card_DB") || !is_struct(card_DB)) return _ids;
+    if (!variable_struct_exists(card_DB, "cards") || !is_array(card_DB.cards)) return _ids;
+
+    for (var i = 0; i < array_length(card_DB.cards); i++) {
+        var _def = card_DB.cards[i];
+        var _is_spirit = card_IsExtraDeckType(_def);
+        if (_destination == "hand" || _destination == "deck") {
+            if (_is_spirit) continue;
+        } else if (_destination == "extra_deck") {
+            if (!_is_spirit) continue;
+        }
+        array_push(_ids, _def.id);
+    }
+    return _ids;
+}
+
 function trait_GetTagDestinationFromType(_type) {
     switch (_type) {
         case "add_hand_tag":
-        case "add_tag": return "hand";
+        case "add_tag":
+        case "add_hand_with_cost":
+        case "addtohandwithcost": return "hand";
         case "add_deck_tag": return "deck";
         case "add_extra_deck_tag": return "extra_deck";
         default: return "";
@@ -152,6 +196,7 @@ function deck_TagPicker_Close() {
         tag_picker_amount = 1;
         tag_picker_title = "";
         tag_picker_footer_hint = "";
+        tag_picker_apply_cost = 0;
     }
 }
 
@@ -162,20 +207,26 @@ function deck_TagPicker_Begin(_trait) {
     if (_destination == "") return false;
 
     var _tags = trait_GetTraitSearchTags(_trait);
-    if (array_length(_tags) <= 0) {
+    var _use_indeck = trait_TraitUsesIndeckTagSearch(_trait);
+    var _any_tag = (_trait.type == "add_hand_with_cost" && array_length(_tags) <= 0);
+
+    if (!_any_tag && array_length(_tags) <= 0) {
         show_debug_message("Tag picker failed: no tags or indeckTag on trait " + string(_trait.type));
         return false;
     }
 
-    var _use_indeck = trait_TraitUsesIndeckTagSearch(_trait);
     var _deck = instance_find(OBJ_Deck, 0);
     if (_deck == noone) return false;
 
     var _ids = [];
     with (_deck) {
-        _ids = _use_indeck
-            ? deck_FindIdsByIndeckTags(_tags, _destination)
-            : card_DB_FindIdsByTags(_tags, _destination);
+        if (_any_tag) {
+            _ids = card_DB_FindAllIdsForDestination(_destination);
+        } else {
+            _ids = _use_indeck
+                ? deck_FindIdsByIndeckTags(_tags, _destination)
+                : card_DB_FindIdsByTags(_tags, _destination);
+        }
     }
     if (array_length(_ids) <= 0) {
         var _scope = _use_indeck ? "in-deck " : "";
@@ -186,12 +237,22 @@ function deck_TagPicker_Begin(_trait) {
 
     var _dest_label = trait_GetTagDestinationLabel(_destination);
     var _scope_label = _use_indeck ? "in deck " : "";
+    var _tag_label = _any_tag ? "any tag" : trait_GetTagsDisplayText(_tags);
+    var _apply_cost = 0;
+    if (variable_struct_exists(_trait, "apply_cost")) {
+        _apply_cost = max(0, floor(real(_trait.apply_cost)));
+    }
+
     with (_deck) {
         tag_picker_card_ids = _ids;
         tag_picker_destination = _destination;
         tag_picker_amount = max(1, _trait.amount);
-        tag_picker_title = "Choose card (" + _scope_label + trait_GetTagsDisplayText(_tags) + ")";
+        tag_picker_apply_cost = _apply_cost;
+        tag_picker_title = "Choose card (" + _scope_label + _tag_label + ")";
         tag_picker_footer_hint = "Click card to add to " + _dest_label;
+        if (_apply_cost > 0) {
+            tag_picker_footer_hint += " (cost " + string(_apply_cost) + ")";
+        }
         tag_picker_open = true;
         tag_picker_scroll = 0;
 
@@ -221,9 +282,11 @@ function deck_TagPicker_AddCard(_card_id) {
 
     var _amount = 1;
     var _destination = "";
+    var _apply_cost = 0;
     with (_deck) {
         _amount = max(1, tag_picker_amount);
         _destination = tag_picker_destination;
+        _apply_cost = max(0, tag_picker_apply_cost);
     }
 
     var _card_data = deck_GetCardData(_card_id);
@@ -235,8 +298,18 @@ function deck_TagPicker_AddCard(_card_id) {
 
     switch (_destination) {
         case "hand":
+            var _hand = instance_find(OBJ_Hand, 0);
             for (var h = 0; h < _amount; h++) {
-                if (trait_ExecuteAddHand(trait_CreateAddHandContext(_card_id))) _added_any = true;
+                if (trait_ExecuteAddHand(trait_CreateAddHandContext(_card_id))) {
+                    _added_any = true;
+                    if (_apply_cost > 0 && _hand != noone) {
+                        with (_hand) {
+                            if (hand_Count > 0) {
+                                card_AppendCostEntry(hand[hand_Count - 1], { amount: _apply_cost });
+                            }
+                        }
+                    }
+                }
             }
             break;
 
@@ -312,6 +385,15 @@ function deck_TagPicker_Step() {
 }
 
 function trait_ExecuteAddHandTag(_trait) {
+    return deck_TagPicker_Begin(_trait);
+}
+
+function trait_ExecuteAddHandWithCost(_trait) {
+    if (_trait == undefined || _trait.type != "add_hand_with_cost") return false;
+    if (_trait.apply_cost <= 0) {
+        show_debug_message("add_hand_with_cost needs cost > 0");
+        return false;
+    }
     return deck_TagPicker_Begin(_trait);
 }
 

@@ -24,12 +24,13 @@ function SCR_Board_GetSlotAt(_mx, _my) {
     return undefined;
 }
 
-function SCR_Board_UpdateHover(_mx, _my, _dragging_card) {
+function SCR_Board_UpdateHover(_mx, _my, _dragging_card, _drag_hand_index = -1) {
     if (_dragging_card == undefined) {
         SCR_Board_ClearHover();
         return;
     }
     var _card_type = _dragging_card.type;
+    var _can_pay = card_CanAffordAllCosts(_dragging_card, _drag_hand_index);
     
     for (var i = 0; i < array_length(player_monster_slots); i++) {
         var _slot = player_monster_slots[i];
@@ -37,7 +38,7 @@ function SCR_Board_UpdateHover(_mx, _my, _dragging_card) {
             _slot.hovered = false;
             continue;
         }
-        var _valid = (_card_type == "monster" || _card_type == "special_monster");
+        var _valid = (_card_type == "monster" || _card_type == "special_monster") && _can_pay;
         _slot.hovered = _valid && (_mx >= _slot.x && _mx <= _slot.x + _slot.w &&
                                    _my >= _slot.y && _my <= _slot.y + _slot.h);
     }
@@ -48,13 +49,13 @@ function SCR_Board_UpdateHover(_mx, _my, _dragging_card) {
             _slot.hovered = false;
             continue;
         }
-        var _valid = (_card_type == "weapon");
+        var _valid = (_card_type == "weapon") && _can_pay;
         _slot.hovered = _valid && (_mx >= _slot.x && _mx <= _slot.x + _slot.w &&
                                    _my >= _slot.y && _my <= _slot.y + _slot.h);
     }
     
     if (action_slot.visible) {
-        var _valid = (_card_type == "action");
+        var _valid = (_card_type == "action") && _can_pay;
         action_slot.hovered = _valid && (_mx >= action_slot.x && _mx <= action_slot.x + action_slot.w &&
                                          _my >= action_slot.y && _my <= action_slot.y + action_slot.h);
     }

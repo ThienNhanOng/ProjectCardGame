@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Trait_AddDeck",
+  "%Name":"SCR_Trait_Resources",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Trait_AddDeck",
+  "name":"SCR_Trait_Resources",
   "parent":{
-    "name":"effects",
-    "path":"folders/scripts/Traits/effects.yy",
+    "name":"resources",
+    "path":"folders/scripts/Traits/resources.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

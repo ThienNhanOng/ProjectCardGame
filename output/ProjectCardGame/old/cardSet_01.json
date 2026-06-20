@@ -1,0 +1,396 @@
+{
+  "collection": "cardsetTest_01",
+  "cards": [
+    {
+      "id": 1,
+      "name": "Goblin I [Draw 1]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 12,
+      "ability": [{ "type": "draw", "amount": 1 }]
+    },
+    {
+      "id": 2,
+      "name": "Goblin II [Draw 2]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 12,
+      "ability": [{ "type": "draw", "amount": 2 }]
+    },
+    {
+      "id": 3,
+      "name": "Goblin I [Heal 3]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 12,
+      "ability": [{ "type": "heal", "amount": 3 }]
+    },
+    {
+      "id": 4,
+      "name": "Goblin II [Heal 5]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 12,
+      "ability": [{ "type": "heal", "amount": 5 }]
+    },
+    {
+      "id": 5,
+      "name": "Goblin I [Atk All 1]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "attack_all", "amount": 1 }]
+    },
+    {
+      "id": 6,
+      "name": "Goblin II [Atk All 2]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "attack_all", "amount": 2 }]
+    },
+    {
+      "id": 7,
+      "name": "Goblin I [Heal All 1]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "heal_all", "amount": 1 }]
+    },
+    {
+      "id": 8,
+      "name": "Goblin II [Heal All 2]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "heal_all", "amount": 2 }]
+    },
+    {
+      "id": 9,
+      "name": "Goblin I [Destroy]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 8,
+      "ability": [{ "type": "destroy", "amount": 1 }]
+    },
+    {
+      "id": 10,
+      "name": "Goblin II [Destroy]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 8,
+      "ability": [{ "type": "destroy", "amount": 1 }]
+    },
+    {
+      "id": 11,
+      "name": "Goblin I [Silence 1T]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "silence", "amount": 1 }]
+    },
+    {
+      "id": 12,
+      "name": "Goblin II [Silence 2T]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "silence", "amount": 2 }]
+    },
+    {
+      "id": 13,
+      "name": "Goblin I [Stasis 1x2]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "silence", "amount": 1 }]
+    },
+    {
+      "id": 14,
+      "name": "Goblin II [Stasis 2x3]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "silence", "amount": 2 }]
+    },
+    {
+      "id": 15,
+      "name": "Goblin I [Add Sword]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "add", "id": 41 }]
+    },
+    {
+      "id": 16,
+      "name": "Goblin II [Add Sword II]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "add", "id": 42 }]
+    },
+    {
+      "id": 17,
+      "name": "Goblin I [Buff +2]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "self_buff", "amount": 2 }]
+    },
+    {
+      "id": 18,
+      "name": "Goblin II [Buff +4]",
+      "type": "monster",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 10,
+      "health": 10,
+      "ability": [{ "type": "self_buff", "amount": 4 }]
+    },
+    {
+      "id": 21,
+      "name": "Action I [Draw 1]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [{ "type": "draw", "amount": 1, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 22,
+      "name": "Action II [Draw 2]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [{ "type": "draw", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 23,
+      "name": "Action I [Attack 4]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "attack", "amount": 4, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 24,
+      "name": "Action II [Attack 7]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "attack", "amount": 7, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 25,
+      "name": "Action I [Heal 3]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "heal", "amount": 3, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 26,
+      "name": "Action II [Heal 5]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "heal", "amount": 5, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 27,
+      "name": "Action I [Atk All 1]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "attack_all", "amount": 1, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 28,
+      "name": "Action II [Atk All 2]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "attack_all", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 29,
+      "name": "Action I [Heal All 1]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "heal_all", "amount": 1, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 30,
+      "name": "Action II [Heal All 2]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "heal_all", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 31,
+      "name": "Action I [Destroy]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 3,
+      "actionType": [{ "type": "destroy", "amount": 1, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 32,
+      "name": "Action II [Destroy]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 3,
+      "actionType": [{ "type": "destroy", "amount": 1, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 33,
+      "name": "Action I [Silence I]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "silence", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 34,
+      "name": "Action II [Silence II]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "silence", "amount": 2, "uses_per_turn": 2 }]
+    },
+    {
+      "id": 35,
+      "name": "Action I [Stasis 1x2]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "silence", "amount": 1, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 36,
+      "name": "Action II [Stasis 2x3]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "silence", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 37,
+      "name": "Action I [Add Sword]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [{ "type": "add", "id": 41, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 38,
+      "name": "Action II [Add Sword II]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [{ "type": "add", "id": 42, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 39,
+      "name": "Action I [Buff +2]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "self_buff", "amount": 2, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 40,
+      "name": "Action II [Buff +4]",
+      "type": "action",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [{ "type": "self_buff", "amount": 4, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 41,
+      "name": "Goblin Sword I [Atk 5]",
+      "type": "weapon",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 5,
+      "ability": [{ "type": "attack", "amount": 5, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 42,
+      "name": "Goblin Sword II [Atk 8]",
+      "type": "weapon",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 8,
+      "ability": [{ "type": "attack", "amount": 8, "uses_per_turn": 1 }]
+    },
+    {
+      "id": 50,
+      "name": "Goblin Spirit",
+      "type": "spirit",
+      "tag": ["Goblin"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 30,
+      "health": 30,
+      "attack": 8,
+      "ability": []
+    }
+  ]
+}

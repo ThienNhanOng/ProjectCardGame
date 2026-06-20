@@ -266,8 +266,9 @@ function SCR_DBD_GetCardSummaryLines(_card) {
         }
     }
 
-    if (_card.type == "action" && variable_struct_exists(_card, "cost")) {
-        array_push(_lines, "Cost: " + string(_card.cost));
+    var _cost_text = card_FormatAllCosts(_card);
+    if (_cost_text != "") {
+        array_push(_lines, "Cost: " + _cost_text);
     }
 
     return _lines;
@@ -284,7 +285,8 @@ function SCR_DBD_FormatTraitLine(_trait) {
         _text = "Add to deck " + deck_GetCardName(_trait.card_id);
     } else if (_trait.type == "add_extra_deck" && _trait.card_id >= 0) {
         _text = "Add to extra deck " + deck_GetCardName(_trait.card_id);
-    } else if (_trait.type == "add_hand_tag" || _trait.type == "add_deck_tag" || _trait.type == "add_extra_deck_tag") {
+    } else if (_trait.type == "add_hand_tag" || _trait.type == "add_deck_tag" || _trait.type == "add_extra_deck_tag"
+        || _trait.type == "add_hand_with_cost") {
         _text = trait_GetDisplayText(_trait);
     }
 

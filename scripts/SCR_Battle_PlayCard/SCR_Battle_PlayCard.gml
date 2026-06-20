@@ -9,7 +9,7 @@ function battle_OnMonsterPlayed(_slot_index, _card) {
         var _trait = _traits[i];
         if (_trait.type == "attack" || _trait.type == "attack_all") continue;
         if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
-            || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
+            || trait_OnPlayNeedsAnyTarget(_trait.type) || trait_OnPlayNeedsAddCostTarget(_trait.type)) continue;
         trait_ExecuteOnPlay(_trait, _slot_index);
     }
 
@@ -28,7 +28,8 @@ function battle_BeginMonsterOnPlayTargeting(_slot_index, _start_trait_index = 0)
         var _type = _traits[i].type;
         if (trait_OnPlayNeedsEnemyTarget(_type)
             || trait_OnPlayNeedsPlayerTarget(_type)
-            || trait_OnPlayNeedsAnyTarget(_type)) {
+            || trait_OnPlayNeedsAnyTarget(_type)
+            || trait_OnPlayNeedsAddCostTarget(_type)) {
             pending_trait_source = "monster_on_play";
             pending_monster_slot = _slot_index;
             pending_monster_trait_index = i;
@@ -101,19 +102,26 @@ function battle_OnWeaponPlayed(_slot_index, _card) {
     weapon_EnsureAttackData(_card);
 
     var _traits = trait_GetFromCard(_card);
-    var _effect_times = weapon_GetEffectRecursion(_card);
-
-    for (var e = 0; e < _effect_times; e++) {
-        for (var i = 0; i < array_length(_traits); i++) {
-            var _trait = _traits[i];
-            if (_trait.type == "attack" || _trait.type == "attack_all") continue;
-            if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
-                || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
-            trait_ExecuteOnPlay(_trait, _slot_index);
-        }
+    for (var i = 0; i < array_length(_traits); i++) {
+        var _trait = _traits[i];
+        if (_trait.type == "attack" || _trait.type == "attack_all") continue;
+        if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
+            || trait_OnPlayNeedsAnyTarget(_trait.type) || trait_OnPlayNeedsAddCostTarget(_trait.type)) continue;
+        trait_ExecuteOnPlay(_trait, _slot_index);
     }
 
     battle_BeginWeaponOnPlayTargeting(_slot_index);
+    show_debug_message("Weapon equipped in column " + string(_slot_index) + " — click column to attack");
+}
+
+function battle_GetWeaponSlotCard(_column) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return undefined;
+    if (_column < 0 || _column >= array_length(_board.player_weapon_slots)) return undefined;
+
+    var _weapon_slot = _board.player_weapon_slots[_column];
+    if (!_weapon_slot.visible || !_weapon_slot.occupied || _weapon_slot.card == undefined) return undefined;
+    return _weapon_slot.card;
 }
 
 function battle_RefreshWeaponRepeatableEffects() {
@@ -132,7 +140,7 @@ function battle_RefreshWeaponRepeatableEffects() {
             if (_trait.type == "attack" || _trait.type == "attack_all") continue;
             if (!trait_IsRepeatable(_trait)) continue;
             if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
-                || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
+                || trait_OnPlayNeedsAnyTarget(_trait.type) || trait_OnPlayNeedsAddCostTarget(_trait.type)) continue;
 
             var _times = trait_GetRecursionLimit(_trait);
             for (var r = 0; r < _times; r++) {
@@ -154,7 +162,8 @@ function battle_BeginWeaponOnPlayTargeting(_slot_index, _start_trait_index = 0) 
         var _type = _traits[i].type;
         if (trait_OnPlayNeedsEnemyTarget(_type)
             || trait_OnPlayNeedsPlayerTarget(_type)
-            || trait_OnPlayNeedsAnyTarget(_type)) {
+            || trait_OnPlayNeedsAnyTarget(_type)
+            || trait_OnPlayNeedsAddCostTarget(_type)) {
             pending_trait_source = "weapon_on_play";
             pending_weapon_slot = _slot_index;
             pending_monster_trait_index = i;
@@ -168,6 +177,9 @@ function battle_BeginWeaponOnPlayTargeting(_slot_index, _start_trait_index = 0) 
 
 function battle_WeaponOnPlayContinue(_slot_index, _completed_trait_index) {
     battle_BeginWeaponOnPlayTargeting(_slot_index, _completed_trait_index + 1);
+    if (!battle_IsTargeting()) {
+        show_debug_message("Weapon on-play abilities finished");
+    }
 }
 
 function battle_ExecuteWeaponOnPlayEnemyTrait(_weapon_column, _trait_index, _enemy_slot) {
@@ -220,6 +232,10 @@ function battle_ExecuteWeaponOnPlayHealTrait(_weapon_column, _trait_index, _targ
 }
 
 function battle_BeginOnPlayTargetMode(_trait_type) {
+    if (trait_OnPlayNeedsAddCostTarget(_trait_type)) {
+        target_mode = "pick_add_cost";
+        return;
+    }
     if (trait_OnPlayNeedsAnyTarget(_trait_type)) {
         target_mode = "pick_any_buff";
         return;
@@ -272,6 +288,9 @@ function battle_BeginActionTargeting(_trait_index, _type) {
             break;
         case "buff":
             target_mode = "pick_any_buff";
+            break;
+        case "add_cost":
+            target_mode = "pick_add_cost";
             break;
         default:
             battle_BeginOnPlayTargetMode(_type);

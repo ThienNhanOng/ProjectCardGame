@@ -1,0 +1,257 @@
+{
+  "collection": "cardSet_01",
+  "cards": [
+    {
+      "id": 1,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "Warrior I",
+      "type": "monster",
+      "tag": ["Test", "Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": []
+    },
+    {
+      "id": 2,
+      "own": 1,
+      "cardRarity": 0,
+      "name": "Warrior II",
+      "type": "monster",
+      "tag": ["Test", "Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 20,
+      "ability": []
+    },
+    {
+      "id": 3,
+      "own": 1,
+      "cardRarity": 0,
+      "name": "Scout In Training",
+      "type": "monster",
+      "tag": ["Test", "Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 5,
+      "ability": [
+        {
+          "type": "add_deck_tag",
+          "tags": ["Warrior"],
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "own": 1,
+      "cardRarity": 0,
+      "name": "Scout In Training II",
+      "type": "monster",
+      "tag": ["Test", "Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 6,
+      "ability": [
+        {
+          "type": "add_deck_tag",
+          "tags": ["Warrior"],
+          "repeat": false,
+          "recursion": 1
+        },
+        {
+          "type": "add_deck_tag",
+          "tags": ["Warrior"],
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "own": 1,
+      "cardRarity": 1,
+      "name": "Wizard Cultivated",
+      "type": "monster",
+      "tag": ["Test", "Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        {
+          "type": "silence",
+          "amount": 2,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "At Arms!",
+      "type": "monster",
+      "tag": ["Test", "Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 5,
+      "ability": [
+        {
+          "type": "add",
+          "id": 1,
+          "repeat": false,
+          "recursion": 1
+        },
+        {
+          "type": "add",
+          "id": 1,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "own": 3,
+      "cardRarity": 0,
+      "name": "Basic Strike",
+      "type": "action",
+      "tag": ["Warrior"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        {
+          "type": "attack",
+          "amount": 4,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "Advance Strike",
+      "type": "action",
+      "tag": ["Warrior"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [
+        {
+          "type": "attack",
+          "amount": 6,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "own": 1,
+      "cardRarity": 0,
+      "name": "Wooden Training Sword",
+      "type": "weapon",
+      "tag": ["Warrior"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 5,
+      "ability": [
+        {
+          "type": "attack",
+          "amount": 5,
+          "repeat": true,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "own": 1,
+      "cardRarity": 1,
+      "name": "Wooden Training Sword",
+      "type": "weapon",
+      "tag": ["Warrior"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 5,
+      "ability": [
+        {
+          "type": "self_buff",
+          "amount": 2,
+          "repeat": true,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "own": 1,
+      "name": "Warrior Soul I",
+      "type": "spirit",
+      "tag": ["Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 30,
+      "ability": [
+        {
+          "type": "conditions",
+          "repeat": false,
+          "recursion": 1,
+          "requirements": [
+            {
+              "type": "sacrifice_monster",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "type": "attack_all",
+          "amount": 10,
+          "repeat": true,
+          "recursion": 1
+        },
+        {
+          "type": "add_deck",
+          "id": 1,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "own": 1,
+      "name": "Warrior Soul II",
+      "type": "spirit",
+      "tag": ["Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 30,
+      "ability": [
+        {
+          "type": "conditions",
+          "repeat": false,
+          "recursion": 1,
+          "requirements": [
+            {
+              "type": "min_turn",
+              "amount": 3
+            },
+            {
+              "type": "sacrifice_monster",
+              "amount": 2
+            }
+          ]
+        },
+        {
+          "type": "attack_all",
+          "amount": 15,
+          "repeat": true,
+          "recursion": 1
+        },
+        {
+          "type": "add_deck",
+          "id": 1,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Trait_AddDeck",
+  "%Name":"SCR_Card_Cost",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Trait_AddDeck",
+  "name":"SCR_Card_Cost",
   "parent":{
-    "name":"effects",
-    "path":"folders/scripts/Traits/effects.yy",
+    "name":"create",
+    "path":"folders/scripts/BattleManager/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

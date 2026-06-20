@@ -58,8 +58,13 @@ function trait_NormalizeEntry(_raw) {
 
     if (_type == "add_to_hand_tag") _type = "add_hand_tag";
     if (_type == "add_tag") _type = "add_hand_tag";
+    if (_type == "addtohandwithcost") _type = "add_hand_with_cost";
+    if (_type == "add_hand_with_cost") _type = "add_hand_with_cost";
 
     if (_type == "buff_attack") _type = "self_buff";
+
+    if (_type == "increase_counter") _type = "add_counter";
+    if (_type == "decrease_counter") _type = "remove_counter";
 
 
 
@@ -108,6 +113,7 @@ function trait_NormalizeEntry(_raw) {
     var _requirements = [];
     var _tags = trait_ParseTags(_raw);
     var _indeck_tags = trait_ParseIndeckTags(_raw);
+    var _apply_cost = trait_ParseApplyCost(_raw);
 
     if (_type == "conditions" && variable_struct_exists(_raw, "requirements") && is_array(_raw.requirements)) {
 
@@ -130,6 +136,7 @@ function trait_NormalizeEntry(_raw) {
         uses_per_turn: _uses,
         tags: _tags,
         indeck_tags: _indeck_tags,
+        apply_cost: _apply_cost,
         requirements: _requirements
     };
 }
@@ -264,7 +271,7 @@ function trait_ActionNeedsTargeting(_type) {
 
     return _type == "attack" || _type == "attack_all" || _type == "heal" || _type == "self_buff" || _type == "buff"
 
-        || _type == "destroy" || _type == "silence";
+        || _type == "destroy" || _type == "silence" || _type == "add_cost";
 
 }
 
@@ -274,6 +281,8 @@ function trait_ActionIsAuto(_type) {
 
     return trait_IsDrawType(_type) || _type == "heal_all"
         || _type == "openzone"
+        || _type == "add_counter" || _type == "remove_counter"
+        || _type == "add_hand_with_cost"
         || _type == "add" || _type == "add_deck" || _type == "add_extra_deck"
         || _type == "add_hand_tag" || _type == "add_deck_tag" || _type == "add_extra_deck_tag";
 
@@ -293,6 +302,12 @@ function trait_OnPlayNeedsPlayerTarget(_type) {
 
     return _type == "heal";
 
+}
+
+
+
+function trait_OnPlayNeedsAddCostTarget(_type) {
+    return _type == "add_cost";
 }
 
 
@@ -349,10 +364,27 @@ function trait_GetDisplayText(_trait) {
             }
             return "Add to extra deck (" + trait_GetTagsDisplayText(_trait.tags) + ")";
 
+        case "add_hand_with_cost":
+            var _tag_txt = trait_GetTagsDisplayText(_trait.tags);
+            if (array_length(_trait.tags) <= 0) _tag_txt = "any tag";
+            var _cost_txt = string(max(0, _trait.apply_cost));
+            return "Add to hand (" + _tag_txt + ") with cost " + _cost_txt;
+
         case "openzone":
             var _zones = max(1, _trait.amount);
             if (_zones <= 1) return "Open hidden zone";
             return "Open hidden zones " + string(_zones);
+
+        case "add_counter":
+            return "Add counter +" + string(max(1, _trait.amount)) + " (this turn)";
+
+        case "remove_counter":
+            return "Remove counter max -" + string(max(1, _trait.amount)) + " (while alive)";
+
+        case "add_cost":
+            var _entry = card_BuildCostEntryFromTrait(_trait);
+            if (_entry == undefined) return "Add cost";
+            return "Add cost: " + card_FormatCostEntry(_entry);
 
         case "silence": return "Silence 1 target (" + string(max(1, _trait.amount)) + " enemy turn(s))";
 
@@ -426,6 +458,10 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
 
             return trait_ExecuteAddHandTag(_trait);
 
+        case "add_hand_with_cost":
+
+            return trait_ExecuteAddHandWithCost(_trait);
+
         case "add_deck_tag":
 
             return trait_ExecuteAddDeckTag(_trait);
@@ -437,6 +473,18 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
         case "openzone":
 
             return trait_ExecuteOpenZone(_trait, _player_slot);
+
+        case "add_counter":
+
+            return trait_ExecuteAddCounter(_trait, _player_slot);
+
+        case "remove_counter":
+
+            return trait_ExecuteRemoveCounter(_trait, _player_slot);
+
+        case "add_cost":
+
+            return false;
 
         case "destroy":
 

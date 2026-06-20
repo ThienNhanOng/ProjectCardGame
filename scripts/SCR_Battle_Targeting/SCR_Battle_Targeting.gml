@@ -332,6 +332,16 @@ function SCR_Battle_Targeting_Step() {
 
 
 
+    if (target_mode == "pick_add_cost") {
+        var _target = battle_PickAddCostTargetAt(mouse_x, mouse_y);
+        if (_target != undefined && _target.card != undefined) {
+            battle_HandleAddCostPick(_target.card);
+        }
+        return;
+    }
+
+
+
     if (target_mode == "pick_any_buff") {
 
         var _player_buff_slot = battle_GetPlayerMonsterSlotAt(mouse_x, mouse_y);
@@ -498,6 +508,13 @@ function SCR_Battle_Targeting_Draw() {
 
         }
 
+    }
+
+
+
+    if (target_mode == "pick_add_cost") {
+        draw_text(room_width / 2, 8, "Choose a card to add cost");
+        battle_TargetingDrawPlayerHighlights(_board, c_red);
     }
 
 

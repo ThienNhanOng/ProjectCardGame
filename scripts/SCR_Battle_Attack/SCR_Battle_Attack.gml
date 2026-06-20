@@ -277,6 +277,10 @@ function battle_CanWeaponAttack(_monster_slot_index) {
 }
 
 function battle_BeginWeaponAttack(_monster_slot_index) {
+    return battle_BeginWeaponAttackStrike(_monster_slot_index);
+}
+
+function battle_BeginWeaponAttackStrike(_monster_slot_index) {
     if (battle_IsTargeting()) return false;
     if (!battle_CanColumnAttack(_monster_slot_index)) {
         show_debug_message("Attack not available for column " + string(_monster_slot_index));

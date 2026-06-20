@@ -30,6 +30,7 @@ function battle_HandleEndTurnButton() {
 
 function SCR_Battle_UI_Draw() {
     battle_DrawPlayerHealthBar();
+    battle_DrawResourcesCounter();
 
     var _rect = battle_GetEndTurnButtonRect();
     var _hover = battle_IsEndTurnButtonHovered();

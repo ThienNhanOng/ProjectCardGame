@@ -100,6 +100,12 @@ function trait_Execute(_trait, _ctx) {
 
 
 
+        case "add_hand_with_cost":
+
+            return trait_ExecuteAddHandWithCost(_trait);
+
+
+
         case "add_deck_tag":
 
             return trait_ExecuteAddDeckTag(_trait);
@@ -109,6 +115,18 @@ function trait_Execute(_trait, _ctx) {
         case "add_extra_deck_tag":
 
             return trait_ExecuteAddExtraDeckTag(_trait);
+
+
+
+        case "add_counter":
+
+            return trait_ExecuteAddCounter(_trait);
+
+
+
+        case "remove_counter":
+
+            return trait_ExecuteRemoveCounter(_trait);
 
 
 

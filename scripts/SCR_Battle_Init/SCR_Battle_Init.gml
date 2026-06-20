@@ -28,6 +28,8 @@ function SCR_Battle_Init() {
 
     battle_InitPlayerHealth();
 
+    battle_InitResources();
+
     conditions_summon_Reset();
 
     battle_InitZoneOwners();

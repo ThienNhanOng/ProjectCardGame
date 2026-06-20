@@ -42,6 +42,7 @@ function SCR_Deck_createinit() {
     tag_picker_amount = 1;
     tag_picker_title = "";
     tag_picker_footer_hint = "";
+    tag_picker_apply_cost = 0;
     
     // Load deck from global variable (saved from deckbuilder)
     if (variable_global_exists("battle_deck")
@@ -187,6 +188,8 @@ function card_NormalizeDefinition(_raw) {
         weapon_EnsureAttackData(_card);
     }
 
+    card_NormalizeCostsOnCard(_card);
+
     return _card;
 }
 
@@ -248,6 +251,8 @@ function card_CreateRuntimeInstance(_template) {
     if (_card.type == "weapon") {
         weapon_EnsureAttackData(_card);
     }
+
+    card_NormalizeCostsOnCard(_card);
 
     return _card;
 }

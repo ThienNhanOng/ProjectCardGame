@@ -53,7 +53,7 @@ function SCR_DragDrop_Step() {
 
         drag_x = _mx;
         drag_y = _my;
-        SCR_Board_UpdateHover(_mx, _my, drag_card);
+        SCR_Board_UpdateHover(_mx, _my, drag_card, drag_hand_index);
         
         if (mouse_check_button_released(mb_left)) {
             var _slot = SCR_Board_GetSlotAt(_mx, _my);
@@ -63,7 +63,10 @@ function SCR_DragDrop_Step() {
                     _slot.locked = false;
                 }
                 if (!_slot.occupied && !_slot.locked) {
-                    if (SCR_Board_PlaceCard(_slot, drag_card)) {
+                    if (!card_CanAffordAllCosts(drag_card, drag_hand_index)) {
+                        show_debug_message("Cannot afford cost for " + drag_card.name);
+                    } else if (SCR_Board_PlaceCard(_slot, drag_card)) {
+                        card_PayAllCosts(drag_card, drag_hand_index);
                         var _hand = instance_find(OBJ_Hand, 0);
                         if (_hand != noone) {
                             var _index = drag_hand_index;
