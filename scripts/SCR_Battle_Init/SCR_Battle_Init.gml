@@ -82,8 +82,10 @@ function battle_RefreshActionUses() {
     for (var i = 0; i < array_length(_traits); i++) {
         if (trait_IsRepeatable(_traits[i])) {
             array_push(action_trait_uses, trait_GetRecursionLimit(_traits[i]));
-        } else {
+        } else if (trait_ActionIsAuto(_traits[i].type)) {
             array_push(action_trait_uses, 0);
+        } else {
+            array_push(action_trait_uses, 1);
         }
     }
 

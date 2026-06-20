@@ -99,7 +99,7 @@
         },
         {
           "type": "add_cost",
-          "amount": 2,
+          "amount": -2,
           "repeat": false,
           "recursion": 1
         }

@@ -49,14 +49,16 @@ function card_NormalizeCostsOnCard(_card) {
     if (_card == undefined) return;
 
     var _costs = [];
-    if (variable_struct_exists(_card, "costs") && is_array(_card.costs)) {
+    var _had_costs_array = variable_struct_exists(_card, "costs")
+        && is_array(_card.costs)
+        && array_length(_card.costs) > 0;
+
+    if (_had_costs_array) {
         for (var i = 0; i < array_length(_card.costs); i++) {
             var _entry = card_NormalizeCostEntry(_card.costs[i]);
             if (_entry != undefined) array_push(_costs, _entry);
         }
-    }
-
-    if (variable_struct_exists(_card, "cost")) {
+    } else if (variable_struct_exists(_card, "cost")) {
         var _legacy = card_NormalizeCostEntry(_card.cost);
         if (_legacy != undefined) array_push(_costs, _legacy);
     }
