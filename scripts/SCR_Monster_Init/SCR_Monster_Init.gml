@@ -4,6 +4,8 @@ function SCR_Monster_Init() {
     battle_won = false;
     monster_queue = [];
     hovered_enemy_slot = -1;
+    active_slot_count = 0;
+    battle_name = "";
 
     var _battle_file = "Battle01.json";
     if (variable_global_exists("battle_config_file")) {

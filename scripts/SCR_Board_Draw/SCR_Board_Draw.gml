@@ -127,6 +127,31 @@ function SCR_Board_DrawPlayerMonsterOverlay(_slot, _card_w, _card_h) {
     var _attack_gain = card_GetAttackBuff(_slot.card);
     card_DrawAttackGainBadge(_slot.x, _slot.y, _card_w, _card_h, _attack_gain);
 
+    if (battle_IsSpiritMonster(_slot.card)) {
+        var _strike = battle_GetMonsterStrikeAmount(_slot.card);
+        if (_strike > 0) {
+            draw_set_halign(fa_center);
+            draw_set_valign(fa_top);
+            draw_set_color(c_maroon);
+            draw_text(_cx, _bar_y - 22, "ATK " + string(_strike));
+        }
+    }
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm != noone) {
+        with (_bm) {
+            if (battle_CanColumnAttack(_slot.index)) {
+                draw_set_color(c_yellow);
+                draw_rectangle(_slot.x - 2, _slot.y - 2, _slot.x + _card_w + 2, _slot.y + _card_h + 2, true);
+            } else if (_slot.index < array_length(weapon_attacks_used)
+                && battle_GetColumnAttackUsesLeft(_slot.index) <= 0) {
+                draw_set_color(c_gray);
+                draw_set_halign(fa_center);
+                draw_text(_slot.x + _card_w / 2, _slot.y + _card_h + 2, "used");
+            }
+        }
+    }
+
     var _pstatus = status_GetDisplayText(_slot.card);
     if (_pstatus != "") {
         draw_set_color(c_orange);
@@ -183,7 +208,8 @@ function SCR_Board_DrawPlacedCards() {
                 if (battle_CanWeaponAttack(i)) {
                     draw_set_color(c_yellow);
                     draw_rectangle(_slot.x - 2, _slot.y - 2, _slot.x + _card_w + 2, _slot.y + _card_h + 2, true);
-                } else if (i < array_length(weapon_attacks_used) && weapon_attacks_used[i]) {
+                } else if (i < array_length(weapon_attacks_used)
+                    && battle_GetColumnAttackUsesLeft(i) <= 0) {
                     draw_set_color(c_gray);
                     draw_text(_slot.x + _card_w / 2, _slot.y + _card_h + 2, "used");
                 }

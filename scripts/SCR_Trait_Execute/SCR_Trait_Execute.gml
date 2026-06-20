@@ -94,6 +94,24 @@ function trait_Execute(_trait, _ctx) {
 
 
 
+        case "add_hand_tag":
+
+            return trait_ExecuteAddHandTag(_trait);
+
+
+
+        case "add_deck_tag":
+
+            return trait_ExecuteAddDeckTag(_trait);
+
+
+
+        case "add_extra_deck_tag":
+
+            return trait_ExecuteAddExtraDeckTag(_trait);
+
+
+
         case "silence":
 
             if (_ctx.amount <= 0) _ctx.amount = max(1, _trait.amount);

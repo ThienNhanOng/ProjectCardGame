@@ -80,22 +80,23 @@ function battle_DestroyPlayerMonster(_slot_index) {
 
     var _name = _monster_slot.card.name;
 
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm != noone) {
+        with (_bm) {
+            battle_CloseZonesOwnedByMonster(_slot_index);
+            if (_slot_index == pending_player_slot) battle_CancelTargeting();
+            if (_slot_index < array_length(weapon_attacks_used)) {
+                weapon_attacks_used[_slot_index] = 0;
+            }
+        }
+    }
+
     with (_board) {
         var _weapon_slot = player_weapon_slots[_slot_index];
         if (_weapon_slot.occupied && _weapon_slot.card != undefined) {
             SCR_Board_RemoveCard(_weapon_slot);
         }
         SCR_Board_RemoveCard(_monster_slot);
-    }
-
-    var _bm = instance_find(OBJ_BattleManager, 0);
-    if (_bm != noone) {
-        with (_bm) {
-            if (_slot_index == pending_player_slot) battle_CancelTargeting();
-            if (_slot_index < array_length(weapon_attacks_used)) {
-                weapon_attacks_used[_slot_index] = false;
-            }
-        }
     }
 
     show_debug_message(_name + " destroyed in player slot " + string(_slot_index));

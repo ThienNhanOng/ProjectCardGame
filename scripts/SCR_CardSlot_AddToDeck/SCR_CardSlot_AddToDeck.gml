@@ -7,21 +7,15 @@ function SCR_CardSlot_AddToDeck() {
     for (var i = 0; i < array_length(global.player_collection); i++) {
         if (global.player_collection[i].id == card_id) {
             
-            // Count how many already in deck
-            var _in_deck = 0;
-            for (var d = 0; d < array_length(_deckbuilder.selected_deck); d++) {
-                if (_deckbuilder.selected_deck[d].id == card_id) {
-                    _in_deck++;
-                }
-            }
-            
-            // Check available without touching owned
-            var _owned = variable_struct_exists(global.player_collection[i], "owned")
-                ? global.player_collection[i].owned : 0;
-            var _available = _owned - _in_deck;
+            var _in_deck = SCR_DBD_GetDeckCount(card_id);
+            var _available = collection_GetAvailableCopies(global.player_collection[i]);
             if (_available <= 0) {
+                var _max = collection_GetMaxDeckCopies(global.player_collection[i]);
+                var _owned = variable_struct_exists(global.player_collection[i], "owned")
+                    ? global.player_collection[i].owned : 0;
                 show_debug_message("No copies left for " + card_data.name
-                    + " (owned " + string(_owned) + ", in deck " + string(_in_deck) + ")");
+                    + " (owned " + string(_owned) + ", deck max " + string(_max)
+                    + ", in deck " + string(_in_deck) + ")");
                 return false;
             }
             

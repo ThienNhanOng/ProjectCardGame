@@ -95,12 +95,18 @@ function battle_GetPreviewSummaryLines(_card) {
         var _lines = [];
         array_push(_lines, "Type: enemy");
         if (monster_IsElite(_card)) array_push(_lines, "Elite");
-        var _atk = variable_struct_exists(_card, "attack") ? _card.attack : _card.base_attack;
-        array_push(_lines, "ATK: " + string(_atk));
         battle_EnsureCardHealth(_card);
         array_push(_lines, "HP: " + string(_card.health) + "/" + string(_card.max_health));
+
         var _buff = card_GetAttackBuff(_card);
-        if (_buff > 0) array_push(_lines, "ATK buff: +" + string(_buff));
+        if (_buff > 0) {
+            array_push(_lines, "ATK buff: +" + string(_buff));
+            array_push(_lines, "Attack: " + string(card_GetSummaryTotalAttack(_card)));
+        } else {
+            var _atk = variable_struct_exists(_card, "attack") ? _card.attack : _card.base_attack;
+            array_push(_lines, "Attack: " + string(_atk));
+        }
+
         var _status = status_GetDisplayText(_card);
         if (_status != "") array_push(_lines, _status);
         return _lines;
@@ -118,8 +124,7 @@ function battle_GetPreviewSummaryLines(_card) {
         }
     }
 
-    var _player_buff = card_GetAttackBuff(_card);
-    if (_player_buff > 0) array_push(_lines, "ATK buff: +" + string(_player_buff));
+    _lines = SCR_DBD_AppendAttackBuffSummaryLines(_lines, _card, battle_FindPlayerMonsterColumn(_card));
 
     var _player_status = status_GetDisplayText(_card);
     if (_player_status != "") array_push(_lines, _player_status);
@@ -151,6 +156,15 @@ function battle_FindHoveredPreviewCard() {
     if (_board != noone && _board.is_dragging) return undefined;
 
     var _deck = instance_find(OBJ_Deck, 0);
+    if (_deck != noone && _deck.tag_picker_open) {
+        var _idx = -1;
+        with (_deck) {
+            _idx = deck_ScrollPicker_PickIndexAt(mouse_x, mouse_y, tag_picker_card_ids, tag_picker_scroll);
+            if (_idx >= 0) return deck_GetCardData(tag_picker_card_ids[_idx]);
+        }
+        return undefined;
+    }
+
     if (_deck != noone && _deck.extra_deck_picker_open) {
         var _idx = -1;
         with (_deck) _idx = deck_ExtraDeckPicker_PickIndexAt(mouse_x, mouse_y);

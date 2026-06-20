@@ -47,8 +47,7 @@ function SCR_DBD_BuildAvailableEntries() {
         if (_card.type == "spirit" || _card.type == "special_monster") continue;
         if (!SCR_DBD_CardMatchesFilter(_card, _filter_type, _search_text)) continue;
 
-        var _in_deck = SCR_DBD_GetDeckCount(_card.id);
-        var _available = _card.owned - _in_deck;
+        var _available = collection_GetAvailableCopies(_card);
         if (_available > 0) {
             array_push(_entries, {
                 card: _card,
@@ -209,6 +208,24 @@ function SCR_DBD_FormatCardTags(_card) {
     return _text;
 }
 
+function SCR_DBD_AppendAttackBuffSummaryLines(_lines, _card, _column = -1) {
+    var _buff = card_GetAttackBuff(_card);
+    if (_buff <= 0) return _lines;
+
+    var _filtered = [];
+    for (var i = 0; i < array_length(_lines); i++) {
+        var _line = _lines[i];
+        if (string_copy(_line, 1, 8) == "Attack: ") continue;
+        if (string_copy(_line, 1, 5) == "ATK: ") continue;
+        if (string_copy(_line, 1, 10) == "ATK buff: ") continue;
+        array_push(_filtered, _line);
+    }
+
+    array_push(_filtered, "ATK buff: +" + string(_buff));
+    array_push(_filtered, "Attack: " + string(battle_GetPlayerMonsterSummaryAttack(_card, _column)));
+    return _filtered;
+}
+
 function SCR_DBD_GetCardSummaryLines(_card) {
     var _lines = [];
     if (_card == undefined) return _lines;
@@ -224,15 +241,29 @@ function SCR_DBD_GetCardSummaryLines(_card) {
         if (variable_struct_exists(_card, "health")) {
             array_push(_lines, "HP: " + string(_card.health));
         }
-        if ((_card.type == "spirit" || _card.type == "special_monster")
-            && variable_struct_exists(_card, "owned")) {
-            array_push(_lines, "Owned: " + string(_card.owned));
+        if (_card.type == "spirit" || _card.type == "special_monster") {
+            var _spirit_atk = battle_GetMonsterStrikeAmount(_card);
+            if (_spirit_atk > 0) array_push(_lines, "Attack: " + string(_spirit_atk));
+            if (variable_struct_exists(_card, "owned")) {
+                array_push(_lines, "Owned: " + string(_card.owned));
+            }
         }
     }
 
     if (_card.type == "weapon") {
         var _atk = variable_struct_exists(_card, "attack") ? _card.attack : 0;
+        if (_atk <= 0) {
+            var _attack_trait = trait_FindFirst(trait_GetFromCard(_card), "attack");
+            if (_attack_trait != undefined && _attack_trait.amount > 0) {
+                _atk = _attack_trait.amount;
+            }
+        }
         array_push(_lines, "Attack: " + string(_atk));
+
+        var _usage = weapon_GetAttackRecursion(_card);
+        if (_usage > 1) {
+            array_push(_lines, "Usage: " + string(_usage));
+        }
     }
 
     if (_card.type == "action" && variable_struct_exists(_card, "cost")) {
@@ -253,11 +284,11 @@ function SCR_DBD_FormatTraitLine(_trait) {
         _text = "Add to deck " + deck_GetCardName(_trait.card_id);
     } else if (_trait.type == "add_extra_deck" && _trait.card_id >= 0) {
         _text = "Add to extra deck " + deck_GetCardName(_trait.card_id);
+    } else if (_trait.type == "add_hand_tag" || _trait.type == "add_deck_tag" || _trait.type == "add_extra_deck_tag") {
+        _text = trait_GetDisplayText(_trait);
     }
 
-    if (_trait.uses_per_turn > 1) {
-        _text += "  (" + string(_trait.uses_per_turn) + "x per turn)";
-    }
+    _text = trait_AppendRepeatDisplayText(_text, _trait);
 
     return _text;
 }
@@ -376,8 +407,8 @@ function SCR_DBD_FindHoveredPreviewCard() {
 
 function SCR_DBD_ShouldShowPreviewTags(_card) {
     if (_card == undefined) return true;
+    // Enemy field units only — player cards (including monsters) show tags
     if (variable_struct_exists(_card, "base_attack")) return false;
-    if (_card.type == "monster" || _card.type == "special_monster") return false;
     return true;
 }
 
@@ -436,10 +467,10 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
     draw_set_color(c_ltgray);
     for (var s = 0; s < array_length(_summary_lines); s++) {
         draw_text_ext(_summary_x, _sum_y, _summary_lines[s], _line_h, _summary_w);
-        _sum_y += _line_h + 2;
+        _sum_y += string_height_ext(_summary_lines[s], _line_h, _summary_w) + 3;
     }
 
-    _cy += _img_h + 12;
+    _cy = max(_cy + _img_h, _sum_y) + 14;
 
     draw_set_color(make_color_rgb(80, 80, 90));
     draw_line(_cx, _cy, _cx + _inner_w, _cy);

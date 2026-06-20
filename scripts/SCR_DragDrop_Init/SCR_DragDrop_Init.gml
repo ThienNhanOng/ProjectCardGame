@@ -20,7 +20,11 @@ function SCR_DragDrop_Step() {
     }
 
     var _deck = instance_find(OBJ_Deck, 0);
-    if (_deck != noone && _deck.extra_deck_picker_open) return;
+    if (_deck != noone) {
+        with (_deck) {
+            if (deck_AnyPickerOpen()) return;
+        }
+    }
     
     if (mouse_check_button_pressed(mb_left) && !is_dragging) {
         if (_targeting) return;

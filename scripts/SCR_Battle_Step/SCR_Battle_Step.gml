@@ -19,7 +19,11 @@ function SCR_Battle_Step() {
         with (_deck) deck_ExtraDeck_Step();
     }
 
-    if (_deck != noone && _deck.extra_deck_picker_open) return;
+    if (_deck != noone) {
+        with (_deck) {
+            if (deck_AnyPickerOpen()) return;
+        }
+    }
 
     if (battle_IsPlayerPhase()) {
         SCR_Battle_Targeting_Step();

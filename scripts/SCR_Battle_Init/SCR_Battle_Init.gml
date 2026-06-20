@@ -8,7 +8,7 @@ function SCR_Battle_Init() {
 
     turn_number = 1;
 
-    weapon_attacks_used = [false, false, false, false, false];
+    weapon_attacks_used = [0, 0, 0, 0, 0];
 
     action_trait_uses = [];
 
@@ -29,6 +29,8 @@ function SCR_Battle_Init() {
     battle_InitPlayerHealth();
 
     conditions_summon_Reset();
+
+    battle_InitZoneOwners();
 
     battle_PrepareBoardCards();
 
@@ -76,9 +78,11 @@ function battle_RefreshActionUses() {
     var _traits = trait_GetFromCard(_board.action_slot.card);
 
     for (var i = 0; i < array_length(_traits); i++) {
-
-        array_push(action_trait_uses, _traits[i].uses_per_turn);
-
+        if (trait_IsRepeatable(_traits[i])) {
+            array_push(action_trait_uses, trait_GetRecursionLimit(_traits[i]));
+        } else {
+            array_push(action_trait_uses, 0);
+        }
     }
 
 }

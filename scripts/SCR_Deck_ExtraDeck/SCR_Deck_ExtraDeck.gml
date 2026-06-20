@@ -41,6 +41,7 @@ function deck_ExtraDeckPicker_IsOpen() {
 }
 
 function deck_ExtraDeckPicker_Open() {
+    if (tag_picker_open) deck_TagPicker_Close();
     extra_deck_picker_open = true;
     extra_deck_picker_scroll = 0;
 }
@@ -50,72 +51,16 @@ function deck_ExtraDeckPicker_Close() {
     extra_deck_picker_scroll = 0;
 }
 
-function deck_ExtraDeckPicker_GetLayout() {
-    var _field_w = sprite_get_width(SPR_Field);
-    var _field_h = sprite_get_height(SPR_Field);
-    var _panel_w = min(520, _field_w - 40);
-    var _panel_h = 180;
-    var _left = (_field_w - _panel_w) / 2;
-    var _top = (_field_h - _panel_h) / 2;
-
-    return {
-        left: _left,
-        top: _top,
-        right: _left + _panel_w,
-        bottom: _top + _panel_h,
-        card_w: 73,
-        card_h: 101,
-        gap: 14,
-        pad_x: 18,
-        pad_y: 18,
-        card_offset_y: 14
-    };
-}
-
-function deck_ExtraDeckPicker_GetCardTop(_layout) {
-    return _layout.top + _layout.pad_y + _layout.card_offset_y;
-}
-
-function deck_ExtraDeckPicker_GetContentWidth(_layout) {
-    if (extra_deck_Count <= 0) return 0;
-    return extra_deck_Count * (_layout.card_w + _layout.gap) - _layout.gap;
-}
-
-function deck_ExtraDeckPicker_GetMaxScroll(_layout) {
-    var _view_w = (_layout.right - _layout.left) - _layout.pad_x * 2;
-    var _content_w = deck_ExtraDeckPicker_GetContentWidth(_layout);
-    return max(0, _content_w - _view_w);
-}
-
-function deck_ExtraDeckPicker_GetCardBounds(_index, _layout) {
-    var _x = _layout.left + _layout.pad_x + _index * (_layout.card_w + _layout.gap) - extra_deck_picker_scroll;
-    var _y = deck_ExtraDeckPicker_GetCardTop(_layout);
-    return {
-        left: _x,
-        top: _y,
-        right: _x + _layout.card_w,
-        bottom: _y + _layout.card_h
-    };
+function deck_ExtraDeckPicker_GetExtraDeckIds() {
+    var _ids = [];
+    for (var i = 0; i < extra_deck_Count; i++) {
+        array_push(_ids, extra_deck[i]);
+    }
+    return _ids;
 }
 
 function deck_ExtraDeckPicker_PickIndexAt(_mx, _my) {
-    var _layout = deck_ExtraDeckPicker_GetLayout();
-    var _clip_left = _layout.left + _layout.pad_x;
-    var _clip_right = _layout.right - _layout.pad_x;
-    var _clip_top = deck_ExtraDeckPicker_GetCardTop(_layout);
-    var _clip_bottom = _layout.bottom - _layout.pad_y;
-
-    if (_mx < _clip_left || _mx > _clip_right || _my < _clip_top || _my > _clip_bottom) {
-        return -1;
-    }
-
-    for (var i = 0; i < extra_deck_Count; i++) {
-        var _box = deck_ExtraDeckPicker_GetCardBounds(i, _layout);
-        if (_mx >= _box.left && _mx <= _box.right && _my >= _box.top && _my <= _box.bottom) {
-            return i;
-        }
-    }
-    return -1;
+    return deck_ScrollPicker_PickIndexAt(_mx, _my, deck_ExtraDeckPicker_GetExtraDeckIds(), extra_deck_picker_scroll);
 }
 
 function deck_RemoveExtraCardAt(_index) {
@@ -176,101 +121,30 @@ function deck_DrawExtraDeckZone() {
 }
 
 function deck_ExtraDeckPicker_Draw() {
-    if (!extra_deck_picker_open) return;
-
-    var _layout = deck_ExtraDeckPicker_GetLayout();
-
-    draw_set_alpha(0.55);
-    draw_set_color(c_black);
-    draw_rectangle(0, 0, sprite_get_width(SPR_Field), sprite_get_height(SPR_Field), false);
-    draw_set_alpha(1);
-
-    draw_set_color(make_color_rgb(35, 35, 45));
-    draw_rectangle(_layout.left, _layout.top, _layout.right, _layout.bottom, false);
-    draw_set_color(c_white);
-    draw_rectangle(_layout.left, _layout.top, _layout.right, _layout.bottom, true);
-
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_top);
-    draw_text((_layout.left + _layout.right) / 2, _layout.top + 4, "Extra Deck");
-    draw_set_halign(fa_left);
-
-    var _clip_left = _layout.left + _layout.pad_x;
-    var _clip_right = _layout.right - _layout.pad_x;
-    var _clip_top = deck_ExtraDeckPicker_GetCardTop(_layout);
-    var _clip_bottom = _layout.bottom - _layout.pad_y;
-
-    if (extra_deck_Count <= 0) {
-        draw_set_halign(fa_center);
-        draw_set_valign(fa_middle);
-        draw_set_color(c_ltgray);
-        draw_text((_layout.left + _layout.right) / 2, (_clip_top + _clip_bottom) / 2, "No cards in extra deck");
-        draw_set_halign(fa_left);
-        draw_set_valign(fa_top);
-        draw_set_color(c_white);
-        return;
-    }
-
-    var _prev_scissor = gpu_get_scissor();
-    gpu_set_scissor(floor(_clip_left - 10), floor(_clip_top - 12),
-        floor(_clip_right - _clip_left + 20), floor(_clip_bottom - _clip_top + 24));
-
-    for (var i = 0; i < extra_deck_Count; i++) {
-        var _box = deck_ExtraDeckPicker_GetCardBounds(i, _layout);
-        if (_box.right < _clip_left || _box.left > _clip_right) continue;
-
-        var _card_data = deck_GetCardData(extra_deck[i]);
-        if (_card_data == undefined) continue;
-
-        SCR_ExtraDeck_DrawCard(_box.left, _box.top, _layout.card_w, _layout.card_h, _card_data);
-    }
-
-    gpu_set_scissor(_prev_scissor);
-
-    var _max_scroll = deck_ExtraDeckPicker_GetMaxScroll(_layout);
-    if (_max_scroll > 0) {
-        draw_set_color(c_ltgray);
-        draw_text(_layout.left + 8, _layout.bottom - 20,
-            "Scroll: wheel / arrows  |  Click card to summon");
-    } else {
-        draw_set_color(c_ltgray);
-        draw_text(_layout.left + 8, _layout.bottom - 20, "Click a card to summon");
-    }
-
-    draw_set_color(c_white);
+    deck_AllPickers_Draw();
 }
 
 function deck_ExtraDeck_Step() {
+    if (tag_picker_open) {
+        deck_TagPicker_Step();
+        return;
+    }
+
     if (extra_deck_picker_open) {
         if (keyboard_check_pressed(vk_escape) || mouse_check_button_pressed(mb_right)) {
             deck_ExtraDeckPicker_Close();
             return;
         }
 
-        var _wheel = mouse_wheel_up() - mouse_wheel_down();
-        if (_wheel != 0) {
-            var _layout = deck_ExtraDeckPicker_GetLayout();
-            var _max_scroll = deck_ExtraDeckPicker_GetMaxScroll(_layout);
-            extra_deck_picker_scroll = clamp(extra_deck_picker_scroll - _wheel * 28, 0, _max_scroll);
-        }
-
-        if (keyboard_check_pressed(vk_left)) {
-            var _layout_l = deck_ExtraDeckPicker_GetLayout();
-            extra_deck_picker_scroll = max(0, extra_deck_picker_scroll - 40);
-        }
-        if (keyboard_check_pressed(vk_right)) {
-            var _layout_r = deck_ExtraDeckPicker_GetLayout();
-            extra_deck_picker_scroll = min(deck_ExtraDeckPicker_GetMaxScroll(_layout_r), extra_deck_picker_scroll + 40);
-        }
+        var _ids = deck_ExtraDeckPicker_GetExtraDeckIds();
+        extra_deck_picker_scroll = deck_ScrollPicker_ApplyScrollInput(_ids, extra_deck_picker_scroll);
 
         if (mouse_check_button_pressed(mb_left)) {
-            var _layout = deck_ExtraDeckPicker_GetLayout();
+            var _layout = deck_ScrollPicker_GetLayout();
             if (mouse_x >= _layout.left && mouse_x <= _layout.right &&
                 mouse_y >= _layout.top && mouse_y <= _layout.bottom) {
                 var _picked = deck_ExtraDeckPicker_PickIndexAt(mouse_x, mouse_y);
-                if (_picked >= 0) {
-                    deck_ExtraDeckPicker_SelectCard(_picked);
-                }
+                if (_picked >= 0) deck_ExtraDeckPicker_SelectCard(_picked);
             } else {
                 deck_ExtraDeckPicker_Close();
             }

@@ -57,9 +57,10 @@ function battle_ResetTurnUses() {
     battle_CancelTargeting();
 
     for (var i = 0; i < array_length(weapon_attacks_used); i++) {
-        weapon_attacks_used[i] = false;
+        weapon_attacks_used[i] = 0;
     }
     battle_RefreshActionUses();
+    battle_RefreshWeaponRepeatableEffects();
 }
 
 function battle_CanUseActionTrait(_trait_index) {

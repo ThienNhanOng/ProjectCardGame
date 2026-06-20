@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Battle_Init",
+  "%Name":"SCR_Trait_AddTag",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Battle_Init",
+  "name":"SCR_Trait_AddTag",
   "parent":{
-    "name":"create",
-    "path":"folders/scripts/BattleManager/create.yy",
+    "name":"effects",
+    "path":"folders/scripts/Traits/effects.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

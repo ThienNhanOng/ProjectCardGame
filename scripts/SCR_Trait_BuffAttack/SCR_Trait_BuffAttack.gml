@@ -16,6 +16,24 @@ function card_GetAttackBuff(_card) {
     return max(0, floor(_card.attack_buff));
 }
 
+function card_GetSummaryTotalAttack(_card) {
+    if (_card == undefined) return 0;
+
+    if (variable_struct_exists(_card, "attack")) {
+        return max(0, floor(_card.attack));
+    }
+
+    if (variable_struct_exists(_card, "base_attack")) {
+        return max(0, floor(_card.base_attack)) + card_GetAttackBuff(_card);
+    }
+
+    if (battle_IsSpiritMonster(_card)) {
+        return battle_GetMonsterStrikeAmount(_card) + card_GetAttackBuff(_card);
+    }
+
+    return card_GetAttackBuff(_card);
+}
+
 function card_DrawAttackGainBadge(_x, _y, _w, _h, _amount) {
     if (_amount <= 0) return;
 

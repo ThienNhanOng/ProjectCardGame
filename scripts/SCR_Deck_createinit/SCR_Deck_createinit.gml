@@ -34,6 +34,14 @@ function SCR_Deck_createinit() {
     extra_deck_Height = 101;
     extra_deck_picker_open = false;
     extra_deck_picker_scroll = 0;
+
+    tag_picker_open = false;
+    tag_picker_scroll = 0;
+    tag_picker_card_ids = [];
+    tag_picker_destination = "";
+    tag_picker_amount = 1;
+    tag_picker_title = "";
+    tag_picker_footer_hint = "";
     
     // Load deck from global variable (saved from deckbuilder)
     if (variable_global_exists("battle_deck")
@@ -189,35 +197,31 @@ function card_GetDefinitionHealth(_template) {
     return 10;
 }
 
-/// @desc Deck-builder label: spirit keeps Lv; other cards show common or cultivated
+/// @desc Deck-builder rarity: 0 = common, 1 = cultivated (extend switch for more tiers)
+function card_GetRarity(_card) {
+    if (_card == undefined) return 0;
+    if (!variable_struct_exists(_card, "cardRarity")) return 0;
+    return max(0, floor(real(_card.cardRarity)));
+}
+
 function card_GetTierLabel(_card) {
     if (_card == undefined) return "";
+    if (_card.type == "spirit" || _card.type == "special_monster") return "";
 
-    if (_card.type == "spirit" || _card.type == "special_monster") {
-        if (variable_struct_exists(_card, "level")) {
-            return "Lv " + string(_card.level);
-        }
-        return "";
+    switch (card_GetRarity(_card)) {
+        case 1: return "cultivated";
+        default: return "common";
     }
-
-    var _name = _card.name;
-    if (string_pos(" II ", _name) > 0 || string_pos(" II[", _name) > 0) {
-        return "cultivated";
-    }
-    return "common";
 }
 
 function card_GetTierLabelColor(_card) {
     if (_card == undefined) return c_white;
+    if (_card.type == "spirit" || _card.type == "special_monster") return c_purple;
 
-    if (_card.type == "spirit" || _card.type == "special_monster") {
-        return c_green;
+    switch (card_GetRarity(_card)) {
+        case 1: return c_yellow;
+        default: return c_ltgray;
     }
-
-    if (card_GetTierLabel(_card) == "cultivated") {
-        return c_yellow;
-    }
-    return c_ltgray;
 }
 
 /// @desc Shallow-copy a DB card so runtime stats (HP, etc.) are per-instance
@@ -228,7 +232,7 @@ function card_CreateRuntimeInstance(_template) {
     var _keys = variable_struct_get_names(_template);
     for (var i = 0; i < array_length(_keys); i++) {
         var _key = _keys[i];
-        if (_key == "health" || _key == "max_health") continue;
+        if (_key == "health" || _key == "max_health" || _key == "own") continue;
         _card[$ _key] = _template[$ _key];
     }
 

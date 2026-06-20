@@ -21,6 +21,8 @@ function monster_IsMouseOverSlot(_slot) {
 function SCR_Monster_UpdateHoverDebug() {
     hovered_enemy_slot = -1;
 
+    if (active_slot_count <= 0) return;
+
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return;
 
@@ -36,6 +38,8 @@ function SCR_Monster_UpdateHoverDebug() {
 }
 
 function SCR_Monster_DrawHoverDebug() {
+    if (active_slot_count <= 0) return;
+
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return;
 

@@ -63,7 +63,7 @@ function SCR_ExtraDeck_DrawCard(_x, _y, _w, _h, _card_data) {
     draw_set_halign(fa_center);
     draw_text(_draw_x + _scaled_w / 2, _draw_y + 16, _type_text);
     
-    // Spirit tier label (extra deck is spirits only)
+    // Rarity label (common/cultivated); spirits show type only
     var _label = card_GetTierLabel(_card_data);
     if (_label != "") {
         draw_set_color(card_GetTierLabelColor(_card_data));

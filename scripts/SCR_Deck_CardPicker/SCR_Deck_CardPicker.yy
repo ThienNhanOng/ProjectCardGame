@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Battle_Init",
+  "%Name":"SCR_Deck_CardPicker",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Battle_Init",
+  "name":"SCR_Deck_CardPicker",
   "parent":{
     "name":"create",
-    "path":"folders/scripts/BattleManager/create.yy",
+    "path":"folders/scripts/deck/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

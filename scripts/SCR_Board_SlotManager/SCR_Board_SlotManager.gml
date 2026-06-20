@@ -163,14 +163,31 @@ function SCR_Board_UnlockSlot(_index) {
     if (_index >= 3 && _index < 5) {
         player_monster_slots[_index].visible = true;
         player_monster_slots[_index].locked = false;
-        // Don't auto-unlock weapon slot - it will unlock when monster is placed
-        // player_weapon_slots[_index].visible = true;
-        // player_weapon_slots[_index].locked = false;
         show_debug_message("Unlocked monster slot: " + string(_index));
-        
-        // Update weapon slot availability based on monster occupation
         SCR_Board_UpdateWeaponSlotAvailability();
     }
+}
+
+function SCR_Board_CloseHiddenSlot(_index) {
+    if (_index < 3 || _index > 4) return;
+
+    var _monster_slot = player_monster_slots[_index];
+    var _weapon_slot = player_weapon_slots[_index];
+
+    if (_weapon_slot.occupied && _weapon_slot.card != undefined) {
+        SCR_Board_RemoveCard(_weapon_slot);
+    }
+    if (_monster_slot.occupied && _monster_slot.card != undefined) {
+        SCR_Board_RemoveCard(_monster_slot);
+    }
+
+    _monster_slot.visible = false;
+    _monster_slot.locked = true;
+    _weapon_slot.visible = false;
+    _weapon_slot.locked = true;
+
+    SCR_Board_UpdateWeaponSlotAvailability();
+    show_debug_message("Hidden slot " + string(_index) + " closed");
 }
 
 function SCR_Board_SetEnemySlots(_count) {

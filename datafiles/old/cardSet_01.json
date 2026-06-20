@@ -389,6 +389,7 @@
       "sprite": "SPR_Monsterplaceholder",
       "level": 30,
       "health": 30,
+      "attack": 8,
       "ability": []
     }
   ]

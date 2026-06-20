@@ -7,7 +7,7 @@ function battle_OnMonsterPlayed(_slot_index, _card) {
     var _traits = trait_GetFromCard(_card);
     for (var i = 0; i < array_length(_traits); i++) {
         var _trait = _traits[i];
-        if (_trait.type == "attack") continue;
+        if (_trait.type == "attack" || _trait.type == "attack_all") continue;
         if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
             || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
         trait_ExecuteOnPlay(_trait, _slot_index);
@@ -101,15 +101,45 @@ function battle_OnWeaponPlayed(_slot_index, _card) {
     weapon_EnsureAttackData(_card);
 
     var _traits = trait_GetFromCard(_card);
-    for (var i = 0; i < array_length(_traits); i++) {
-        var _trait = _traits[i];
-        if (_trait.type == "attack") continue;
-        if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
-            || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
-        trait_ExecuteOnPlay(_trait, _slot_index);
+    var _effect_times = weapon_GetEffectRecursion(_card);
+
+    for (var e = 0; e < _effect_times; e++) {
+        for (var i = 0; i < array_length(_traits); i++) {
+            var _trait = _traits[i];
+            if (_trait.type == "attack" || _trait.type == "attack_all") continue;
+            if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
+                || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
+            trait_ExecuteOnPlay(_trait, _slot_index);
+        }
     }
 
     battle_BeginWeaponOnPlayTargeting(_slot_index);
+}
+
+function battle_RefreshWeaponRepeatableEffects() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return;
+
+    for (var col = 0; col < array_length(_board.player_weapon_slots); col++) {
+        var _wslot = _board.player_weapon_slots[col];
+        if (!_wslot.visible || !_wslot.occupied || _wslot.card == undefined) continue;
+
+        weapon_EnsureAttackData(_wslot.card);
+        var _traits = trait_GetFromCard(_wslot.card);
+
+        for (var i = 0; i < array_length(_traits); i++) {
+            var _trait = _traits[i];
+            if (_trait.type == "attack" || _trait.type == "attack_all") continue;
+            if (!trait_IsRepeatable(_trait)) continue;
+            if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
+                || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
+
+            var _times = trait_GetRecursionLimit(_trait);
+            for (var r = 0; r < _times; r++) {
+                trait_ExecuteOnPlay(_trait, col);
+            }
+        }
+    }
 }
 
 function battle_BeginWeaponOnPlayTargeting(_slot_index, _start_trait_index = 0) {
@@ -231,6 +261,7 @@ function battle_BeginActionTargeting(_trait_index, _type) {
 
     switch (_type) {
         case "attack":
+        case "attack_all":
             target_mode = "pick_player_monster";
             break;
         case "heal":
@@ -262,9 +293,6 @@ function battle_ExecuteActionTraitInstant(_trait_index) {
         case "draw_cards":
             _ok = trait_ExecuteDraw(trait_CreateDrawContext(max(1, _trait.amount)));
             break;
-        case "attack_all":
-            _ok = trait_Execute(_trait, trait_CreateAttackAllContext(_trait.amount));
-            break;
         case "heal_all":
             _ok = trait_Execute(_trait, trait_CreateHealAllContext(_trait.amount));
             break;
@@ -276,6 +304,15 @@ function battle_ExecuteActionTraitInstant(_trait_index) {
             break;
         case "add_extra_deck":
             _ok = trait_Execute(_trait, trait_CreateAddExtraDeckContext(_trait.card_id));
+            break;
+        case "add_hand_tag":
+            _ok = trait_ExecuteAddHandTag(_trait);
+            break;
+        case "add_deck_tag":
+            _ok = trait_ExecuteAddDeckTag(_trait);
+            break;
+        case "add_extra_deck_tag":
+            _ok = trait_ExecuteAddExtraDeckTag(_trait);
             break;
     }
 
@@ -290,8 +327,12 @@ function battle_OnActionCardPlayed(_card) {
     var _traits = trait_GetFromCard(_card);
 
     for (var a = 0; a < array_length(_traits); a++) {
-        if (trait_ActionIsAuto(_traits[a].type)) {
+        if (!trait_ActionIsAuto(_traits[a].type)) continue;
+
+        if (trait_IsRepeatable(_traits[a])) {
             battle_ExecuteActionTraitInstant(a);
+        } else {
+            trait_ExecuteOnPlay(_traits[a], -1);
         }
     }
 
@@ -315,7 +356,7 @@ function battle_ActionCardRequiresMonster(_card) {
     var _traits = trait_GetFromCard(_card);
     for (var i = 0; i < array_length(_traits); i++) {
         var _type = _traits[i].type;
-        if (_type == "attack" || _type == "heal" || _type == "self_buff" || _type == "buff") return true;
+        if (_type == "attack" || _type == "attack_all" || _type == "heal" || _type == "self_buff" || _type == "buff") return true;
     }
     return false;
 }
@@ -397,7 +438,7 @@ function battle_TargetingContinueAfterAction(_last_trait_index) {
         if (!trait_ActionNeedsTargeting(_traits[i].type)) continue;
 
         var _type = _traits[i].type;
-        if ((_type == "attack" || _type == "heal" || _type == "self_buff")
+        if ((_type == "attack" || _type == "attack_all" || _type == "heal" || _type == "self_buff")
             && !battle_HasPlayerMonsterOnBoard()) {
             show_debug_message("Need a player monster on the board for this action");
             continue;

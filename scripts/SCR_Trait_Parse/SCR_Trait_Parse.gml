@@ -56,6 +56,9 @@ function trait_NormalizeEntry(_raw) {
 
     if (_type == "add_to_extra_deck") _type = "add_extra_deck";
 
+    if (_type == "add_to_hand_tag") _type = "add_hand_tag";
+    if (_type == "add_tag") _type = "add_hand_tag";
+
     if (_type == "buff_attack") _type = "self_buff";
 
 
@@ -82,11 +85,29 @@ function trait_NormalizeEntry(_raw) {
 
 
 
-    if (variable_struct_exists(_raw, "uses_per_turn")) _uses = _raw.uses_per_turn;
+    var _repeat = false;
+    var _recursion = 1;
 
+    if (variable_struct_exists(_raw, "repeat")) {
+        _repeat = _raw.repeat;
+    }
 
+    if (variable_struct_exists(_raw, "recursion")) {
+        _recursion = max(1, floor(real(_raw.recursion)));
+    } else if (variable_struct_exists(_raw, "uses_per_turn")) {
+        _recursion = max(1, floor(real(_raw.uses_per_turn)));
+        _repeat = true;
+    }
+
+    if (_repeat) {
+        _uses = _recursion;
+    } else {
+        _uses = 0;
+    }
 
     var _requirements = [];
+    var _tags = trait_ParseTags(_raw);
+    var _indeck_tags = trait_ParseIndeckTags(_raw);
 
     if (_type == "conditions" && variable_struct_exists(_raw, "requirements") && is_array(_raw.requirements)) {
 
@@ -101,19 +122,40 @@ function trait_NormalizeEntry(_raw) {
 
 
     return {
-
         type: _type,
-
         amount: _amount,
-
         card_id: _card_id,
-
+        repeat: _repeat,
+        recursion: _recursion,
         uses_per_turn: _uses,
-
+        tags: _tags,
+        indeck_tags: _indeck_tags,
         requirements: _requirements
-
     };
+}
 
+function trait_IsRepeatable(_trait) {
+    if (_trait == undefined) return false;
+    return variable_struct_exists(_trait, "repeat") && _trait.repeat;
+}
+
+function trait_GetRecursionLimit(_trait) {
+    if (_trait == undefined) return 1;
+    if (variable_struct_exists(_trait, "recursion")) {
+        return max(1, floor(real(_trait.recursion)));
+    }
+    if (variable_struct_exists(_trait, "uses_per_turn") && _trait.uses_per_turn > 0) {
+        return max(1, floor(real(_trait.uses_per_turn)));
+    }
+    return 1;
+}
+
+function trait_AppendRepeatDisplayText(_text, _trait) {
+    if (!trait_IsRepeatable(_trait)) return _text;
+
+    var _limit = trait_GetRecursionLimit(_trait);
+    if (_limit <= 1) return _text + "  (once per turn)";
+    return _text + "  (" + string(_limit) + "x per turn)";
 }
 
 
@@ -158,7 +200,7 @@ function trait_GetFromCard(_card) {
 
         && variable_struct_exists(_card, "action")) {
 
-        var _legacy = { type: string(_card.action), amount: 0, uses_per_turn: 1 };
+        var _legacy = { type: string(_card.action), amount: 0, repeat: true, recursion: 1 };
 
         if (_legacy.type == "heal" && variable_struct_exists(_card, "heal_value")) {
 
@@ -220,7 +262,7 @@ function trait_FindFirst(_traits, _type) {
 
 function trait_ActionNeedsTargeting(_type) {
 
-    return _type == "attack" || _type == "heal" || _type == "self_buff" || _type == "buff"
+    return _type == "attack" || _type == "attack_all" || _type == "heal" || _type == "self_buff" || _type == "buff"
 
         || _type == "destroy" || _type == "silence";
 
@@ -230,9 +272,10 @@ function trait_ActionNeedsTargeting(_type) {
 
 function trait_ActionIsAuto(_type) {
 
-    return trait_IsDrawType(_type) || _type == "attack_all" || _type == "heal_all"
-
-        || _type == "add" || _type == "add_deck" || _type == "add_extra_deck";
+    return trait_IsDrawType(_type) || _type == "heal_all"
+        || _type == "openzone"
+        || _type == "add" || _type == "add_deck" || _type == "add_extra_deck"
+        || _type == "add_hand_tag" || _type == "add_deck_tag" || _type == "add_extra_deck_tag";
 
 }
 
@@ -290,6 +333,27 @@ function trait_GetDisplayText(_trait) {
 
         case "add_extra_deck": return "Add to extra deck id " + string(_trait.card_id);
 
+        case "add_hand_tag":
+            if (trait_TraitUsesIndeckTagSearch(_trait)) {
+                return "Add to hand (in deck: " + trait_GetTagsDisplayText(_trait.indeck_tags) + ")";
+            }
+            return "Add to hand (" + trait_GetTagsDisplayText(_trait.tags) + ")";
+        case "add_deck_tag":
+            if (trait_TraitUsesIndeckTagSearch(_trait)) {
+                return "Add to deck (in deck: " + trait_GetTagsDisplayText(_trait.indeck_tags) + ")";
+            }
+            return "Add to deck (" + trait_GetTagsDisplayText(_trait.tags) + ")";
+        case "add_extra_deck_tag":
+            if (trait_TraitUsesIndeckTagSearch(_trait)) {
+                return "Add to extra deck (in deck: " + trait_GetTagsDisplayText(_trait.indeck_tags) + ")";
+            }
+            return "Add to extra deck (" + trait_GetTagsDisplayText(_trait.tags) + ")";
+
+        case "openzone":
+            var _zones = max(1, _trait.amount);
+            if (_zones <= 1) return "Open hidden zone";
+            return "Open hidden zones " + string(_zones);
+
         case "silence": return "Silence 1 target (" + string(max(1, _trait.amount)) + " enemy turn(s))";
 
         case "conditions": return trait_GetConditionsDisplayText(_trait);
@@ -332,6 +396,8 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
 
         case "buff":
 
+        case "attack_all":
+
             return false;
 
         case "draw":
@@ -339,10 +405,6 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
         case "draw_cards":
 
             return trait_ExecuteDraw(trait_CreateDrawContext(max(1, _trait.amount)));
-
-        case "attack_all":
-
-            return trait_Execute(_trait, trait_CreateAttackAllContext(_trait.amount));
 
         case "heal_all":
 
@@ -359,6 +421,22 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
         case "add_extra_deck":
 
             return trait_Execute(_trait, trait_CreateAddExtraDeckContext(_trait.card_id));
+
+        case "add_hand_tag":
+
+            return trait_ExecuteAddHandTag(_trait);
+
+        case "add_deck_tag":
+
+            return trait_ExecuteAddDeckTag(_trait);
+
+        case "add_extra_deck_tag":
+
+            return trait_ExecuteAddExtraDeckTag(_trait);
+
+        case "openzone":
+
+            return trait_ExecuteOpenZone(_trait, _player_slot);
 
         case "destroy":
 

@@ -242,9 +242,19 @@ function SCR_Battle_Targeting_Step() {
 
         if (_player_slot < 0) return;
 
-
-
         pending_player_slot = _player_slot;
+
+        if (pending_trait_source == "action") {
+            var _traits = battle_GetActionTraits();
+            if (pending_action_trait_index >= 0
+                && pending_action_trait_index < array_length(_traits)
+                && _traits[pending_action_trait_index].type == "attack_all") {
+                if (battle_ExecuteActionAttackAll(pending_action_trait_index, _player_slot)) {
+                    battle_TargetingContinueAfterAction(pending_action_trait_index);
+                }
+                return;
+            }
+        }
 
         target_mode = "pick_enemy";
 
@@ -414,7 +424,21 @@ function SCR_Battle_Targeting_Draw() {
 
     if (target_mode == "pick_player_monster") {
 
-        draw_text(room_width / 2, 8, "Choose your monster card to attack");
+        var _is_attack_all = false;
+        if (pending_trait_source == "action") {
+            var _traits = battle_GetActionTraits();
+            if (pending_action_trait_index >= 0
+                && pending_action_trait_index < array_length(_traits)
+                && _traits[pending_action_trait_index].type == "attack_all") {
+                _is_attack_all = true;
+            }
+        }
+
+        if (_is_attack_all) {
+            draw_text(room_width / 2, 8, "Choose your monster to attack all enemies");
+        } else {
+            draw_text(room_width / 2, 8, "Choose your monster card to attack");
+        }
 
 
 

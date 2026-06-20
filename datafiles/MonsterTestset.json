@@ -1,0 +1,321 @@
+{
+  "collection": "MonsterEffectTest",
+  "cards": [
+    {
+      "id": 1001,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster01_(DrawCards)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "draw_cards", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1002,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster02_(Attack)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "attack", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1003,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster03_(AttackAll)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "attack_all", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1004,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster04_(Heal)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "heal", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1005,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster05_(HealAll)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "heal_all", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1006,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster06_(SelfBuff)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "self_buff", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1007,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster07_(Buff)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "buff", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1008,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster08_(Destroy)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "destroy", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1009,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster09_(Silence)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "silence", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1010,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster10_(Add)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "add", "id": 1001, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1011,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster11_(AddDeck)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "add_deck", "id": 1001, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1012,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster12_(AddExtraDeck)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "add_extra_deck", "id": 1016, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1013,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster13_(AddHandTag)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "add_hand_tag", "tags": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1014,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster14_(AddDeckTag)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "add_deck_tag", "tags": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1015,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster15_(AddExtraDeckTag)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "add_extra_deck_tag", "tags": ["Warrior"], "repeat": false, "recursion": 1 }
+      ]
+    },
+
+    {
+      "id": 1020,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster16_(AddDeckIndeckTag)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "add_deck_tag", "indeckTag": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1021,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster17_(OpenZone)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "openzone", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 1022,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "TestMonster18_(OpenZone)",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        { "type": "openzone", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+
+    {
+      "id": 1016,
+      "own": 0,
+      "cardRarity": 0,
+      "name": "Test Warrior Spirit I",
+      "type": "spirit",
+      "tag": ["Warrior", "Warrior Spirit I"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 30,
+      "ability": [
+        {
+          "type": "conditions",
+          "repeat": false,
+          "recursion": 1,
+          "requirements": [
+            { "type": "sacrifice_monster", "amount": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1017,
+      "own": 0,
+      "cardRarity": 0,
+      "name": "Test Warrior Spirit II",
+      "type": "spirit",
+      "tag": ["Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 40,
+      "ability": [
+        {
+          "type": "conditions",
+          "repeat": false,
+          "recursion": 1,
+          "requirements": [
+            { "type": "sacrifice_monster", "amount": 2 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1018,
+      "own": 0,
+      "cardRarity": 0,
+      "name": "Test Warrior Spirit III",
+      "type": "spirit",
+      "tag": ["Warrior"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 50,
+      "ability": [
+        {
+          "type": "conditions",
+          "repeat": false,
+          "recursion": 1,
+          "requirements": [
+            { "type": "min_turn", "amount": 3 },
+            { "type": "sacrifice_monster", "amount": 3 }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": 1019,
+      "own": 0,
+      "cardRarity": 0,
+      "name": "TestMonster_WarriorSpirit_Link",
+      "type": "monster",
+      "tag": ["Test"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": [
+        {
+          "type": "add_extra_deck",
+          "id": 1016,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    }
+  ]
+}

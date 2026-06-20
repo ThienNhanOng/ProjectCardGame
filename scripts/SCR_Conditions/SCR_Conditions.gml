@@ -102,8 +102,9 @@ function conditions_CardHasTag(_card, _tags) {
     if (!variable_struct_exists(_card, "tag") || !is_array(_card.tag)) return false;
 
     for (var t = 0; t < array_length(_tags); t++) {
+        var _want = string_lower(string_trim(_tags[t]));
         for (var c = 0; c < array_length(_card.tag); c++) {
-            if (string(_card.tag[c]) == _tags[t]) return true;
+            if (string_lower(string(_card.tag[c])) == _want) return true;
         }
     }
     return false;
@@ -167,6 +168,37 @@ function conditions_FindEmptyMonsterSlot() {
     return -1;
 }
 
+function conditions_CountEmptyMonsterSlots() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return 0;
+
+    var _count = 0;
+    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
+        var _slot = _board.player_monster_slots[i];
+        if (_slot.visible && !_slot.locked && !_slot.occupied) _count++;
+    }
+    return _count;
+}
+
+function conditions_CountSacrificeRequirements(_card) {
+    var _conds = conditions_GetRequirements(_card);
+    var _total = 0;
+
+    for (var i = 0; i < array_length(_conds); i++) {
+        var _cond = _conds[i];
+        if (_cond.type == "sacrifice_monster" || _cond.type == "sacrifice_tag") {
+            _total += _cond.amount;
+        }
+    }
+    return _total;
+}
+
+/// Empty slot now, or slots that will open after listed sacrifices
+function conditions_HasRoomToSummon(_card) {
+    if (_card == undefined) return false;
+    return (conditions_CountEmptyMonsterSlots() + conditions_CountSacrificeRequirements(_card)) > 0;
+}
+
 function conditions_CanMeetRequirement(_cond) {
     if (_cond == undefined) return true;
 
@@ -190,9 +222,24 @@ function conditions_CanMeetRequirement(_cond) {
     }
 }
 
+function conditions_GetSummonFailReason(_card) {
+    if (_card == undefined) return "invalid card";
+    if (!conditions_HasRoomToSummon(_card)) {
+        return "no board space (need an empty slot or monsters to sacrifice)";
+    }
+
+    var _conds = conditions_GetRequirements(_card);
+    for (var i = 0; i < array_length(_conds); i++) {
+        if (!conditions_CanMeetRequirement(_conds[i])) {
+            return "still need: " + conditions_GetRequirementText(_conds[i]);
+        }
+    }
+    return "";
+}
+
 function conditions_CanSummon(_card) {
     if (_card == undefined) return false;
-    if (conditions_FindEmptyMonsterSlot() < 0) return false;
+    if (!conditions_HasRoomToSummon(_card)) return false;
 
     var _conds = conditions_GetRequirements(_card);
     for (var i = 0; i < array_length(_conds); i++) {
@@ -231,7 +278,10 @@ function conditions_TryBeginFromExtraDeck(_deck_index) {
         show_debug_message("Summoning " + _card.name + "...");
     } else {
         with (_deck) deck_AddExtraCard(_card_id);
-        show_debug_message("Cannot summon " + _card.name + " — conditions not met");
+        var _reason = "";
+        with (_bm) { _reason = conditions_GetSummonFailReason(_card); }
+        show_debug_message("Cannot summon " + _card.name
+            + (_reason != "" ? " — " + _reason : " — conditions not met"));
     }
     return _ok;
 }
