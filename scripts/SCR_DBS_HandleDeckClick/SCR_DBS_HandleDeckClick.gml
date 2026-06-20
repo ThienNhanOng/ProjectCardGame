@@ -117,9 +117,11 @@ function SCR_DBS_HandleDeckClick() {
 
     var _layout = SCR_DBD_GetDeckListLayout();
     var _entries = SCR_DBD_GetDeckListSummary(selected_deck);
+    var _scroll = SCR_DBD_GetDeckListScroll();
 
     for (var i = 0; i < array_length(_entries); i++) {
-        var _bounds = SCR_DBD_GetDeckListRowBounds(_layout, i);
+        var _bounds = SCR_DBD_GetDeckListRowBounds(_layout, i, _scroll);
+        if (!SCR_DBD_IsDeckListRowInViewport(_layout, _bounds)) continue;
 
         if (mouse_x >= _bounds.x && mouse_x < _bounds.x + _bounds.w
             && mouse_y >= _bounds.y && mouse_y < _bounds.y + _bounds.h) {

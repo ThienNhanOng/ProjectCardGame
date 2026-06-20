@@ -22,6 +22,7 @@ function conditions_NormalizeEntry(_raw) {
     var _amount = 1;
     var _tags = [];
     var _slots = [];
+    var _id = -1;
 
     if (variable_struct_exists(_raw, "amount")) _amount = _raw.amount;
     else if (variable_struct_exists(_raw, "value")) _amount = _raw.value;
@@ -31,6 +32,10 @@ function conditions_NormalizeEntry(_raw) {
     if (_type == "destroy_weapon" || _type == "destroy_weapons") _type = "destroy_weapons";
     if (_type == "min_turn" || _type == "turn_plus" || _type == "turn_minimum") _type = "min_turn";
     if (_type == "sacrifice_tag" || _type == "sacrifice_tags") _type = "sacrifice_tag";
+    if (_type == "sacrifice_card" || _type == "sacrifice_cards") _type = "sacrifice_id";
+
+    if (variable_struct_exists(_raw, "id")) _id = floor(real(_raw.id));
+    else if (variable_struct_exists(_raw, "card_id")) _id = floor(real(_raw.card_id));
 
     if (variable_struct_exists(_raw, "tags") && is_array(_raw.tags)) {
         for (var t = 0; t < array_length(_raw.tags); t++) {
@@ -46,7 +51,7 @@ function conditions_NormalizeEntry(_raw) {
         }
     }
 
-    return { type: _type, amount: max(1, floor(_amount)), tags: _tags, slots: _slots };
+    return { type: _type, amount: max(1, floor(_amount)), tags: _tags, slots: _slots, id: _id };
 }
 
 function conditions_GetTrait(_card) {
@@ -59,7 +64,12 @@ function conditions_GetRequirements(_card) {
     var _trait = conditions_GetTrait(_card);
     if (_trait == undefined) return [];
     if (!variable_struct_exists(_trait, "requirements") || !is_array(_trait.requirements)) return [];
-    return _trait.requirements;
+
+    var _normalized = [];
+    for (var i = 0; i < array_length(_trait.requirements); i++) {
+        array_push(_normalized, conditions_NormalizeEntry(_trait.requirements[i]));
+    }
+    return _normalized;
 }
 
 function conditions_GetRequirementText(_cond) {
@@ -72,6 +82,9 @@ function conditions_GetRequirementText(_cond) {
         case "destroy_weapons": return "Destroy " + string(_cond.amount) + " weapon(s)";
         case "sacrifice_tag":
             return "Sacrifice " + string(_cond.amount) + " [" + conditions_JoinTags(_cond.tags) + "] monster(s)";
+        case "sacrifice_id":
+            var _name = (_cond.id > 0) ? deck_GetCardName(_cond.id) : "card #" + string(_cond.id);
+            return "Sacrifice " + string(_cond.amount) + " " + _name + "(s)";
         case "discard_action": return "Discard " + string(_cond.amount) + " action card(s)";
         case "discard_monster": return "Discard " + string(_cond.amount) + " monster card(s)";
         case "discard_weapon": return "Discard " + string(_cond.amount) + " weapon card(s)";
@@ -123,6 +136,12 @@ function conditions_HandCountOfType(_type) {
     return _count;
 }
 
+function conditions_CardMatchesId(_card, _card_id) {
+    if (_card == undefined || _card_id <= 0) return false;
+    if (!variable_struct_exists(_card, "id")) return false;
+    return floor(real(_card.id)) == floor(real(_card_id));
+}
+
 function conditions_CountOccupiedMonsters(_tags, _slots_filter) {
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return 0;
@@ -136,6 +155,37 @@ function conditions_CountOccupiedMonsters(_tags, _slots_filter) {
         _count++;
     }
     return _count;
+}
+
+function conditions_CountOccupiedMonstersById(_card_id) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return 0;
+
+    var _count = 0;
+    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
+        var _slot = _board.player_monster_slots[i];
+        if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
+        if (!conditions_CardMatchesId(_slot.card, _card_id)) continue;
+        _count++;
+    }
+    return _count;
+}
+
+function conditions_CountHandCardsById(_card_id) {
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand == noone) return 0;
+
+    var _count = 0;
+    with (_hand) {
+        for (var i = 0; i < hand_Count; i++) {
+            if (conditions_CardMatchesId(hand[i], _card_id)) _count++;
+        }
+    }
+    return _count;
+}
+
+function conditions_CountSacrificeCandidatesById(_card_id) {
+    return conditions_CountOccupiedMonstersById(_card_id) + conditions_CountHandCardsById(_card_id);
 }
 
 function conditions_SlotInList(_index, _list) {
@@ -180,23 +230,26 @@ function conditions_CountEmptyMonsterSlots() {
     return _count;
 }
 
-function conditions_CountSacrificeRequirements(_card) {
-    var _conds = conditions_GetRequirements(_card);
-    var _total = 0;
+function conditions_HasRoomToSummon(_card) {
+    if (_card == undefined) return false;
 
+    var _empty = conditions_CountEmptyMonsterSlots();
+    if (_empty > 0) return true;
+
+    var _conds = conditions_GetRequirements(_card);
     for (var i = 0; i < array_length(_conds); i++) {
         var _cond = _conds[i];
         if (_cond.type == "sacrifice_monster" || _cond.type == "sacrifice_tag") {
-            _total += _cond.amount;
+            if (conditions_CountOccupiedMonsters(
+                (_cond.type == "sacrifice_tag") ? _cond.tags : [],
+                _cond.slots) >= _cond.amount) {
+                return true;
+            }
+        } else if (_cond.type == "sacrifice_id") {
+            if (conditions_CountOccupiedMonstersById(_cond.id) >= _cond.amount) return true;
         }
     }
-    return _total;
-}
-
-/// Empty slot now, or slots that will open after listed sacrifices
-function conditions_HasRoomToSummon(_card) {
-    if (_card == undefined) return false;
-    return (conditions_CountEmptyMonsterSlots() + conditions_CountSacrificeRequirements(_card)) > 0;
+    return false;
 }
 
 function conditions_CanMeetRequirement(_cond) {
@@ -211,6 +264,10 @@ function conditions_CanMeetRequirement(_cond) {
             return conditions_CountOccupiedWeapons() >= _cond.amount;
         case "sacrifice_tag":
             return conditions_CountOccupiedMonsters(_cond.tags, []) >= _cond.amount;
+        case "sacrifice_id":
+            if (conditions_CountSacrificeCandidatesById(_cond.id) < _cond.amount) return false;
+            if (conditions_CountEmptyMonsterSlots() > 0) return true;
+            return conditions_CountOccupiedMonstersById(_cond.id) >= _cond.amount;
         case "discard_action":
             return conditions_HandCountOfType("action") >= _cond.amount;
         case "discard_monster":
@@ -357,6 +414,12 @@ function conditions_ProcessNext() {
             conditions_summon_prompt = "Select " + string(_cond.amount) + " [" + conditions_JoinTags(_cond.tags) + "] monster(s) to sacrifice";
             break;
 
+        case "sacrifice_id":
+            conditions_summon_mode = "sacrifice_id";
+            var _sac_name = (_cond.id > 0) ? deck_GetCardName(_cond.id) : "card #" + string(_cond.id);
+            conditions_summon_prompt = "Select " + string(_cond.amount) + " " + _sac_name + "(s) from board or hand";
+            break;
+
         case "discard_action":
             conditions_summon_mode = "discard_hand";
             conditions_summon_prompt = "Select " + string(_cond.amount) + " action card(s) to discard";
@@ -416,6 +479,10 @@ function conditions_IsValidSacrificeSlot(_slot_index) {
         if (!conditions_CardHasTag(_slot.card, conditions_summon_current.tags)) return false;
     }
 
+    if (conditions_summon_mode == "sacrifice_id") {
+        if (!conditions_CardMatchesId(_slot.card, conditions_summon_current.id)) return false;
+    }
+
     if (conditions_summon_mode == "sacrifice_monster" && array_length(conditions_summon_current.slots) > 0) {
         if (!conditions_SlotInList(_slot_index, conditions_summon_current.slots)) return false;
     }
@@ -451,6 +518,23 @@ function conditions_ExecuteSacrifices() {
     for (var i = 0; i < array_length(conditions_summon_picked_slots); i++) {
         battle_DestroyPlayerMonster(conditions_summon_picked_slots[i]);
     }
+
+    if (array_length(conditions_summon_picked_hand) <= 0) return;
+
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand == noone) return;
+
+    var _sorted = [];
+    for (var h = 0; h < array_length(conditions_summon_picked_hand); h++) {
+        array_push(_sorted, conditions_summon_picked_hand[h]);
+    }
+    array_sort(_sorted, true);
+
+    with (_hand) {
+        for (var s = 0; s < array_length(_sorted); s++) {
+            hand_RemoveCard(_sorted[s]);
+        }
+    }
 }
 
 function conditions_CompleteSummonOnSlot(_slot_index) {
@@ -475,11 +559,49 @@ function conditions_CompleteSummonOnSlot(_slot_index) {
     return _placed;
 }
 
+function conditions_HandIndexAlreadyPicked(_index) {
+    for (var i = 0; i < array_length(conditions_summon_picked_hand); i++) {
+        if (conditions_summon_picked_hand[i] == _index) return true;
+    }
+    return false;
+}
+
+function conditions_IsValidSacrificeHandIndex(_index) {
+    if (conditions_summon_mode != "sacrifice_id") return false;
+    if (conditions_summon_current == undefined) return false;
+
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand == noone) return false;
+    if (_index < 0 || _index >= _hand.hand_Count) return false;
+
+    var _card = _hand.hand[_index];
+    if (_card == undefined) return false;
+    if (conditions_HandIndexAlreadyPicked(_index)) return false;
+
+    return conditions_CardMatchesId(_card, conditions_summon_current.id);
+}
+
+function conditions_SacrificePickCount() {
+    return array_length(conditions_summon_picked_slots) + array_length(conditions_summon_picked_hand);
+}
+
 function conditions_TryPickSacrificeSlot(_slot_index) {
     if (!conditions_IsValidSacrificeSlot(_slot_index)) return false;
 
     array_push(conditions_summon_picked_slots, _slot_index);
-    if (array_length(conditions_summon_picked_slots) < conditions_summon_current.amount) return true;
+    if (conditions_SacrificePickCount() < conditions_summon_current.amount) return true;
+
+    conditions_ExecuteSacrifices();
+    array_delete(conditions_summon_queue, 0, 1);
+    conditions_ProcessNext();
+    return true;
+}
+
+function conditions_TryPickSacrificeHand(_index) {
+    if (!conditions_IsValidSacrificeHandIndex(_index)) return false;
+
+    array_push(conditions_summon_picked_hand, _index);
+    if (conditions_SacrificePickCount() < conditions_summon_current.amount) return true;
 
     conditions_ExecuteSacrifices();
     array_delete(conditions_summon_queue, 0, 1);
@@ -524,9 +646,21 @@ function conditions_summon_Step() {
         return;
     }
 
-    if (conditions_summon_mode == "sacrifice_monster" || conditions_summon_mode == "sacrifice_tag") {
+    if (conditions_summon_mode == "sacrifice_monster" || conditions_summon_mode == "sacrifice_tag" || conditions_summon_mode == "sacrifice_id") {
         var _sac_slot = conditions_GetMonsterSlotAt(mouse_x, mouse_y);
-        if (_sac_slot >= 0) conditions_TryPickSacrificeSlot(_sac_slot);
+        if (_sac_slot >= 0) {
+            conditions_TryPickSacrificeSlot(_sac_slot);
+            return;
+        }
+
+        if (conditions_summon_mode == "sacrifice_id") {
+            var _hand = instance_find(OBJ_Hand, 0);
+            if (_hand != noone) {
+                var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
+                var _idx = SCR_Hand_PickCardIndex(mouse_x, mouse_y, _hand.hand_Count, _spacing, _hand.hand_Y);
+                if (_idx >= 0) conditions_TryPickSacrificeHand(_idx);
+            }
+        }
         return;
     }
 
@@ -574,12 +708,27 @@ function conditions_summon_Draw() {
         }
     }
 
-    if (conditions_summon_mode == "sacrifice_monster" || conditions_summon_mode == "sacrifice_tag") {
+    if (conditions_summon_mode == "sacrifice_monster" || conditions_summon_mode == "sacrifice_tag" || conditions_summon_mode == "sacrifice_id") {
         for (var s = 0; s < array_length(_board.player_monster_slots); s++) {
             if (!conditions_IsValidSacrificeSlot(s)) continue;
             var _sslot = _board.player_monster_slots[s];
             draw_set_color(c_orange);
             draw_rectangle(_sslot.x, _sslot.y, _sslot.x + _sslot.w, _sslot.y + _sslot.h, true);
+        }
+    }
+
+    if (conditions_summon_mode == "sacrifice_id") {
+        var _hand = instance_find(OBJ_Hand, 0);
+        if (_hand != noone) {
+            var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
+            var _start_x = SCR_Hand_GetStartX(_hand.hand_Count, _spacing);
+
+            for (var sh = 0; sh < _hand.hand_Count; sh++) {
+                if (!conditions_IsValidSacrificeHandIndex(sh)) continue;
+                var _hbox = SCR_Hand_GetCardHitbox(sh, _hand.hand_Count, _spacing, _hand.hand_Y, _start_x, false);
+                draw_set_color(c_orange);
+                draw_rectangle(_hbox.left, _hbox.top, _hbox.right, _hbox.bottom, true);
+            }
         }
     }
 

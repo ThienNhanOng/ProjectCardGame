@@ -82,10 +82,25 @@ function collection_GrantFromDatabase() {
     show_debug_message("Granted " + string(_granted) + " owned card types from database");
 }
 
+function collection_SyncDefinitionsFromDatabase() {
+    for (var i = 0; i < array_length(global.player_collection); i++) {
+        var _owned = global.player_collection[i].owned;
+        var _collection = variable_struct_exists(global.player_collection[i], "collection")
+            ? global.player_collection[i].collection : "";
+        var _fresh = collection_FindDefinition(global.player_collection[i].id, _collection);
+        if (_fresh == undefined) continue;
+
+        global.player_collection[i] = collection_CopyDefinition(_fresh);
+        global.player_collection[i].owned = _owned;
+    }
+}
+
 function SetupTestCollection() {
     global.player_collection = [];
 
+    SCR_LoadAllCollections();
     collection_GrantFromDatabase();
+    collection_SyncDefinitionsFromDatabase();
 
     show_debug_message("=== Test Collection Ready ===");
     show_debug_message("Total card types: " + string(array_length(global.player_collection)));

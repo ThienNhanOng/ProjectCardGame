@@ -317,11 +317,11 @@
     },
     {
       "id": 1016,
-      "own": 0,
+      "own": 1,
       "cardRarity": 0,
-      "name": "Test Warrior Spirit I",
+      "name": "Wolf",
       "type": "spirit",
-      "tag": ["Warrior", "Warrior Spirit I"],
+      "tag": ["Wolf"],
       "sprite": "SPR_Monsterplaceholder",
       "health": 30,
       "ability": [
@@ -330,7 +330,7 @@
           "repeat": false,
           "recursion": 1,
           "requirements": [
-            { "type": "sacrifice_monster", "amount": 1 }
+            { "type": "sacrifice_tag", "amount": 1, "tags": ["Amnesia"] }
           ]
         }
       ]
@@ -379,9 +379,9 @@
 
     {
       "id": 1019,
-      "own": 0,
+      "own": 2,
       "cardRarity": 0,
-      "name": "TestMonster_WarriorSpirit_Link",
+      "name": "TestMonster_WolfSpirit_Link",
       "type": "monster",
       "tag": ["Test"],
       "sprite": "SPR_Monsterplaceholder",
@@ -394,6 +394,17 @@
           "recursion": 1
         }
       ]
+    },
+    {
+      "id": 1030,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "Amnesia",
+      "type": "monster",
+      "tag": ["Amnesia"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "ability": []
     }
   ]
 }

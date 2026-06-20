@@ -80,7 +80,7 @@ function SCR_DBD_DrawDeckInfo() {
     draw_set_color(c_white);
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
-    draw_text(container_x, container_y + container_h + 10, "Deck: " + string(_deck_size) + "/40");
+    draw_text(container_x, container_y + container_h + 10, "Deck: " + string(_deck_size) + "/" + string(collection_GetDeckMaxSize()));
 
     draw_text(container_x + 90, container_y + container_h + 10, "|");
 

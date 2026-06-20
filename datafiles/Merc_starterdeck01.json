@@ -1,0 +1,339 @@
+{
+  "collection": "starterDeck_01",
+  "cards": [
+    {
+      "id": 1,
+      "own": 3,
+      "cardRarity": 0,
+      "name": "Mercenary Warrior I",
+      "type": "monster",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 15,
+      "ability": []
+    },
+    {
+      "id": 2,
+      "own": 3,
+      "cardRarity": 0,
+      "name": "Mercenary Warrior II",
+      "type": "monster",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 20,
+      "ability": []
+    },
+    {
+      "id": 3,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "Mercenary Recruiter I",
+      "type": "monster",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 5,
+      "ability": [
+        {
+          "type": "add_deck",
+          "id": 1,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "own": 1,
+      "cardRarity": 1,
+      "name": "Legendary Recruiter",
+      "type": "monster",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 5,
+      "ability": [
+        {
+          "type": "add_deck",
+          "id": 1,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "Inspired Adventurer",
+      "type": "monster",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 5,
+      "ability": [
+        {
+          "type": "self_buff",
+          "amount": 1,
+          "repeat": false,
+          "recursion": 1
+        },
+        {
+          "type": "add",
+          "id": 7,
+          "repeat": false,
+          "recursion": 1
+        },
+        {
+          "type": "add",
+          "id": 7,
+          "repeat": false,
+          "recursion": 1
+        },
+        {
+          "type": "add_cost",
+          "amount": 2,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "Guild Reinforcement",
+      "type": "monster",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 1,
+      "ability": [
+        {
+          "type": "draw_cards",
+          "amount": 1,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "Basic Strike",
+      "type": "action",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [
+        {
+          "type": "attack",
+          "amount": 5,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "Advance Strike",
+      "type": "action",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 3,
+      "actionType": [
+        {
+          "type": "attack",
+          "amount": 7,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "Adventurer's Supply",
+      "type": "action",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [
+        {
+          "type": "add_hand_tag",
+          "tags": [
+            "Weapon"
+          ],
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "own": 3,
+      "cardRarity": 0,
+      "name": "Planned Attack",
+      "type": "action",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [
+        {
+          "type": "add_deck",
+          "id": 7,
+          "repeat": false,
+          "recursion": 1
+        },
+        {
+          "type": "add_deck",
+          "id": 7,
+          "repeat": false,
+          "recursion": 1
+        },
+        {
+          "type": "add_deck",
+          "id": 7,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "own": 1,
+      "cardRarity": 1,
+      "name": "Bounty Fulfilled",
+      "type": "action",
+      "tag": [
+        "Mercenary"
+      ],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 3,
+      "actionType": [
+        {
+          "type": "destroy",
+          "amount": 1,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "own": 3,
+      "cardRarity": 0,
+      "name": "Thrift Store Sword",
+      "type": "weapon",
+      "tag": [
+        "Mercenary",
+        "Weapon"
+      ],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 3,
+      "ability": [
+        {
+          "type": "self_buff",
+          "amount": 1,
+          "repeat": true,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "own": 1,
+      "cardRarity": 0,
+      "name": "Mercenary Wolf",
+      "type": "spirit",
+      "tag": ["Mercenary"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 30,
+      "ability": [
+        {
+          "type": "conditions",
+          "repeat": false,
+          "recursion": 1,
+          "requirements": [
+            { "type": "sacrifice_id", "amount": 1, "id": 14 }
+          ]
+        },
+        {
+          "type": "self_buff",
+          "amount": 2,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "own": 1,
+      "cardRarity": 1,
+      "name": "Mercenary Amnesia",
+      "type": "monster",
+      "tag": ["Mercenary"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 10,
+      "costs": [
+        { "type": "monster", "amount": 1 }
+      ],
+      "ability": [
+        {
+          "type": "silence",
+          "amount": 1,
+          "repeat": false,
+          "recursion": 1
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "own": 2,
+      "cardRarity": 0,
+      "name": "Mercenary Hawk",
+      "type": "spirit",
+      "tag": ["Hawk"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 20,
+      "attack": 15,
+      "ability": [
+        {
+          "type": "conditions",
+          "repeat": false,
+          "recursion": 1,
+          "requirements": [
+            { "type": "discard_monster", "amount": 2 }
+          ]
+        },
+        {
+          "type": "attack",
+          "amount": 15,
+          "repeat": true,
+          "recursion": 1
+        }
+      ]
+    }
+  ]
+}

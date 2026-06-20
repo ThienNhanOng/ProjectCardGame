@@ -2,7 +2,7 @@ function SCR_CardSlot_AddToDeck() {
     var _deckbuilder = instance_find(OBJ_DeckBuilder, 0);
     
     if (_deckbuilder == noone) return false;
-    if (array_length(_deckbuilder.selected_deck) >= 40) return false;
+    if (array_length(_deckbuilder.selected_deck) >= collection_GetDeckMaxSize()) return false;
     
     for (var i = 0; i < array_length(global.player_collection); i++) {
         if (global.player_collection[i].id == card_id) {
@@ -26,6 +26,7 @@ function SCR_CardSlot_AddToDeck() {
                 type: card_data.type
             };
             array_push(_deckbuilder.selected_deck, _copy);
+            SCR_DBD_ShuffleSelectedDeck();
             
             // Update badge display (available after this add)
             count = _available - 1;

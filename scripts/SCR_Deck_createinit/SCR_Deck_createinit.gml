@@ -9,7 +9,7 @@ function SCR_Deck_createinit() {
     deck_Width = 73;
     deck_Height = 101;
     deck_Min = 8;
-    deck_Max = 40;
+    deck_Max = collection_GetDeckMaxSize();
     deck_Count = 0;
     deck_Head = 0;
 
@@ -113,6 +113,7 @@ function deck_AddCard(card_id) {
 
     deck[deck_Count] = card_id;
     deck_Count++;
+    deck_Shuffle(true);
     return true;
 }
 
@@ -148,7 +149,7 @@ function deck_DrawCard() {
     return _card_id;
 }
 
-function deck_Shuffle() {
+function deck_Shuffle(_quiet = false) {
     for (var i = deck_Count - 1; i > 0; i--) {
         var _j = irandom(i);
         var _temp = deck[i];
@@ -156,7 +157,9 @@ function deck_Shuffle() {
         deck[_j] = _temp;
     }
     deck_Head = 0;
-    show_debug_message("Deck shuffled. Cards: " + string(deck_Count));
+    if (!_quiet) {
+        show_debug_message("Deck shuffled. Cards: " + string(deck_Count));
+    }
 }
 
 function deck_GetCardData(card_id) {
@@ -189,6 +192,11 @@ function card_NormalizeDefinition(_raw) {
     }
 
     card_NormalizeCostsOnCard(_card);
+
+    if ((!variable_struct_exists(_card, "tag") || !is_array(_card.tag) || array_length(_card.tag) <= 0)
+        && variable_struct_exists(_raw, "tags") && is_array(_raw.tags)) {
+        _card.tag = _raw.tags;
+    }
 
     return _card;
 }

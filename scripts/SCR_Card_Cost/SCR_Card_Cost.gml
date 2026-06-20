@@ -32,7 +32,13 @@ function card_NormalizeCostEntry(_raw) {
         _entry.id = floor(real(_raw.card_id));
     }
 
-    if (_entry.amount <= 0 && !variable_struct_exists(_entry, "tag") && !variable_struct_exists(_entry, "id")) {
+    if (variable_struct_exists(_raw, "type") && is_string(_raw.type)) {
+        _entry.card_type = string_lower(string_trim(_raw.type));
+    }
+
+    if (_entry.amount <= 0 && !variable_struct_exists(_entry, "tag")
+        && !variable_struct_exists(_entry, "id")
+        && !variable_struct_exists(_entry, "card_type")) {
         return undefined;
     }
 
@@ -66,7 +72,20 @@ function card_GetCosts(_card) {
 
 function card_CostEntryIsTribute(_entry) {
     if (_entry == undefined) return false;
-    return variable_struct_exists(_entry, "tag") || variable_struct_exists(_entry, "id");
+    return variable_struct_exists(_entry, "tag")
+        || variable_struct_exists(_entry, "id")
+        || variable_struct_exists(_entry, "card_type");
+}
+
+function card_CostEntryMatchesCardType(_entry, _hand_card) {
+    if (_entry == undefined || _hand_card == undefined) return false;
+    if (!variable_struct_exists(_entry, "card_type")) return false;
+
+    var _want = string_lower(string(_entry.card_type));
+    if (_want == "monster") {
+        return (_hand_card.type == "monster" || _hand_card.type == "special_monster");
+    }
+    return (_hand_card.type == _want);
 }
 
 function card_GetResourceCostTotal(_card) {
@@ -81,6 +100,10 @@ function card_GetResourceCostTotal(_card) {
 
 function card_CostEntryMatchesHandCard(_entry, _hand_card) {
     if (_entry == undefined || _hand_card == undefined) return false;
+
+    if (variable_struct_exists(_entry, "card_type")) {
+        return card_CostEntryMatchesCardType(_entry, _hand_card);
+    }
 
     if (variable_struct_exists(_entry, "tag")) {
         return card_HasAnyTag(_hand_card, [_entry.tag]);
@@ -233,6 +256,10 @@ function card_FormatCostEntry(_entry) {
 
     if (variable_struct_exists(_entry, "id")) {
         return string(_entry.amount) + "x id " + string(_entry.id);
+    }
+
+    if (variable_struct_exists(_entry, "card_type")) {
+        return string(_entry.amount) + "x " + _entry.card_type + " (hand)";
     }
 
     return string(_entry.amount) + " resources";

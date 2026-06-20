@@ -4,6 +4,12 @@ function SCR_Battle_Step() {
     if (battle_IsPlayerDefeated()) return;
 
     var _bm = instance_find(OBJ_BattleManager, 0);
+    var _deck = instance_find(OBJ_Deck, 0);
+
+    if (_deck != noone) {
+        with (_deck) deck_ExtraDeck_Step();
+    }
+
     if (_bm != noone) {
         with (_bm) conditions_summon_Step();
     }
@@ -12,11 +18,6 @@ function SCR_Battle_Step() {
         with (_bm) {
             if (conditions_summon_IsActive()) return;
         }
-    }
-
-    var _deck = instance_find(OBJ_Deck, 0);
-    if (_deck != noone) {
-        with (_deck) deck_ExtraDeck_Step();
     }
 
     if (_deck != noone) {
