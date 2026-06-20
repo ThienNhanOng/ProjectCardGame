@@ -73,5 +73,6 @@ function SCR_Deck_Draw(_debug = false) {
     }
 
     deck_DrawHoverCount();
+    deck_DrawExtraDeckZone();
     draw_set_color(c_white);
 }

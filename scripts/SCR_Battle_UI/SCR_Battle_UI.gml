@@ -29,6 +29,8 @@ function battle_HandleEndTurnButton() {
 }
 
 function SCR_Battle_UI_Draw() {
+    battle_DrawPlayerHealthBar();
+
     var _rect = battle_GetEndTurnButtonRect();
     var _hover = battle_IsEndTurnButtonHovered();
     var _enabled = battle_CanEndTurn();
@@ -98,7 +100,7 @@ function battle_GetPreviewSummaryLines(_card) {
         battle_EnsureCardHealth(_card);
         array_push(_lines, "HP: " + string(_card.health) + "/" + string(_card.max_health));
         var _buff = card_GetAttackBuff(_card);
-        if (_buff > 0) array_push(_lines, "Buff: +" + string(_buff));
+        if (_buff > 0) array_push(_lines, "ATK buff: +" + string(_buff));
         var _status = status_GetDisplayText(_card);
         if (_status != "") array_push(_lines, _status);
         return _lines;
@@ -117,7 +119,7 @@ function battle_GetPreviewSummaryLines(_card) {
     }
 
     var _player_buff = card_GetAttackBuff(_card);
-    if (_player_buff > 0) array_push(_lines, "Buff: +" + string(_player_buff));
+    if (_player_buff > 0) array_push(_lines, "ATK buff: +" + string(_player_buff));
 
     var _player_status = status_GetDisplayText(_card);
     if (_player_status != "") array_push(_lines, _player_status);
@@ -147,6 +149,14 @@ function battle_GetPreviewAbilityLines(_card) {
 function battle_FindHoveredPreviewCard() {
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board != noone && _board.is_dragging) return undefined;
+
+    var _deck = instance_find(OBJ_Deck, 0);
+    if (_deck != noone && _deck.extra_deck_picker_open) {
+        var _idx = -1;
+        with (_deck) _idx = deck_ExtraDeckPicker_PickIndexAt(mouse_x, mouse_y);
+        if (_idx >= 0) return deck_GetCardData(_deck.extra_deck[_idx]);
+        return undefined;
+    }
 
     var _mm = instance_find(OBJ_MonsterManager, 0);
     if (_mm != noone && _board != noone) {
@@ -214,6 +224,7 @@ function battle_DrawHoverPreview() {
         _card,
         battle_GetPreviewSummaryLines(_card),
         battle_GetPreviewAbilityLines(_card),
-        _title_color
+        _title_color,
+        SCR_DBD_ShouldShowPreviewConditions(_card) ? SCR_DBD_GetCardConditionLines(_card) : undefined
     );
 }

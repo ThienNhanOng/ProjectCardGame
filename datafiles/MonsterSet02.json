@@ -12,7 +12,7 @@
       "enemyattackvalue": 3,
       "enemyability": [
         { "type": "heal", "value": 2 },
-        { "type": "buff_attack", "value": 1 }
+        { "type": "self_buff", "value": 1 }
       ]
     },
     {
@@ -40,7 +40,7 @@
       "enemyattackvalue": 2,
       "enemyability": [
         { "type": "silence", "value": 1 },
-        { "type": "stasis", "dot": "burn", "value": 1, "duration": 2 }
+        { "type": "silence", "value": 1 }
       ]
     },
     {
@@ -54,7 +54,7 @@
       "enemyattackvalue": 2,
       "enemyability": [
         { "type": "heal_all", "value": 2 },
-        { "type": "buff_attack", "value": 2 }
+        { "type": "self_buff", "value": 2 }
       ]
     },
     {
@@ -81,7 +81,7 @@
       "enemyhealthvalue": 12,
       "enemyattackvalue": 3,
       "enemyability": [
-        { "type": "stasis", "dot": "poison", "value": 1, "duration": 3 },
+        { "type": "silence", "value": 1 },
         { "type": "attack_all", "value": 1 }
       ]
     }

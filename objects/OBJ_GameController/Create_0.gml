@@ -4,9 +4,6 @@ card_DB = { cards: [] };
 globalvar monster_DB;
 monster_DB = { enemies: [] };
 
-globalvar dot_DB;
-dot_DB = {};
-
 function load_Collection(filename) {
     if (!file_exists(filename)) {
         show_debug_message("Collection not found: " + filename);
@@ -126,4 +123,3 @@ function load_MixedContent(_filename) {
 
 SCR_LoadAllCollections();
 SCR_LoadAllMonsters();
-SCR_LoadAllDoT();

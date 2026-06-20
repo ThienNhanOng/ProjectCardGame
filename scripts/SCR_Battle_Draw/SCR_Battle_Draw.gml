@@ -21,6 +21,22 @@ function SCR_Battle_Draw() {
     }
 
     SCR_Battle_Targeting_Draw();
+
+    draw_set_color(c_white);
+}
+
+function SCR_Battle_DrawOverlays() {
+    var _deck = instance_find(OBJ_Deck, 0);
+    if (_deck != noone) {
+        with (_deck) deck_ExtraDeckPicker_Draw();
+    }
+
     battle_DrawHoverPreview();
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm != noone) {
+        with (_bm) conditions_summon_Draw();
+    }
+
     draw_set_color(c_white);
 }

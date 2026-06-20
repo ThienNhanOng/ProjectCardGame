@@ -14,9 +14,13 @@ function SCR_DragDrop_Step() {
     if (_bm != noone) {
         with (_bm) {
             _targeting = battle_IsTargeting();
-            if (!battle_IsPlayerPhase()) return;
+            if (!battle_IsPlayerPhase() || battle_IsPlayerDefeated()) return;
+            if (conditions_summon_IsActive()) return;
         }
     }
+
+    var _deck = instance_find(OBJ_Deck, 0);
+    if (_deck != noone && _deck.extra_deck_picker_open) return;
     
     if (mouse_check_button_pressed(mb_left) && !is_dragging) {
         if (_targeting) return;

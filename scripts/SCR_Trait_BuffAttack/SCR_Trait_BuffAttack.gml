@@ -1,4 +1,4 @@
-/// @desc Shared buff_attack trait — increases target monster attack stat
+/// @desc Shared buff trait — self_buff targets own slot; buff targets any monster
 
 function card_GainAttack(_card, _amount) {
     if (_card == undefined || _amount <= 0) return;
@@ -44,12 +44,46 @@ function trait_ExecuteBuffAttack(_ctx) {
 
 function trait_CreateBuffAttackContext(_amount, _target_side, _target_slot) {
     return {
-        trait_type: "buff_attack",
+        trait_type: "buff",
         amount: _amount,
         target_side: _target_side,
         target_enemy_slot: (_target_side == "enemy") ? _target_slot : -1,
         target_player_slot: (_target_side == "player") ? _target_slot : -1
     };
+}
+
+function battle_ExecuteBuffAt(_side, _slot_index, _amount) {
+    if (_amount <= 0) return false;
+    if (_side == "player") return battle_BuffPlayerMonster(_slot_index, _amount);
+    if (_side == "enemy") return battle_BuffEnemyMonster(_slot_index, _amount);
+    return false;
+}
+
+function battle_PickRandomAnyBuffTarget() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_board == noone) return { side: "", slot: -1 };
+
+    var _choices = [];
+
+    for (var p = 0; p < array_length(_board.player_monster_slots); p++) {
+        var _pslot = _board.player_monster_slots[p];
+        if (_pslot.visible && _pslot.occupied && _pslot.card != undefined) {
+            array_push(_choices, { side: "player", slot: p });
+        }
+    }
+
+    if (_mm != noone) {
+        for (var e = 0; e < _mm.active_slot_count; e++) {
+            var _eslot = _board.enemy_slots[e];
+            if (_eslot.visible && _eslot.occupied && _eslot.card != undefined && _eslot.card.alive) {
+                array_push(_choices, { side: "enemy", slot: e });
+            }
+        }
+    }
+
+    if (array_length(_choices) == 0) return { side: "", slot: -1 };
+    return _choices[irandom(array_length(_choices) - 1)];
 }
 
 function battle_BuffEnemyMonster(_slot_index, _amount) {

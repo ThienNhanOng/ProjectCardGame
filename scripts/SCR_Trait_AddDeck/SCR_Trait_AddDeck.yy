@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Trait_Stasis",
+  "%Name":"SCR_Trait_AddDeck",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Trait_Stasis",
+  "name":"SCR_Trait_AddDeck",
   "parent":{
     "name":"effects",
     "path":"folders/scripts/Traits/effects.yy",

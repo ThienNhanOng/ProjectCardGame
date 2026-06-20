@@ -14,6 +14,18 @@ if (mouse_x > room_width - 150 && mouse_x < room_width - 20 &&
         }
         
         show_debug_message("Deck saved to global.battle_deck. Cards: " + string(array_length(global.battle_deck)));
+
+        global.battle_extra_deck = [];
+        for (var s = 0; s < array_length(global.player_collection); s++) {
+            var _spirit = global.player_collection[s];
+            if (_spirit.type != "spirit" && _spirit.type != "special_monster") continue;
+
+            var _owned = variable_struct_exists(_spirit, "owned") ? _spirit.owned : 0;
+            for (var c = 0; c < _owned; c++) {
+                array_push(global.battle_extra_deck, _spirit.id);
+            }
+        }
+        show_debug_message("Extra deck saved. Spirit cards: " + string(array_length(global.battle_extra_deck)));
         
         // Transition to battle room
         room_goto(Room_battle);  // ← Use your actual room name

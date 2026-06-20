@@ -21,7 +21,7 @@ function battle_EnemyEffectIsWorthUsing(_enemy_slot_index, _monster, _trait) {
         case "heal_all":
             return battle_EnemyNeedsHeal();
 
-        case "buff_attack":
+        case "self_buff":
             var _board = instance_find(OBJ_BoardManager, 0);
             var _mm = instance_find(OBJ_MonsterManager, 0);
             if (_board == noone || _mm == noone) return false;
@@ -29,13 +29,16 @@ function battle_EnemyEffectIsWorthUsing(_enemy_slot_index, _monster, _trait) {
             var _target = battle_EnemyPickBuffTarget(_enemy_slot_index);
             var _slot = _board.enemy_slots[_target];
             if (!_slot.occupied || _slot.card == undefined) return false;
-            // Skip buff spam — attack instead once this enemy already has a buff bonus
             return card_GetAttackBuff(_slot.card) <= 0;
 
+        case "buff":
+            return battle_PickRandomAnyBuffTarget().slot >= 0;
+
         case "attack_all":
+            return !battle_IsPlayerDefeated();
+
         case "destroy":
         case "silence":
-        case "stasis":
             return battle_PlayerMonsterCount() > 0;
 
         default:
@@ -144,7 +147,7 @@ function battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _trait) {
             }
             return _heal_all_ok;
 
-        case "buff_attack":
+        case "self_buff":
             var _buff_target = battle_EnemyPickBuffTarget(_enemy_slot_index);
             var _buff_slot = _board.enemy_slots[_buff_target];
             var _atk_before = _buff_slot.card.attack;
@@ -154,6 +157,18 @@ function battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _trait) {
                     _atk_before, _buff_slot.card.attack);
             }
             return _buff_ok;
+
+        case "buff":
+            var _any_target = battle_PickRandomAnyBuffTarget();
+            if (_any_target.slot < 0) return false;
+            var _any_ok = battle_ExecuteBuffAt(_any_target.side, _any_target.slot, _trait.amount);
+            if (_any_ok) {
+                battle_EnemyLog_Write("Turn " + string(battle_EnemyLog_GetTurn())
+                    + " | " + _monster.name + " (slot " + string(_enemy_slot_index) + ")"
+                    + " | ABILITY buff +" + string(_trait.amount)
+                    + " -> " + _any_target.side + " slot " + string(_any_target.slot));
+            }
+            return _any_ok;
 
         case "attack_all":
             var _atk_all_ok = trait_Execute(_trait, trait_CreateAttackAllContext(_trait.amount, "player"));
@@ -189,17 +204,6 @@ function battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _trait) {
             }
             return _silence_ok;
 
-        case "stasis":
-            var _stasis_target = battle_PickRandomPlayerMonsterSlot();
-            if (_stasis_target < 0) return false;
-            var _stasis_ok = trait_Execute(_trait, trait_CreateStasisContext(_trait.dot_type, _trait.amount, _trait.duration, "player", _stasis_target));
-            if (_stasis_ok) {
-                battle_EnemyLog_Write("Turn " + string(battle_EnemyLog_GetTurn())
-                    + " | " + _monster.name + " (slot " + string(_enemy_slot_index) + ")"
-                    + " | ABILITY stasis " + _trait.dot_type + " -> player slot " + string(_stasis_target));
-            }
-            return _stasis_ok;
-
         default:
             battle_EnemyLog_Skipped(_enemy_slot_index, _monster, "effect not implemented: " + _trait.type);
             show_debug_message(_monster.name + " effect pending: " + _trait.type);
@@ -208,24 +212,19 @@ function battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _trait) {
 }
 
 function battle_EnemyAttack(_enemy_slot_index, _monster) {
-    var _target = battle_PickRandomPlayerMonsterSlot();
-    if (_target < 0) {
-        battle_EnemyLog_Skipped(_enemy_slot_index, _monster, "no player target");
-        show_debug_message(_monster.name + " has no player target");
-        return false;
-    }
+    if (battle_IsPlayerDefeated()) return false;
 
-    var _ctx = trait_CreateAttackContext(_monster.attack, "player", _target);
+    var _ctx = trait_CreateAttackContext(_monster.attack, "player", -1);
     var _ok = trait_ExecuteAttack(_ctx);
     if (_ok) {
-        battle_EnemyLog_Attack(_enemy_slot_index, _monster, _target, _monster.attack);
-        show_debug_message(_monster.name + " attacked player slot " + string(_target)
-            + " for " + string(_monster.attack));
+        battle_EnemyLog_Attack(_enemy_slot_index, _monster, -1, _monster.attack);
+        show_debug_message(_monster.name + " attacked player for " + string(_monster.attack));
     }
     return _ok;
 }
 
 function battle_EnemyTakeTurn(_enemy_slot_index, _monster) {
+    if (battle_IsPlayerDefeated()) return;
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board != noone
         && _enemy_slot_index >= 0
@@ -260,11 +259,10 @@ function battle_RunEnemyTurn() {
     var _mm = instance_find(OBJ_MonsterManager, 0);
     if (_board == noone || _mm == noone) return;
 
-    status_TickEnemyDoTs(_board, _mm);
-
     battle_EnemyLog_Write("--- Enemy phase (player turn " + string(battle_EnemyLog_GetTurn()) + " ended) ---");
 
     for (var i = 0; i < _mm.active_slot_count; i++) {
+        if (battle_IsPlayerDefeated()) break;
         var _slot = _board.enemy_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
         battle_EnemyTakeTurn(i, _slot.card);

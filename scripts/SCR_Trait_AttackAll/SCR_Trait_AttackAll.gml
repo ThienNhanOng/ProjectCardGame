@@ -31,17 +31,10 @@ function trait_AttackAllEnemies(_amount) {
 }
 
 function trait_AttackAllPlayerMonsters(_amount) {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board == noone) return false;
-
-    var _hit = false;
-    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
-        var _slot = _board.player_monster_slots[i];
-        if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-        if (battle_DamagePlayerMonster(i, _amount)) _hit = true;
+    var _hit = battle_DamagePlayer(_amount);
+    if (_hit) {
+        show_debug_message("Attack all hit player for " + string(_amount) + " damage");
     }
-
-    show_debug_message("Attack all player monsters for " + string(_amount) + " damage");
     return _hit;
 }
 

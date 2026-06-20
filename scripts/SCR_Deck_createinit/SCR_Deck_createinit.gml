@@ -12,13 +12,28 @@ function SCR_Deck_createinit() {
     deck_Max = 40;
     deck_Count = 0;
     deck_Head = 0;
-    
+
+    extra_deck_Max = 40;
+    extra_deck_Count = 0;
+    extra_deck = [];
+
 	deck = []; 
 	
     // Card slots (stores card IDs)
     for (var i = 0; i < deck_Max; i++) {
         deck[i] = 0;
     }
+
+    for (var e = 0; e < extra_deck_Max; e++) {
+        extra_deck[e] = 0;
+    }
+
+    extra_deck_X = 548;
+    extra_deck_Y = 371.5;
+    extra_deck_Width = 73;
+    extra_deck_Height = 101;
+    extra_deck_picker_open = false;
+    extra_deck_picker_scroll = 0;
     
     // Load deck from global variable (saved from deckbuilder)
     if (variable_global_exists("battle_deck")
@@ -37,6 +52,40 @@ function SCR_Deck_createinit() {
         deck_AddCard(3);
         deck_Shuffle();
     }
+
+    deck_LoadExtraDeckFromCollection();
+}
+
+function deck_LoadExtraDeckFromCollection() {
+    if (variable_global_exists("battle_extra_deck")
+        && is_array(global.battle_extra_deck)
+        && array_length(global.battle_extra_deck) > 0) {
+        for (var i = 0; i < array_length(global.battle_extra_deck); i++) {
+            deck_AddExtraCard(global.battle_extra_deck[i]);
+        }
+        show_debug_message("Loaded " + string(extra_deck_Count) + " cards into extra deck (saved)");
+        global.battle_extra_deck = undefined;
+        return;
+    }
+
+    if (!variable_global_exists("player_collection") || !is_array(global.player_collection)) {
+        show_debug_message("Extra deck: no player collection found");
+        return;
+    }
+
+    for (var i = 0; i < array_length(global.player_collection); i++) {
+        var _card = global.player_collection[i];
+        if (_card.type != "spirit" && _card.type != "special_monster") continue;
+
+        var _owned = variable_struct_exists(_card, "owned") ? _card.owned : 0;
+        if (_owned <= 0) continue;
+
+        for (var c = 0; c < _owned; c++) {
+            if (!deck_AddExtraCard(_card.id)) break;
+        }
+    }
+
+    show_debug_message("Loaded " + string(extra_deck_Count) + " spirit cards into extra deck");
 }
 
 // ===== DECK FUNCTIONS =====
@@ -45,8 +94,37 @@ function deck_AddCard(card_id) {
         show_debug_message("Deck full! Cannot add card " + string(card_id));
         return false;
     }
+
+    var _data = deck_GetCardData(card_id);
+    if (_data != undefined
+        && (_data.type == "spirit" || _data.type == "special_monster")) {
+        show_debug_message("Spirit cards must be added to the extra deck");
+        return false;
+    }
+
     deck[deck_Count] = card_id;
     deck_Count++;
+    return true;
+}
+
+function deck_AddExtraCard(card_id) {
+    if (extra_deck_Count >= extra_deck_Max) {
+        show_debug_message("Extra deck full! Cannot add card " + string(card_id));
+        return false;
+    }
+
+    var _data = deck_GetCardData(card_id);
+    if (_data == undefined) {
+        show_debug_message("Extra deck add failed: card id " + string(card_id) + " not found");
+        return false;
+    }
+    if (_data.type != "spirit" && _data.type != "special_monster") {
+        show_debug_message("Extra deck only accepts spirit/special_monster cards");
+        return false;
+    }
+
+    extra_deck[extra_deck_Count] = card_id;
+    extra_deck_Count++;
     return true;
 }
 

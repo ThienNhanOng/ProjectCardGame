@@ -10,6 +10,7 @@ function battle_IsEnemyPhase() {
 
 function battle_CanEndTurn() {
     if (!battle_IsPlayerPhase()) return false;
+    if (battle_IsPlayerDefeated()) return false;
     if (battle_IsTargeting()) return false;
     return true;
 }
@@ -28,7 +29,6 @@ function battle_BeginNextPlayerTurn() {
 
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board != noone) {
-        status_TickPlayerDoTs(_board);
         status_DecrementPlayerSilence(_board);
     }
 
@@ -48,7 +48,9 @@ function battle_EndTurn() {
     battle_phase = "enemy";
     show_debug_message("=== Enemy turn ===");
     battle_RunEnemyTurn();
-    battle_BeginNextPlayerTurn();
+    if (!battle_IsPlayerDefeated()) {
+        battle_BeginNextPlayerTurn();
+    }
 }
 
 function battle_ResetTurnUses() {
@@ -62,6 +64,7 @@ function battle_ResetTurnUses() {
 
 function battle_CanUseActionTrait(_trait_index) {
     if (!battle_IsPlayerPhase()) return false;
+    if (battle_IsPlayerDefeated()) return false;
     if (_trait_index < 0 || _trait_index >= array_length(action_trait_uses)) return false;
     return action_trait_uses[_trait_index] > 0;
 }

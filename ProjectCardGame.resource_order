@@ -60,6 +60,7 @@
     {"name":"SCR_Battle_Init","order":3,"path":"scripts/SCR_Battle_Init/SCR_Battle_Init.yy",},
     {"name":"SCR_Battle_Load","order":2,"path":"scripts/SCR_Battle_Load/SCR_Battle_Load.yy",},
     {"name":"SCR_Battle_PlayCard","order":6,"path":"scripts/SCR_Battle_PlayCard/SCR_Battle_PlayCard.yy",},
+    {"name":"SCR_Battle_PlayerHealth","order":12,"path":"scripts/SCR_Battle_PlayerHealth/SCR_Battle_PlayerHealth.yy",},
     {"name":"SCR_Battle_Step","order":7,"path":"scripts/SCR_Battle_Step/SCR_Battle_Step.yy",},
     {"name":"SCR_Battle_Targeting","order":8,"path":"scripts/SCR_Battle_Targeting/SCR_Battle_Targeting.yy",},
     {"name":"SCR_Battle_Turn","order":4,"path":"scripts/SCR_Battle_Turn/SCR_Battle_Turn.yy",},

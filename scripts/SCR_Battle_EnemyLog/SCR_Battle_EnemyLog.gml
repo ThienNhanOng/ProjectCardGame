@@ -40,9 +40,10 @@ function battle_EnemyLog_MonsterLabel(_slot_index) {
 
 function battle_EnemyLog_Attack(_source_slot, _source, _player_slot, _damage) {
     var _turn = battle_EnemyLog_GetTurn();
+    var _target = (_player_slot < 0) ? "player" : "player slot " + string(_player_slot);
     var _line = "Turn " + string(_turn)
         + " | " + _source.name + " (slot " + string(_source_slot) + ")"
-        + " | ATTACK -> player slot " + string(_player_slot)
+        + " | ATTACK -> " + _target
         + " for " + string(_damage) + " damage";
     battle_EnemyLog_Write(_line);
 }
@@ -62,7 +63,7 @@ function battle_EnemyLog_BuffAttack(_source_slot, _source, _target_slot, _amount
     var _turn = battle_EnemyLog_GetTurn();
     var _line = "Turn " + string(_turn)
         + " | " + _source.name + " (slot " + string(_source_slot) + ")"
-        + " | ABILITY buff_attack +" + string(_amount)
+        + " | ABILITY self_buff +" + string(_amount)
         + " -> " + battle_EnemyLog_MonsterLabel(_target_slot)
         + " ATK " + string(_before) + " -> " + string(_after);
     battle_EnemyLog_Write(_line);

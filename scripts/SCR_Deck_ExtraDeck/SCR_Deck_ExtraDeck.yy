@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"LoadDoT",
+  "%Name":"SCR_Deck_ExtraDeck",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"LoadDoT",
+  "name":"SCR_Deck_ExtraDeck",
   "parent":{
-    "name":"load",
-    "path":"folders/scripts/MonsterSystem/load.yy",
+    "name":"create",
+    "path":"folders/scripts/deck/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

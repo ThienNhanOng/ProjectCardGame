@@ -1,6 +1,26 @@
 /// @desc Battle input — targeting + End Turn button
 
 function SCR_Battle_Step() {
+    if (battle_IsPlayerDefeated()) return;
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm != noone) {
+        with (_bm) conditions_summon_Step();
+    }
+
+    if (_bm != noone) {
+        with (_bm) {
+            if (conditions_summon_IsActive()) return;
+        }
+    }
+
+    var _deck = instance_find(OBJ_Deck, 0);
+    if (_deck != noone) {
+        with (_deck) deck_ExtraDeck_Step();
+    }
+
+    if (_deck != noone && _deck.extra_deck_picker_open) return;
+
     if (battle_IsPlayerPhase()) {
         SCR_Battle_Targeting_Step();
         if (!battle_IsTargeting()) {

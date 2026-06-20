@@ -8,7 +8,8 @@ function battle_OnMonsterPlayed(_slot_index, _card) {
     for (var i = 0; i < array_length(_traits); i++) {
         var _trait = _traits[i];
         if (_trait.type == "attack") continue;
-        if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)) continue;
+        if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
+            || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
         trait_ExecuteOnPlay(_trait, _slot_index);
     }
 
@@ -25,7 +26,9 @@ function battle_BeginMonsterOnPlayTargeting(_slot_index, _start_trait_index = 0)
     var _traits = trait_GetFromCard(_slot.card);
     for (var i = _start_trait_index; i < array_length(_traits); i++) {
         var _type = _traits[i].type;
-        if (trait_OnPlayNeedsEnemyTarget(_type) || trait_OnPlayNeedsPlayerTarget(_type)) {
+        if (trait_OnPlayNeedsEnemyTarget(_type)
+            || trait_OnPlayNeedsPlayerTarget(_type)
+            || trait_OnPlayNeedsAnyTarget(_type)) {
             pending_trait_source = "monster_on_play";
             pending_monster_slot = _slot_index;
             pending_monster_trait_index = i;
@@ -60,10 +63,22 @@ function battle_ExecuteMonsterOnPlayEnemyTrait(_player_slot, _trait_index, _enem
             return trait_Execute(_trait, trait_CreateDestroyContext(_trait.amount, "enemy", _enemy_slot));
         case "silence":
             return trait_Execute(_trait, trait_CreateSilenceContext(max(1, _trait.amount), "enemy", _enemy_slot));
-        case "stasis":
-            return trait_Execute(_trait, trait_CreateStasisContext(_trait.dot_type, _trait.amount, _trait.duration, "enemy", _enemy_slot));
     }
     return false;
+}
+
+function battle_ExecuteMonsterOnPlayBuffTrait(_player_slot, _trait_index, _side, _target_slot) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return false;
+
+    var _slot = _board.player_monster_slots[_player_slot];
+    if (!_slot.occupied || _slot.card == undefined) return false;
+
+    var _traits = trait_GetFromCard(_slot.card);
+    if (_trait_index >= array_length(_traits)) return false;
+    if (_traits[_trait_index].type != "buff") return false;
+
+    return battle_ExecuteBuffAt(_side, _target_slot, _traits[_trait_index].amount);
 }
 
 function battle_ExecuteMonsterOnPlayHealTrait(_player_slot, _trait_index, _target_player_slot) {
@@ -89,7 +104,8 @@ function battle_OnWeaponPlayed(_slot_index, _card) {
     for (var i = 0; i < array_length(_traits); i++) {
         var _trait = _traits[i];
         if (_trait.type == "attack") continue;
-        if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)) continue;
+        if (trait_OnPlayNeedsEnemyTarget(_trait.type) || trait_OnPlayNeedsPlayerTarget(_trait.type)
+            || trait_OnPlayNeedsAnyTarget(_trait.type)) continue;
         trait_ExecuteOnPlay(_trait, _slot_index);
     }
 
@@ -106,7 +122,9 @@ function battle_BeginWeaponOnPlayTargeting(_slot_index, _start_trait_index = 0) 
     var _traits = trait_GetFromCard(_weapon_slot.card);
     for (var i = _start_trait_index; i < array_length(_traits); i++) {
         var _type = _traits[i].type;
-        if (trait_OnPlayNeedsEnemyTarget(_type) || trait_OnPlayNeedsPlayerTarget(_type)) {
+        if (trait_OnPlayNeedsEnemyTarget(_type)
+            || trait_OnPlayNeedsPlayerTarget(_type)
+            || trait_OnPlayNeedsAnyTarget(_type)) {
             pending_trait_source = "weapon_on_play";
             pending_weapon_slot = _slot_index;
             pending_monster_trait_index = i;
@@ -138,10 +156,22 @@ function battle_ExecuteWeaponOnPlayEnemyTrait(_weapon_column, _trait_index, _ene
             return trait_Execute(_trait, trait_CreateDestroyContext(_trait.amount, "enemy", _enemy_slot));
         case "silence":
             return trait_Execute(_trait, trait_CreateSilenceContext(max(1, _trait.amount), "enemy", _enemy_slot));
-        case "stasis":
-            return trait_Execute(_trait, trait_CreateStasisContext(_trait.dot_type, _trait.amount, _trait.duration, "enemy", _enemy_slot));
     }
     return false;
+}
+
+function battle_ExecuteWeaponOnPlayBuffTrait(_weapon_column, _trait_index, _side, _target_slot) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return false;
+
+    var _weapon_slot = _board.player_weapon_slots[_weapon_column];
+    if (!_weapon_slot.occupied || _weapon_slot.card == undefined) return false;
+
+    var _traits = trait_GetFromCard(_weapon_slot.card);
+    if (_trait_index >= array_length(_traits)) return false;
+    if (_traits[_trait_index].type != "buff") return false;
+
+    return battle_ExecuteBuffAt(_side, _target_slot, _traits[_trait_index].amount);
 }
 
 function battle_ExecuteWeaponOnPlayHealTrait(_weapon_column, _trait_index, _target_player_slot) {
@@ -160,6 +190,10 @@ function battle_ExecuteWeaponOnPlayHealTrait(_weapon_column, _trait_index, _targ
 }
 
 function battle_BeginOnPlayTargetMode(_trait_type) {
+    if (trait_OnPlayNeedsAnyTarget(_trait_type)) {
+        target_mode = "pick_any_buff";
+        return;
+    }
     if (trait_OnPlayNeedsPlayerTarget(_trait_type)) {
         battle_BeginPlayerTargetMode(_trait_type);
         return;
@@ -170,7 +204,7 @@ function battle_BeginOnPlayTargetMode(_trait_type) {
 function battle_BeginPlayerTargetMode(_trait_type) {
     switch (_trait_type) {
         case "heal": target_mode = "pick_player_heal"; break;
-        case "buff_attack": target_mode = "pick_player_buff"; break;
+        case "self_buff": target_mode = "pick_player_self_buff"; break;
         default: battle_CancelTargeting(); break;
     }
 }
@@ -179,7 +213,6 @@ function battle_BeginEnemyTargetMode(_trait_type) {
     switch (_trait_type) {
         case "destroy": target_mode = "pick_enemy_destroy"; break;
         case "silence": target_mode = "pick_enemy_silence"; break;
-        case "stasis": target_mode = "pick_enemy_stasis"; break;
         default: battle_CancelTargeting(); break;
     }
 }
@@ -203,8 +236,11 @@ function battle_BeginActionTargeting(_trait_index, _type) {
         case "heal":
             target_mode = "pick_player_heal";
             break;
-        case "buff_attack":
-            target_mode = "pick_player_buff";
+        case "self_buff":
+            target_mode = "pick_player_self_buff";
+            break;
+        case "buff":
+            target_mode = "pick_any_buff";
             break;
         default:
             battle_BeginOnPlayTargetMode(_type);
@@ -234,6 +270,12 @@ function battle_ExecuteActionTraitInstant(_trait_index) {
             break;
         case "add":
             _ok = trait_Execute(_trait, trait_CreateAddHandContext(_trait.card_id));
+            break;
+        case "add_deck":
+            _ok = trait_Execute(_trait, trait_CreateAddDeckContext(_trait.card_id));
+            break;
+        case "add_extra_deck":
+            _ok = trait_Execute(_trait, trait_CreateAddExtraDeckContext(_trait.card_id));
             break;
     }
 
@@ -273,7 +315,7 @@ function battle_ActionCardRequiresMonster(_card) {
     var _traits = trait_GetFromCard(_card);
     for (var i = 0; i < array_length(_traits); i++) {
         var _type = _traits[i].type;
-        if (_type == "attack" || _type == "heal" || _type == "buff_attack") return true;
+        if (_type == "attack" || _type == "heal" || _type == "self_buff" || _type == "buff") return true;
     }
     return false;
 }
@@ -316,6 +358,10 @@ function battle_ClearActionSlotIfFinished() {
     action_trait_uses = [];
 }
 
+function battle_HasAnyBuffTarget() {
+    return battle_PickRandomAnyBuffTarget().slot >= 0;
+}
+
 function battle_NotifyCardPlaced(_slot, _card) {
     if (_slot == undefined || _card == undefined) return;
 
@@ -351,8 +397,14 @@ function battle_TargetingContinueAfterAction(_last_trait_index) {
         if (!trait_ActionNeedsTargeting(_traits[i].type)) continue;
 
         var _type = _traits[i].type;
-        if ((_type == "attack" || _type == "heal" || _type == "buff_attack") && !battle_HasPlayerMonsterOnBoard()) {
+        if ((_type == "attack" || _type == "heal" || _type == "self_buff")
+            && !battle_HasPlayerMonsterOnBoard()) {
             show_debug_message("Need a player monster on the board for this action");
+            continue;
+        }
+
+        if (_type == "buff" && !battle_HasAnyBuffTarget()) {
+            show_debug_message("Need a monster on the board to buff");
             continue;
         }
 

@@ -2,6 +2,7 @@ function SCR_Hand_GetSprite(_card) {
     var _spr = SPR_Monsterplaceholder;
     switch (_card.type) {
         case "monster":
+        case "spirit":
         case "special_monster":
             _spr = SPR_Monsterplaceholder;
             break;

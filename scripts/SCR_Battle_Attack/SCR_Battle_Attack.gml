@@ -265,30 +265,28 @@ function battle_ExecuteActionSilence(_trait_index, _enemy_slot_index) {
     return true;
 }
 
-function battle_ExecuteActionStasis(_trait_index, _enemy_slot_index) {
+function battle_ExecuteActionSelfBuff(_trait_index, _player_slot_index) {
     if (!battle_CanUseActionTrait(_trait_index)) return false;
 
     var _traits = battle_GetActionTraits();
     if (_trait_index >= array_length(_traits)) return false;
-    if (_traits[_trait_index].type != "stasis") return false;
+    if (_traits[_trait_index].type != "self_buff") return false;
 
-    var _trait = _traits[_trait_index];
-    var _ctx = trait_CreateStasisContext(_trait.dot_type, _trait.amount, _trait.duration, "enemy", _enemy_slot_index);
-    if (!trait_Execute(_trait, _ctx)) return false;
+    var _ctx = trait_CreateBuffAttackContext(_traits[_trait_index].amount, "player", _player_slot_index);
+    if (!trait_Execute(_traits[_trait_index], _ctx)) return false;
 
     battle_ConsumeActionTrait(_trait_index);
     return true;
 }
 
-function battle_ExecuteActionBuff(_trait_index, _player_slot_index) {
+function battle_ExecuteActionBuff(_trait_index, _side, _slot_index) {
     if (!battle_CanUseActionTrait(_trait_index)) return false;
 
     var _traits = battle_GetActionTraits();
     if (_trait_index >= array_length(_traits)) return false;
-    if (_traits[_trait_index].type != "buff_attack") return false;
+    if (_traits[_trait_index].type != "buff") return false;
 
-    var _ctx = trait_CreateBuffAttackContext(_traits[_trait_index].amount, "player", _player_slot_index);
-    if (!trait_Execute(_traits[_trait_index], _ctx)) return false;
+    if (!battle_ExecuteBuffAt(_side, _slot_index, _traits[_trait_index].amount)) return false;
 
     battle_ConsumeActionTrait(_trait_index);
     return true;

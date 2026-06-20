@@ -26,12 +26,13 @@ function SCR_Battle_Init() {
 
     pending_weapon_slot = -1;
 
+    battle_InitPlayerHealth();
 
+    conditions_summon_Reset();
 
     battle_PrepareBoardCards();
 
     battle_StartBattle();
-
 }
 
 

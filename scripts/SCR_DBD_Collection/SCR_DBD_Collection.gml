@@ -248,11 +248,11 @@ function SCR_DBD_FormatTraitLine(_trait) {
     var _text = trait_GetDisplayText(_trait);
 
     if (_trait.type == "add" && _trait.card_id >= 0) {
-        _text = "Add " + deck_GetCardName(_trait.card_id);
-    } else if (_trait.type == "stasis") {
-        var _dot = (_trait.dot_type != "") ? _trait.dot_type : "?";
-        _text = "Stasis " + _dot + " " + string(_trait.amount)
-            + " dmg / " + string(max(1, _trait.duration)) + " turn(s)";
+        _text = "Add to hand " + deck_GetCardName(_trait.card_id);
+    } else if (_trait.type == "add_deck" && _trait.card_id >= 0) {
+        _text = "Add to deck " + deck_GetCardName(_trait.card_id);
+    } else if (_trait.type == "add_extra_deck" && _trait.card_id >= 0) {
+        _text = "Add to extra deck " + deck_GetCardName(_trait.card_id);
     }
 
     if (_trait.uses_per_turn > 1) {
@@ -267,12 +267,34 @@ function SCR_DBD_GetCardAbilityLines(_card) {
     var _lines = [];
 
     for (var t = 0; t < array_length(_traits); t++) {
-        if (_traits[t].type == "none") continue;
+        if (_traits[t].type == "none" || _traits[t].type == "conditions") continue;
         array_push(_lines, SCR_DBD_FormatTraitLine(_traits[t]));
     }
 
     if (array_length(_lines) <= 0) array_push(_lines, "None");
     return _lines;
+}
+
+function SCR_DBD_GetCardConditionLines(_card) {
+    var _lines = [];
+    if (_card == undefined) return _lines;
+    if (_card.type != "spirit" && _card.type != "special_monster") return _lines;
+
+    var _conds = conditions_GetRequirements(_card);
+    if (array_length(_conds) <= 0) {
+        array_push(_lines, "None");
+        return _lines;
+    }
+
+    for (var c = 0; c < array_length(_conds); c++) {
+        array_push(_lines, conditions_GetRequirementText(_conds[c]));
+    }
+    return _lines;
+}
+
+function SCR_DBD_ShouldShowPreviewConditions(_card) {
+    if (_card == undefined) return false;
+    return (_card.type == "spirit" || _card.type == "special_monster");
 }
 
 function SCR_DBD_GetCardPreviewSprite(_card) {
@@ -359,7 +381,7 @@ function SCR_DBD_ShouldShowPreviewTags(_card) {
     return true;
 }
 
-function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_lines, _title_color = c_white) {
+function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_lines, _title_color = c_white, _condition_lines = undefined) {
     var _pad = 12;
     var _line_h = 16;
 
@@ -434,6 +456,24 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
         _cy += string_height_ext(_ability_line, _line_h, _inner_w) + 4;
     }
 
+    if (_condition_lines != undefined) {
+        _cy += 6;
+        draw_set_color(make_color_rgb(80, 80, 90));
+        draw_line(_cx, _cy, _cx + _inner_w, _cy);
+        _cy += 10;
+
+        draw_set_color(c_yellow);
+        draw_text(_cx, _cy, "Conditions");
+        _cy += _line_h + 4;
+
+        draw_set_color(c_white);
+        for (var c = 0; c < array_length(_condition_lines); c++) {
+            var _cond_line = "• " + _condition_lines[c];
+            draw_text_ext(_cx, _cy, _cond_line, _line_h, _inner_w);
+            _cy += string_height_ext(_cond_line, _line_h, _inner_w) + 4;
+        }
+    }
+
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
     draw_set_color(c_white);
@@ -447,6 +487,8 @@ function SCR_DBD_DrawHoverPreview() {
         SCR_DBD_GetPreviewPanelLayout(),
         _card,
         SCR_DBD_GetCardSummaryLines(_card),
-        SCR_DBD_GetCardAbilityLines(_card)
+        SCR_DBD_GetCardAbilityLines(_card),
+        c_white,
+        SCR_DBD_ShouldShowPreviewConditions(_card) ? SCR_DBD_GetCardConditionLines(_card) : undefined
     );
 }

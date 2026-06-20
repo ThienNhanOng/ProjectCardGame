@@ -105,7 +105,7 @@ function SCR_Board_PlaceCard(_slot, _card) {
     var _valid = false;
     switch (_slot.type) {
         case "monster":
-            _valid = (_card.type == "monster" || _card.type == "special_monster");
+            _valid = (_card.type == "monster" || _card.type == "special_monster" || _card.type == "spirit");
             break;
         case "weapon":
             _valid = (_card.type == "weapon");

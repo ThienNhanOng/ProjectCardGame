@@ -21,7 +21,7 @@
       "level": 10,
       "enemyhealthvalue": 10,
       "enemyattackvalue": 3,
-      "enemyability": [{ "type": "buff_attack", "value": 2 }]
+      "enemyability": [{ "type": "self_buff", "value": 2 }]
     },
     {
       "enemyID": 3,
@@ -54,7 +54,7 @@
       "level": 10,
       "enemyhealthvalue": 9,
       "enemyattackvalue": 2,
-      "enemyability": [{ "type": "stasis", "dot": "burn", "value": 2, "duration": 2 }]
+      "enemyability": [{ "type": "silence", "value": 2 }]
     },
     {
       "enemyID": 6,

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Conditions",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Conditions",
+  "parent":{
+    "name":"conditions",
+    "path":"folders/scripts/Traits/conditions.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
