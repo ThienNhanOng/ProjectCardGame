@@ -402,6 +402,11 @@ function trait_GetDisplayText(_trait) {
 
         case "silence": return "Silence 1 target (" + string(max(1, _trait.amount)) + " enemy turn(s))";
 
+        case "discard_action": return "Discard " + string(max(1, _trait.amount)) + " action card(s)";
+        case "discard_monster": return "Discard " + string(max(1, _trait.amount)) + " monster card(s)";
+        case "discard_weapon": return "Discard " + string(max(1, _trait.amount)) + " weapon card(s)";
+        case "discard_spirit": return "Discard " + string(max(1, _trait.amount)) + " spirit card(s)";
+
         case "conditions": return trait_GetConditionsDisplayText(_trait);
 
         default: return string(_trait.type);

@@ -54,9 +54,13 @@ function SCR_Monster_DrawDebugCounter() {
     var _living = (_board != noone) ? monster_CountLivingActive(_board) : 0;
 
     draw_set_color(c_yellow);
+    var _db_count = (variable_global_exists("monster_DB") && is_struct(global.monster_DB))
+        ? array_length(global.monster_DB.enemies) : 0;
+
     draw_text(10, 10, "Queue: " + string(monster_GetQueueCount())
         + " | Slots: " + string(active_slot_count)
-        + " | Field: " + string(_living));
+        + " | Field: " + string(_living)
+        + " | DB: " + string(_db_count));
 
     if (variable_instance_exists(id, "battle_name")) {
         draw_text(10, 26, "Battle: " + battle_name);
@@ -70,14 +74,24 @@ function SCR_Monster_DrawDebugCounter() {
     draw_set_color(c_white);
 }
 
+function monster_DrawEmptySlot(_slot) {
+    var _layout = monster_GetSlotLayout(_slot);
+    draw_sprite_ext(SPR_MonsterSlot, 0, _layout.cx, _layout.cy, 1, 1, 0, c_white, 0.45);
+}
+
 function SCR_Monster_Draw() {
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return;
 
     for (var i = 0; i < active_slot_count; i++) {
         var _slot = _board.enemy_slots[i];
-        if (!_slot.visible || !_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
-        monster_DrawActive(_slot, _slot.card);
+        if (!_slot.visible) continue;
+
+        if (_slot.occupied && _slot.card != undefined && _slot.card.alive) {
+            monster_DrawActive(_slot, _slot.card);
+        } else {
+            monster_DrawEmptySlot(_slot);
+        }
     }
 
     SCR_Monster_DrawDebugCounter();

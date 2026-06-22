@@ -7,28 +7,26 @@ if (mouse_x > room_width - 150 && mouse_x < room_width - 20 &&
     // Verify deck has minimum 8 cards
     if (array_length(selected_deck) >= 8) {
         
-        // Save the deck to a global variable for the battle room
-        global.battle_deck = [];
+        var _main_ids = [];
         for (var i = 0; i < array_length(selected_deck); i++) {
-            array_push(global.battle_deck, selected_deck[i].id);
+            array_push(_main_ids, selected_deck[i].id);
         }
-        
-        show_debug_message("Deck saved to global.battle_deck. Cards: " + string(array_length(global.battle_deck)));
 
-        global.battle_extra_deck = [];
+        var _extra_ids = [];
         for (var s = 0; s < array_length(global.player_collection); s++) {
             var _spirit = global.player_collection[s];
             if (_spirit.type != "spirit" && _spirit.type != "special_monster") continue;
 
             var _owned = variable_struct_exists(_spirit, "owned") ? _spirit.owned : 0;
             for (var c = 0; c < _owned; c++) {
-                array_push(global.battle_extra_deck, _spirit.id);
+                array_push(_extra_ids, _spirit.id);
             }
         }
-        show_debug_message("Extra deck saved. Spirit cards: " + string(array_length(global.battle_extra_deck)));
+
+        battle_SaveDeckSources(_main_ids, _extra_ids);
         
         // Transition to battle room
-        room_goto(Room_battle);  // ← Use your actual room name
+        room_goto(Room_Worldmap1);  // ← Use your actual room name
         
     } else {
         show_debug_message("Need at least 8 cards to start! Current: " + string(array_length(selected_deck)));

@@ -7,12 +7,20 @@ function SCR_Monster_Init() {
     active_slot_count = 0;
     battle_name = "";
 
-    var _battle_file = "Battle01.json";
-    if (variable_global_exists("battle_config_file")) {
-        _battle_file = global.battle_config_file;
+    battle_EnsureMonsterDatabase();
+
+    var _config = undefined;
+
+    if (variable_global_exists("battle_runtime_config") && global.battle_runtime_config != undefined) {
+        _config = global.battle_runtime_config;
+    } else {
+        var _battle_file = "Battle01.json";
+        if (variable_global_exists("battle_config_file")) {
+            _battle_file = global.battle_config_file;
+        }
+        _config = battle_LoadConfig(_battle_file);
     }
 
-    var _config = battle_LoadConfig(_battle_file);
     if (_config == undefined) {
         show_debug_message("MonsterManager: battle config failed to load!");
         return;
@@ -36,9 +44,12 @@ function SCR_Monster_Init() {
     monster_ApplyActiveSlotLayout(_board);
     monster_FillActiveSlots(_board);
 
+    var _living = monster_CountLivingActive(_board);
     show_debug_message("MonsterManager ready | Battle: " + battle_name
         + " | Active slots: " + string(active_slot_count)
-        + " | Queue waiting: " + string(array_length(monster_queue)));
+        + " | Queue waiting: " + string(array_length(monster_queue))
+        + " | On field: " + string(_living)
+        + " | DB: " + string(array_length(global.monster_DB.enemies)));
 }
 
 function monster_ApplyActiveSlotLayout(_board) {

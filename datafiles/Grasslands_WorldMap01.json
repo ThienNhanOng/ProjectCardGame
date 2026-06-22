@@ -1,0 +1,37 @@
+{
+  "map_id": "grasslands_01",
+  "battleset": "Grasslands_Battleset01_starter.json",
+  "event_flow": [1, 2, 3, 4, 5],
+  "events": [
+    {
+      "id": 1,
+      "label": "Trail Start",
+      "battle": "battle01",
+      "replay_pool": ["battle01", "battle02", "battle03", "battle04", "battle05"]
+    },
+    {
+      "id": 2,
+      "label": "Crossroads",
+      "battle": "battle02",
+      "replay_pool": ["battle02", "battle03", "battle04"]
+    },
+    {
+      "id": 3,
+      "label": "Rocky Pass",
+      "battle": "battle03",
+      "replay_pool": ["battle03", "battle04", "battle05"]
+    },
+    {
+      "id": 4,
+      "label": "Old Ruins",
+      "battle": "battle04",
+      "replay_pool": ["battle04", "battle05", "battle06"]
+    },
+    {
+      "id": 5,
+      "label": "Boss Gate",
+      "battle": "battle05",
+      "replay_pool": ["battle05", "battle06", "battle07", "battle08"]
+    }
+  ]
+}

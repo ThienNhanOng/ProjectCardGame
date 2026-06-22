@@ -1,0 +1,93 @@
+{
+  "battles": [
+    {
+      "battle": "battle01",
+      "active_slots": 1,
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 1 }
+      ]
+    },
+    {
+      "battle": "battle02",
+      "active_slots": 3,
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 2 },
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 1 }
+      ]
+    },
+    {
+      "battle": "battle03",
+      "active_slots": 2,
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 2 },
+        { "collection": "enemyCollection01", "enemyID": 3 },
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 2 }
+      ]
+    },
+    {
+      "battle": "battle04",
+      "active_slots": 3,
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 2 },
+        { "collection": "enemyCollection01", "enemyID": 3 },
+        { "collection": "enemyCollection01", "enemyID": 4 },
+        { "collection": "enemyCollection01", "enemyID": 5 },
+        { "collection": "enemyCollection01", "enemyID": 1 }
+      ]
+    },
+    {
+      "battle": "battle05",
+      "active_slots": 3,
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 5 },
+        { "collection": "enemyCollection01", "enemyID": 6 },
+        { "collection": "enemyCollection01", "enemyID": 3 },
+        { "collection": "enemyCollection01", "enemyID": 3 },
+        { "collection": "enemyCollection01", "enemyID": 4 }
+      ]
+    },
+    {
+      "battle": "battle06",
+      "active_slots": 2,
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 7 },
+        { "collection": "enemyCollection01", "enemyID": 7 },
+        { "collection": "enemyCollection01", "enemyID": 8 },
+        { "collection": "enemyCollection01", "enemyID": 7 }
+      ]
+    },
+    {
+      "battle": "battle07",
+      "active_slots": 2,
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 9 },
+        { "collection": "enemyCollection01", "enemyID": 10 },
+        { "collection": "enemyCollection01", "enemyID": 11 },
+        { "collection": "enemyCollection01", "enemyID": 12 },
+        { "collection": "enemyCollection01", "enemyID": 13 }
+      ]
+    },
+    {
+      "battle": "battle08",
+      "active_slots": 3,
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 8 },
+        { "collection": "enemyCollection01", "enemyID": 13 },
+        { "collection": "enemyCollection01", "enemyID": 14 },
+        { "collection": "enemyCollection01", "enemyID": 9 },
+        { "collection": "enemyCollection01", "enemyID": 10 }
+      ]
+    }
+  ]
+}

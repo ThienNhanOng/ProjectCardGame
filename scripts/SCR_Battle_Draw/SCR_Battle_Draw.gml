@@ -32,6 +32,7 @@ function SCR_Battle_DrawOverlays() {
     }
 
     battle_DrawHoverPreview();
+    worldmap_DrawBattleVictoryPrompt();
 
     var _bm = instance_find(OBJ_BattleManager, 0);
     if (_bm != noone) {

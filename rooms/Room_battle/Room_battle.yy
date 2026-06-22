@@ -6,9 +6,9 @@
   "inheritCreationOrder":false,
   "inheritLayers":false,
   "instanceCreationOrder":[
+    {"name":"inst_4C012EB9","path":"rooms/Room_battle/Room_battle.yy",},
     {"name":"inst_449C8370","path":"rooms/Room_battle/Room_battle.yy",},
     {"name":"inst_4DDC3B0","path":"rooms/Room_battle/Room_battle.yy",},
-    {"name":"inst_4C012EB9","path":"rooms/Room_battle/Room_battle.yy",},
     {"name":"inst_554CA191","path":"rooms/Room_battle/Room_battle.yy",},
     {"name":"inst_4914D761","path":"rooms/Room_battle/Room_battle.yy",},
     {"name":"inst_B8A4E2F1","path":"rooms/Room_battle/Room_battle.yy",},

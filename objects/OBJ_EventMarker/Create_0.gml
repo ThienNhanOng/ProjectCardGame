@@ -1,0 +1,1 @@
+eventmarker_init();

@@ -36,6 +36,8 @@ function SCR_Battle_Step() {
         }
     }
 
+    worldmap_BattleVictoryStep();
+
     if (battle_IsPlayerPhase()) {
         if (!battle_ConsumeSkipFollowUpInput()) {
             SCR_Battle_Targeting_Step();

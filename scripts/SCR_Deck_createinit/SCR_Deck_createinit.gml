@@ -44,36 +44,52 @@ function SCR_Deck_createinit() {
     tag_picker_footer_hint = "";
     tag_picker_apply_cost = 0;
     
-    // Load deck from global variable (saved from deckbuilder)
-    if (variable_global_exists("battle_deck")
-        && is_array(global.battle_deck)
-        && array_length(global.battle_deck) > 0) {
-        for (var i = 0; i < array_length(global.battle_deck); i++) {
-            deck_AddCard(global.battle_deck[i]);
+    deck_LoadFromBattleSource();
+}
+
+function deck_LoadFromBattleSource() {
+    deck_Clear();
+
+    extra_deck_Count = 0;
+    for (var e = 0; e < extra_deck_Max; e++) {
+        extra_deck[e] = 0;
+    }
+
+    var _source = battle_GetDeckSourceCopy();
+    if (array_length(_source) > 0) {
+        for (var i = 0; i < array_length(_source); i++) {
+            if (deck_Count >= deck_Max) break;
+            deck[deck_Count] = _source[i];
+            deck_Count++;
         }
         deck_Shuffle();
-        show_debug_message("Loaded " + string(deck_Count) + " cards into battle deck");
-        global.battle_deck = undefined;
+        show_debug_message("Loaded " + string(deck_Count) + " cards into battle deck (fresh copy, shuffled)");
     } else {
-        show_debug_message("No battle deck found! Using default cards.");
+        show_debug_message("No battle deck source found! Using default cards.");
         deck_AddCard(1);
         deck_AddCard(2);
         deck_AddCard(3);
         deck_Shuffle();
     }
 
-    deck_LoadExtraDeckFromCollection();
+    var _extra_source = battle_GetExtraDeckSourceCopy();
+    if (array_length(_extra_source) > 0) {
+        for (var j = 0; j < array_length(_extra_source); j++) {
+            deck_AddExtraCard(_extra_source[j]);
+        }
+        show_debug_message("Loaded " + string(extra_deck_Count) + " cards into extra deck (fresh copy)");
+    } else {
+        deck_LoadExtraDeckFromCollection();
+    }
 }
 
 function deck_LoadExtraDeckFromCollection() {
-    if (variable_global_exists("battle_extra_deck")
-        && is_array(global.battle_extra_deck)
-        && array_length(global.battle_extra_deck) > 0) {
-        for (var i = 0; i < array_length(global.battle_extra_deck); i++) {
-            deck_AddExtraCard(global.battle_extra_deck[i]);
+    var _extra_source = battle_GetExtraDeckSourceCopy();
+    if (array_length(_extra_source) > 0) {
+        for (var i = 0; i < array_length(_extra_source); i++) {
+            deck_AddExtraCard(_extra_source[i]);
         }
-        show_debug_message("Loaded " + string(extra_deck_Count) + " cards into extra deck (saved)");
-        global.battle_extra_deck = undefined;
+        show_debug_message("Loaded " + string(extra_deck_Count) + " cards into extra deck (saved source)");
         return;
     }
 

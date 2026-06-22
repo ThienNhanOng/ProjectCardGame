@@ -8,7 +8,12 @@ function monster_SpawnIntoSlot(_board, _slot_index) {
     array_delete(monster_queue, 0, 1);
 
     var _monster = monster_CreateInstance(_entry);
-    if (_monster == undefined) return false;
+    if (_monster == undefined) {
+        array_insert(monster_queue, 0, _entry);
+        show_debug_message("Spawn failed: " + string(_entry.collection)
+            + " ID " + string(_entry.enemyID));
+        return false;
+    }
 
     var _slot = _board.enemy_slots[_slot_index];
     _slot.occupied = true;
@@ -68,6 +73,7 @@ function monster_CheckVictory(_board) {
 
     battle_won = true;
     show_debug_message("All enemies defeated!");
+    worldmap_NotifyBattleVictory();
 }
 
 function monster_GetQueueCount() {

@@ -1,0 +1,203 @@
+Map1 Markers — How It Works
+
+
+Table of Contents
+
+1. Quick overview
+2. Folder layout
+3. Map 1 markers (this folder)
+4. Room setup (Room_Worldmap1)
+5. Battlesets (which enemies spawn)
+6. Adding a new map 1 marker
+7. Starting map 2 (Map2Markers folder)
+8. Adding new monster JSON
+
+
+1. Quick overview
+
+World map events are battle markers placed in the room.
+Each marker object knows:
+  - unlock order
+  - display label
+  - which battle to run (battle01, battle02, ...)
+  - which battleset JSON file to read
+  - replay battles after the event is cleared
+
+Flow when the player presses E at a marker:
+
+  OBJ_Map1_MarkerXX  (Create event config)
+        ↓
+  worldmap_SyncMarkersFromRoom()  (on map load)
+        ↓
+  worldmap_LaunchEventBattle()
+        ↓
+  Grasslands_Battleset01_starter.json  (waves / enemy IDs)
+        ↓
+  EnemyCollection01.json  (enemy stats, abilities, animation)
+        ↓
+  Room_battle
+
+
+2. Folder layout
+
+Objects / WorldMapSystem
+  EventMarkers
+    OBJ_EventMarker          ← parent object (logic only — do not place in room)
+  Map1Markers                ← YOU ARE HERE
+    OBJ_Map1_Marker01
+    OBJ_Map1_Marker02
+    OBJ_Map1_Marker03
+    OBJ_Map1_Marker04
+    OBJ_Map1_Marker05
+  Map2Markers
+    OBJ_Map2_Marker01        ← template for a second map
+
+
+3. Map 1 markers (this folder)
+
+Each marker is a child of OBJ_EventMarker.
+Battle settings live in that object's Create event.
+
+Example — OBJ_Map1_Marker01 / Create:
+
+  event_inherited();
+  eventmarker_apply_config(
+      1,                                              // marker_order (unlock sequence)
+      "Trail Start",                                  // label shown on map
+      "battle01",                                     // battle id in battleset JSON
+      "Grasslands_Battleset01_starter.json",          // battleset file
+      "battle01,battle02,battle03,battle04,battle05" // replay pool when cleared
+  );
+
+Parameters for eventmarker_apply_config:
+  1. marker_order     — 1 = first event, 2 = second, etc.
+  2. marker_label     — name above the marker
+  3. marker_battle    — battle id string (must exist in battleset JSON)
+  4. marker_battleset — filename in datafiles/ (leave "" to use map default)
+  5. marker_replay_pool — comma-separated battle ids for replays after clear
+
+Marker states (sprites):
+  locked    — blue/inactive (not yet reachable)
+  available — orange (current event — press E)
+  cleared   — green (done — can replay random battle from replay pool)
+
+
+4. Room setup (Room_Worldmap1)
+
+1. Open Room_Worldmap1 in the Room Editor.
+2. Drag marker objects from Map1Markers into the room.
+3. Position them anywhere on the map — order comes from marker_order, not X position.
+4. OBJ_WorldMapController must exist in the room (calls worldmap_InitRoom on start).
+
+You do NOT need to edit Grasslands_WorldMap01.json for normal setup.
+Markers in the room are the source of truth. The JSON is only a fallback if a
+marker field is left blank.
+
+
+5. Battlesets (which enemies spawn)
+
+File: datafiles/Grasslands_Battleset01_starter.json
+
+Each battle lists waves of enemies by collection + enemyID:
+
+  {
+    "battle": "battle01",
+    "active_slots": 1,
+    "wave": [
+      { "collection": "enemyCollection01", "enemyID": 1 },
+      { "collection": "enemyCollection01", "enemyID": 1 }
+    ]
+  }
+
+  battle01–battle08  = fight definitions (waves)
+  enemyID            = must match an entry in EnemyCollection01.json
+
+To point a marker at a fight, set marker_battle to "battle01" (or any battle id
+in the battleset file named in marker_battleset).
+
+
+6. Adding a new map 1 marker
+
+1. In Asset Browser: right-click Map1Markers → Create Object
+   (or duplicate OBJ_Map1_Marker05).
+2. Set Parent Object to OBJ_EventMarker.
+3. Open the new object's Create event and call eventmarker_apply_config(...).
+4. Register the object in the project if you created it manually (IDE usually does this).
+5. Place the instance in Room_Worldmap1.
+
+Duplicate shortcut:
+  Duplicate OBJ_Map1_Marker05 → rename to OBJ_Map1_Marker06 → edit Create event.
+
+
+7. Starting map 2 (Map2Markers folder)
+
+Same pattern as map 1:
+
+1. Duplicate OBJ_Map2_Marker01 in Map2Markers.
+2. Edit Create → eventmarker_apply_config(order, label, battle, battleset, replays).
+3. Create Room_Worldmap2 (or duplicate Room_Worldmap1).
+4. Place Map2 marker instances in that room.
+5. Add OBJ_WorldMapController to the new room.
+6. Optional: change which map config JSON loads in SCR_WorldMapController_Init.
+
+
+8. Adding new monster JSON
+
+Monsters are defined separately from battles and markers.
+
+Step A — Define the enemy (stats, name, abilities)
+
+  File: datafiles/EnemyCollection01.json
+
+  Add a new entry under "enemy" with a unique enemyID:
+
+  {
+    "enemyID": 15,
+    "enemyname": "Wolf",
+    "type": "monster",
+    "tag": ["Beast"],
+    "sprite": "SPR_Monsterplaceholder",
+    "animation": "GoblinSoldier",
+    "level": 1,
+    "enemyhealthvalue": 8,
+    "enemyattackvalue": 5,
+    "enemyability": [{ "type": "attack", "value": 5 }]
+  }
+
+  Ability types used in this project:
+    attack, attack_all, heal, heal_all, self_buff, buff, destroy, silence
+
+Step B — Use the enemy in a battle
+
+  File: datafiles/Grasslands_Battleset01_starter.json
+
+  Add or edit a battle wave entry:
+
+  { "collection": "enemyCollection01", "enemyID": 15 }
+
+  Then set a marker's marker_battle to that battle id.
+
+Step C — Included Files (if new JSON file)
+
+  If you create a NEW collection file (not EnemyCollection01.json):
+  1. Put the file in datafiles/
+  2. GameMaker → Included Files → add the JSON
+  3. Open scripts/LoadMonsters/LoadMonsters.gml
+  4. In SCR_LoadAllMonsters(), add:
+       load_MonsterSet("YourNewCollection.json");
+
+  For edits inside EnemyCollection01.json only — no loader change needed.
+  Reload / restart the game so OBJ_GameController runs SCR_LoadAllMonsters() again.
+
+Step D — New battleset file (optional)
+
+  If map 2 uses different fights:
+  1. Create datafiles/YourMap_Battleset.json (copy Grasslands_Battleset01_starter.json)
+  2. Add to Included Files
+  3. Set marker_battleset in the marker Create event to that filename
+
+Data chain summary:
+
+  Marker Create event     → which battle id + which battleset file
+  Battleset JSON          → which enemyIDs spawn in each wave
+  EnemyCollection JSON    → what those enemies actually are

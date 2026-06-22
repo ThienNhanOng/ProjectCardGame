@@ -1,5 +1,7 @@
 /// @desc Debug hover + hitbox overlay for enemy monsters
 
+#macro DEBUG_ENEMY_HITBOXES false
+
 function monster_GetHitbox(_slot) {
     var _layout = monster_GetSlotLayout(_slot);
 
@@ -38,6 +40,7 @@ function SCR_Monster_UpdateHoverDebug() {
 }
 
 function SCR_Monster_DrawHoverDebug() {
+    if (!DEBUG_ENEMY_HITBOXES) return;
     if (active_slot_count <= 0) return;
 
     var _board = instance_find(OBJ_BoardManager, 0);
@@ -49,11 +52,6 @@ function SCR_Monster_DrawHoverDebug() {
 
         var _box = monster_GetHitbox(_slot);
         var _hovered = (i == hovered_enemy_slot);
-
-        if (!_slot.occupied || _slot.card == undefined) {
-            var _layout = monster_GetSlotLayout(_slot);
-            draw_sprite_ext(SPR_MonsterSlot, 0, _layout.cx, _layout.cy, 1, 1, 0, c_white, 0.35);
-        }
 
         draw_set_color(_hovered ? c_lime : c_yellow);
         draw_rectangle(_box.card_left, _box.card_top, _box.card_right, _box.full_bottom, true);

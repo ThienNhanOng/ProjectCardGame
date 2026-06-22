@@ -1,3 +1,6 @@
+// Reset battle session globals before instances spawn (reuses this room for every event)
+battle_BeginSession();
+
 // ===== PLAY ROOM CAMERA SETUP =====
 
 // Enable viewports

@@ -1,19 +1,51 @@
 /// @desc Read-only monster data helpers (DB lookup, runtime struct, display helpers)
 
+function monster_NormalizeCollectionName(_collection) {
+    var _name = string(_collection);
+    switch (_name) {
+        case "enemySet_01":
+        case "enemySet_02":
+        case "enemySet_03":
+        case "enemyGoblins_01":
+        case "enemyOrcs_01":
+            return "enemyCollection01";
+        default:
+            return _name;
+    }
+}
+
 function monster_GetDefinition(_collection, _enemy_id) {
-    for (var i = 0; i < array_length(monster_DB.enemies); i++) {
-        var _enemy = monster_DB.enemies[i];
-        if (_enemy.collection == _collection && _enemy.enemyID == _enemy_id) {
+    monsters_EnsureDatabase();
+
+    _collection = monster_NormalizeCollectionName(_collection);
+    _enemy_id = floor(_enemy_id);
+
+    for (var i = 0; i < array_length(global.monster_DB.enemies); i++) {
+        var _enemy = global.monster_DB.enemies[i];
+        if (_enemy.collection == _collection && floor(_enemy.enemyID) == _enemy_id) {
             return _enemy;
         }
     }
 
-    show_debug_message("Monster not found: " + _collection + " ID " + string(_enemy_id));
+    for (var j = 0; j < array_length(global.monster_DB.enemies); j++) {
+        var _fallback = global.monster_DB.enemies[j];
+        if (floor(_fallback.enemyID) == _enemy_id) {
+            show_debug_message("Monster fallback by ID " + string(_enemy_id)
+                + " (wanted collection " + _collection + ")");
+            return _fallback;
+        }
+    }
+
+    show_debug_message("Monster not found: " + _collection + " ID " + string(_enemy_id)
+        + " | DB size: " + string(array_length(global.monster_DB.enemies)));
     return undefined;
 }
 
 function monster_CreateInstance(_wave_entry) {
-    var _def = monster_GetDefinition(_wave_entry.collection, _wave_entry.enemyID);
+    var _collection = monster_NormalizeCollectionName(_wave_entry.collection);
+    var _enemy_id = floor(_wave_entry.enemyID);
+
+    var _def = monster_GetDefinition(_collection, _enemy_id);
     if (_def == undefined) return undefined;
 
     return {
