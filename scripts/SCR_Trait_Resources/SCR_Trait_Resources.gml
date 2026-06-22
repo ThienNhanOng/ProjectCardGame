@@ -1,5 +1,79 @@
 /// @desc Resource traits — add_counter, remove_counter, add_cost
 
+function trait_ChainReset() {
+    trait_chain_added_cards = [];
+    trait_chain_added_deck_ids = [];
+    trait_pending_add_cost_entries = [];
+}
+
+function trait_ChainFinish() {
+    var _deck = instance_find(OBJ_Deck, 0);
+    if (_deck != noone && _deck.tag_picker_open) return;
+
+    trait_chain_added_cards = [];
+    trait_chain_added_deck_ids = [];
+    trait_pending_add_cost_entries = [];
+}
+
+function trait_ApplyDeckIdCostEntry(_card_id, _entry) {
+    if (_card_id <= 0 || _entry == undefined) return;
+
+    var _key = string(_card_id);
+    if (!variable_struct_exists(trait_chain_deck_id_costs, _key)) {
+        trait_chain_deck_id_costs[$ _key] = [];
+    }
+    array_push(trait_chain_deck_id_costs[$ _key], _entry);
+}
+
+function trait_ChainApplyDeckIdCosts(_card, _card_id) {
+    if (_card == undefined || _card_id <= 0) return;
+
+    var _key = string(_card_id);
+    if (!variable_struct_exists(trait_chain_deck_id_costs, _key)) return;
+
+    var _entries = trait_chain_deck_id_costs[$ _key];
+    for (var i = 0; i < array_length(_entries); i++) {
+        card_AppendCostEntry(_card, _entries[i]);
+    }
+}
+
+function trait_ChainRegisterAddedCard(_card) {
+    if (_card == undefined) return;
+
+    array_push(trait_chain_added_cards, _card);
+    for (var i = 0; i < array_length(trait_pending_add_cost_entries); i++) {
+        card_AppendCostEntry(_card, trait_pending_add_cost_entries[i]);
+    }
+}
+
+function trait_ChainRegisterAddedDeckId(_card_id) {
+    if (_card_id <= 0) return;
+
+    array_push(trait_chain_added_deck_ids, _card_id);
+    for (var i = 0; i < array_length(trait_pending_add_cost_entries); i++) {
+        trait_ApplyDeckIdCostEntry(_card_id, trait_pending_add_cost_entries[i]);
+    }
+}
+
+function trait_ExecuteAddCostToChain(_trait) {
+    var _entry = card_BuildCostEntryFromTrait(_trait);
+    if (_entry == undefined) return false;
+
+    array_push(trait_pending_add_cost_entries, _entry);
+
+    var _applied = false;
+    for (var i = 0; i < array_length(trait_chain_added_cards); i++) {
+        if (card_AppendCostEntry(trait_chain_added_cards[i], _entry)) _applied = true;
+    }
+    for (var d = 0; d < array_length(trait_chain_added_deck_ids); d++) {
+        trait_ApplyDeckIdCostEntry(trait_chain_added_deck_ids[d], _entry);
+        _applied = true;
+    }
+
+    show_debug_message((_applied ? "Add cost applied: " : "Add cost queued: ") + card_FormatCostEntry(_entry));
+    return true;
+}
+
 function trait_ExecuteAddCounter(_trait, _player_slot = -1) {
     return battle_AddResourcesTemporary(max(1, _trait.amount), _player_slot);
 }

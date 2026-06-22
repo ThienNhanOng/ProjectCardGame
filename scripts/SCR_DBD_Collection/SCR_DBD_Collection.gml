@@ -326,11 +326,6 @@ function SCR_DBD_GetCardSummaryLines(_card) {
         }
     }
 
-    var _cost_text = card_FormatAllCosts(_card);
-    if (_cost_text != "") {
-        array_push(_lines, "Cost: " + _cost_text);
-    }
-
     return _lines;
 }
 
@@ -371,23 +366,29 @@ function SCR_DBD_GetCardAbilityLines(_card) {
 function SCR_DBD_GetCardConditionLines(_card) {
     var _lines = [];
     if (_card == undefined) return _lines;
-    if (_card.type != "spirit" && _card.type != "special_monster") return _lines;
 
-    var _conds = conditions_GetRequirements(_card);
-    if (array_length(_conds) <= 0) {
-        array_push(_lines, "None");
-        return _lines;
+    var _play_costs = card_GetPlayCostConditionLines(_card);
+    for (var p = 0; p < array_length(_play_costs); p++) {
+        array_push(_lines, _play_costs[p]);
     }
 
-    for (var c = 0; c < array_length(_conds); c++) {
-        array_push(_lines, conditions_GetRequirementText(_conds[c]));
+    if (_card.type == "spirit" || _card.type == "special_monster") {
+        var _conds = conditions_GetRequirements(_card);
+        for (var c = 0; c < array_length(_conds); c++) {
+            array_push(_lines, conditions_GetRequirementText(_conds[c]));
+        }
     }
+
+    if (array_length(_lines) <= 0) array_push(_lines, "None");
     return _lines;
 }
 
 function SCR_DBD_ShouldShowPreviewConditions(_card) {
     if (_card == undefined) return false;
-    return (_card.type == "spirit" || _card.type == "special_monster");
+    if (_card.type == "spirit" || _card.type == "special_monster") return true;
+
+    card_NormalizeCostsOnCard(_card);
+    return array_length(card_GetCosts(_card)) > 0;
 }
 
 function SCR_DBD_GetCardPreviewSprite(_card) {

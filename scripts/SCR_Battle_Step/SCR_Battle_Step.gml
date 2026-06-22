@@ -1,5 +1,15 @@
 /// @desc Battle input — targeting + End Turn button
 
+function battle_SkipFollowUpInputThisFrame() {
+    battle_skip_followup_input = true;
+}
+
+function battle_ConsumeSkipFollowUpInput() {
+    if (!battle_skip_followup_input) return false;
+    battle_skip_followup_input = false;
+    return true;
+}
+
 function SCR_Battle_Step() {
     if (battle_IsPlayerDefeated()) return;
 
@@ -27,10 +37,12 @@ function SCR_Battle_Step() {
     }
 
     if (battle_IsPlayerPhase()) {
-        SCR_Battle_Targeting_Step();
-        if (!battle_IsTargeting()) {
-            SCR_Battle_WeaponInput_Step();
-            battle_HandleEndTurnButton();
+        if (!battle_ConsumeSkipFollowUpInput()) {
+            SCR_Battle_Targeting_Step();
+            if (!battle_IsTargeting()) {
+                SCR_Battle_WeaponInput_Step();
+                battle_HandleEndTurnButton();
+            }
         }
     }
 }

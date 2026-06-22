@@ -4,8 +4,8 @@ function card_NormalizeCostEntry(_raw) {
     if (_raw == undefined) return undefined;
 
     if (is_real(_raw) || is_int64(_raw) || is_bool(_raw)) {
-        var _num = max(0, floor(real(_raw)));
-        if (_num <= 0) return undefined;
+        var _num = floor(real(_raw));
+        if (_num == 0) return undefined;
         return { amount: _num };
     }
 
@@ -13,9 +13,9 @@ function card_NormalizeCostEntry(_raw) {
 
     var _amount = 0;
     if (variable_struct_exists(_raw, "amount")) {
-        _amount = max(0, floor(real(_raw.amount)));
+        _amount = floor(real(_raw.amount));
     } else if (variable_struct_exists(_raw, "value")) {
-        _amount = max(0, floor(real(_raw.value)));
+        _amount = floor(real(_raw.value));
     }
 
     var _entry = { amount: _amount };
@@ -36,11 +36,16 @@ function card_NormalizeCostEntry(_raw) {
         _entry.card_type = string_lower(string_trim(_raw.type));
     }
 
-    if (_entry.amount <= 0 && !variable_struct_exists(_entry, "tag")
+    var _resource_only = !variable_struct_exists(_entry, "tag")
         && !variable_struct_exists(_entry, "id")
-        && !variable_struct_exists(_entry, "card_type")) {
-        return undefined;
+        && !variable_struct_exists(_entry, "card_type");
+
+    if (_resource_only) {
+        if (_amount == 0) return undefined;
+        return _entry;
     }
+
+    if (_entry.amount <= 0) return undefined;
 
     return _entry;
 }
@@ -58,9 +63,25 @@ function card_NormalizeCostsOnCard(_card) {
             var _entry = card_NormalizeCostEntry(_card.costs[i]);
             if (_entry != undefined) array_push(_costs, _entry);
         }
-    } else if (variable_struct_exists(_card, "cost")) {
+    }
+
+    if (variable_struct_exists(_card, "cost")) {
         var _legacy = card_NormalizeCostEntry(_card.cost);
-        if (_legacy != undefined) array_push(_costs, _legacy);
+        if (_legacy != undefined) {
+            var _needs_legacy = true;
+            if (_had_costs_array && !card_CostEntryIsTribute(_legacy)) {
+                for (var r = 0; r < array_length(_costs); r++) {
+                    if (!card_CostEntryIsTribute(_costs[r])) {
+                        _needs_legacy = false;
+                        break;
+                    }
+                }
+            }
+            if (_needs_legacy) {
+                if (_had_costs_array) array_insert(_costs, 0, _legacy);
+                else array_push(_costs, _legacy);
+            }
+        }
     }
 
     _card.costs = _costs;
@@ -95,9 +116,9 @@ function card_GetResourceCostTotal(_card) {
     var _costs = card_GetCosts(_card);
     for (var i = 0; i < array_length(_costs); i++) {
         if (card_CostEntryIsTribute(_costs[i])) continue;
-        _total += max(0, _costs[i].amount);
+        _total += _costs[i].amount;
     }
-    return _total;
+    return max(0, _total);
 }
 
 function card_CostEntryMatchesHandCard(_entry, _hand_card) {
@@ -234,7 +255,8 @@ function card_AppendCostEntry(_card, _entry) {
 function card_BuildCostEntryFromTrait(_trait) {
     if (_trait == undefined) return undefined;
 
-    var _entry = { amount: max(0, floor(real(_trait.amount))) };
+    var _amount = floor(real(_trait.amount));
+    var _entry = { amount: _amount };
 
     if (_trait.card_id >= 0) {
         _entry.id = _trait.card_id;
@@ -242,9 +264,13 @@ function card_BuildCostEntryFromTrait(_trait) {
         _entry.tag = string(_trait.tags[0]);
     }
 
-    if (_entry.amount <= 0 && !variable_struct_exists(_entry, "tag") && !variable_struct_exists(_entry, "id")) {
-        return undefined;
+    var _resource_only = !variable_struct_exists(_entry, "tag") && !variable_struct_exists(_entry, "id");
+    if (_resource_only) {
+        if (_amount == 0) return undefined;
+        return _entry;
     }
+
+    if (_amount <= 0) return undefined;
 
     return _entry;
 }
@@ -277,4 +303,70 @@ function card_FormatAllCosts(_card) {
         _txt += card_FormatCostEntry(_costs[i]);
     }
     return _txt;
+}
+
+function card_GetDefinitionResourceCost(_card) {
+    if (_card == undefined || !variable_struct_exists(_card, "id")) return -1;
+
+    var _def = deck_GetCardData(floor(real(_card.id)));
+    if (_def == undefined) return -1;
+
+    return card_GetResourceCostTotal(_def);
+}
+
+function card_FormatCostConditionLine(_entry) {
+    if (_entry == undefined) return "";
+
+    if (variable_struct_exists(_entry, "tag")) {
+        return "Discard " + string(_entry.amount) + " " + _entry.tag;
+    }
+
+    if (variable_struct_exists(_entry, "id")) {
+        return "Discard " + string(_entry.amount) + " " + deck_GetCardName(_entry.id);
+    }
+
+    if (variable_struct_exists(_entry, "card_type")) {
+        return "Discard " + string(_entry.amount) + " " + _entry.card_type;
+    }
+
+    if (_entry.amount < 0) {
+        return "Cost reduced by " + string(abs(_entry.amount)) + " resources";
+    }
+
+    return "Pay " + string(_entry.amount) + " resources";
+}
+
+function card_GetPlayCostConditionLines(_card) {
+    var _lines = [];
+    if (_card == undefined) return _lines;
+    if (_card.type == "spirit" || _card.type == "special_monster") return _lines;
+
+    card_NormalizeCostsOnCard(_card);
+    var _costs = card_GetCosts(_card);
+    var _resource_total = 0;
+    var _tribute_lines = [];
+
+    for (var i = 0; i < array_length(_costs); i++) {
+        if (card_CostEntryIsTribute(_costs[i])) {
+            array_push(_tribute_lines, card_FormatCostConditionLine(_costs[i]));
+        } else {
+            _resource_total += _costs[i].amount;
+        }
+    }
+
+    _resource_total = max(0, _resource_total);
+    if (_resource_total > 0) {
+        var _base = card_GetDefinitionResourceCost(_card);
+        if (_base >= 0 && _base != _resource_total) {
+            array_push(_lines, "Pay " + string(_resource_total) + " resources (was " + string(_base) + ")");
+        } else {
+            array_push(_lines, "Pay " + string(_resource_total) + " resources");
+        }
+    }
+
+    for (var t = 0; t < array_length(_tribute_lines); t++) {
+        array_push(_lines, _tribute_lines[t]);
+    }
+
+    return _lines;
 }

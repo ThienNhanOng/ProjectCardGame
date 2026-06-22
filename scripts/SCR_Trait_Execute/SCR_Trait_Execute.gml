@@ -130,6 +130,18 @@ function trait_Execute(_trait, _ctx) {
 
 
 
+        case "no_board_expire":
+
+            return trait_ExecuteNoBoardExpire(_trait, _player_slot);
+
+
+
+        case "add_board_turns":
+
+            return trait_ExecuteAddBoardTurns(_trait, _player_slot);
+
+
+
         case "silence":
 
             if (_ctx.amount <= 0) _ctx.amount = max(1, _trait.amount);

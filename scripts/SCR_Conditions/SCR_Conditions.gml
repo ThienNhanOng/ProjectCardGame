@@ -626,10 +626,15 @@ function conditions_TryPickDiscardHand(_index) {
     return true;
 }
 
+function conditions_summon_CanCancel() {
+    return conditions_summon_mode != "discard_hand";
+}
+
 function conditions_summon_Step() {
     if (!conditions_summon_active) return;
 
-    if (keyboard_check_pressed(vk_escape) || mouse_check_button_pressed(mb_right)) {
+    if (conditions_summon_CanCancel()
+        && (keyboard_check_pressed(vk_escape) || mouse_check_button_pressed(mb_right))) {
         conditions_CancelSummon();
         return;
     }
@@ -639,7 +644,9 @@ function conditions_summon_Step() {
     if (conditions_summon_mode == "pick_slot") {
         var _slot = conditions_GetMonsterSlotAt(mouse_x, mouse_y);
         if (_slot >= 0) {
-            if (!conditions_CompleteSummonOnSlot(_slot)) {
+            if (conditions_CompleteSummonOnSlot(_slot)) {
+                battle_SkipFollowUpInputThisFrame();
+            } else {
                 show_debug_message("Cannot summon there");
             }
         }
@@ -649,7 +656,9 @@ function conditions_summon_Step() {
     if (conditions_summon_mode == "sacrifice_monster" || conditions_summon_mode == "sacrifice_tag" || conditions_summon_mode == "sacrifice_id") {
         var _sac_slot = conditions_GetMonsterSlotAt(mouse_x, mouse_y);
         if (_sac_slot >= 0) {
-            conditions_TryPickSacrificeSlot(_sac_slot);
+            if (conditions_TryPickSacrificeSlot(_sac_slot)) {
+                battle_SkipFollowUpInputThisFrame();
+            }
             return;
         }
 
@@ -658,7 +667,9 @@ function conditions_summon_Step() {
             if (_hand != noone) {
                 var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
                 var _idx = SCR_Hand_PickCardIndex(mouse_x, mouse_y, _hand.hand_Count, _spacing, _hand.hand_Y);
-                if (_idx >= 0) conditions_TryPickSacrificeHand(_idx);
+                if (_idx >= 0 && conditions_TryPickSacrificeHand(_idx)) {
+                    battle_SkipFollowUpInputThisFrame();
+                }
             }
         }
         return;
@@ -669,7 +680,9 @@ function conditions_summon_Step() {
         if (_hand == noone) return;
         var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
         var _idx = SCR_Hand_PickCardIndex(mouse_x, mouse_y, _hand.hand_Count, _spacing, _hand.hand_Y);
-        if (_idx >= 0) conditions_TryPickDiscardHand(_idx);
+        if (_idx >= 0 && conditions_TryPickDiscardHand(_idx)) {
+            battle_SkipFollowUpInputThisFrame();
+        }
     }
 }
 
@@ -693,7 +706,8 @@ function conditions_summon_Draw() {
 
     draw_set_halign(fa_center);
     draw_set_color(c_yellow);
-    draw_text(room_width / 2, 8, conditions_summon_prompt + "  (ESC to cancel)");
+    var _hint = conditions_summon_CanCancel() ? "  (ESC to cancel)" : "";
+    draw_text(room_width / 2, 8, conditions_summon_prompt + _hint);
     draw_set_halign(fa_left);
 
     var _board = instance_find(OBJ_BoardManager, 0);

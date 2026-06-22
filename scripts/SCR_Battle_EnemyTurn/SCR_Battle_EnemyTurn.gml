@@ -214,11 +214,17 @@ function battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _trait) {
 function battle_EnemyAttack(_enemy_slot_index, _monster) {
     if (battle_IsPlayerDefeated()) return false;
 
-    var _ctx = trait_CreateAttackContext(_monster.attack, "player", -1);
+    var _player_target = battle_PickRandomPlayerMonsterSlot();
+    var _ctx = trait_CreateAttackContext(_monster.attack, "player", _player_target);
     var _ok = trait_ExecuteAttack(_ctx);
     if (_ok) {
-        battle_EnemyLog_Attack(_enemy_slot_index, _monster, -1, _monster.attack);
-        show_debug_message(_monster.name + " attacked player for " + string(_monster.attack));
+        battle_EnemyLog_Attack(_enemy_slot_index, _monster, _player_target, _monster.attack);
+        if (_player_target >= 0) {
+            show_debug_message(_monster.name + " attacked player monster slot "
+                + string(_player_target) + " for " + string(_monster.attack));
+        } else {
+            show_debug_message(_monster.name + " attacked player for " + string(_monster.attack));
+        }
     }
     return _ok;
 }

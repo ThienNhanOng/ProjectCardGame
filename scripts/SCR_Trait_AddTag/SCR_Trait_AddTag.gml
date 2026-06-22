@@ -188,7 +188,9 @@ function deck_TagPicker_Close() {
     var _deck = instance_find(OBJ_Deck, 0);
     if (_deck == noone) return;
 
+    var _was_open = false;
     with (_deck) {
+        _was_open = tag_picker_open;
         tag_picker_open = false;
         tag_picker_scroll = 0;
         tag_picker_card_ids = [];
@@ -197,6 +199,13 @@ function deck_TagPicker_Close() {
         tag_picker_title = "";
         tag_picker_footer_hint = "";
         tag_picker_apply_cost = 0;
+    }
+
+    if (_was_open) {
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone) {
+            with (_bm) trait_ChainFinish();
+        }
     }
 }
 
@@ -316,7 +325,13 @@ function deck_TagPicker_AddCard(_card_id) {
         case "deck":
             with (_deck) {
                 for (var d = 0; d < _amount; d++) {
-                    if (deck_AddCard(_card_id)) _added_any = true;
+                    if (deck_AddCard(_card_id)) {
+                        _added_any = true;
+                        var _bm = instance_find(OBJ_BattleManager, 0);
+                        if (_bm != noone) {
+                            with (_bm) trait_ChainRegisterAddedDeckId(_card_id);
+                        }
+                    }
                 }
             }
             break;
@@ -324,7 +339,13 @@ function deck_TagPicker_AddCard(_card_id) {
         case "extra_deck":
             with (_deck) {
                 for (var e = 0; e < _amount; e++) {
-                    if (deck_AddExtraCard(_card_id)) _added_any = true;
+                    if (deck_AddExtraCard(_card_id)) {
+                        _added_any = true;
+                        var _bm = instance_find(OBJ_BattleManager, 0);
+                        if (_bm != noone) {
+                            with (_bm) trait_ChainRegisterAddedDeckId(_card_id);
+                        }
+                    }
                 }
             }
             break;

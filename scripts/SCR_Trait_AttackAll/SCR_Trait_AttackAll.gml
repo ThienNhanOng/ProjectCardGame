@@ -31,11 +31,21 @@ function trait_AttackAllEnemies(_amount) {
 }
 
 function trait_AttackAllPlayerMonsters(_amount) {
-    var _hit = battle_DamagePlayer(_amount);
-    if (_hit) {
-        show_debug_message("Attack all hit player for " + string(_amount) + " damage");
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return battle_DamagePlayer(_amount);
+
+    var _hit = false;
+    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
+        var _slot = _board.player_monster_slots[i];
+        if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
+        battle_DamagePlayerMonster(i, _amount);
+        _hit = true;
     }
-    return _hit;
+
+    if (!_hit) return battle_DamagePlayer(_amount);
+
+    show_debug_message("Attack all player monsters for " + string(_amount) + " damage each");
+    return true;
 }
 
 function trait_CreateAttackAllContext(_amount, _target_side = "enemy") {

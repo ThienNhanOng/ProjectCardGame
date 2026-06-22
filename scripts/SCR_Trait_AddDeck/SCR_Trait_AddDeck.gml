@@ -13,6 +13,10 @@ function trait_ExecuteAddDeck(_ctx) {
 
     if (_added) {
         show_debug_message("Added card id " + string(_ctx.card_id) + " to battle deck");
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone) {
+            with (_bm) trait_ChainRegisterAddedDeckId(_ctx.card_id);
+        }
     }
     return _added;
 }
@@ -30,6 +34,10 @@ function trait_ExecuteAddExtraDeck(_ctx) {
 
     if (_added) {
         show_debug_message("Added card id " + string(_ctx.card_id) + " to extra deck");
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone) {
+            with (_bm) trait_ChainRegisterAddedDeckId(_ctx.card_id);
+        }
     }
     return _added;
 }

@@ -92,7 +92,7 @@ Test sets (`MonsterTestset`, `TestActionset`, `TestWeaponset`) remain in the pro
 
 | `weapon` | `ability` | Needs `attack`; see [Weapons](#weapons) |
 
-| `action` | `actionType` | Placed in the action slot; supports `cost` / `costs` |
+| `action` | `actionType` | Placed in the action slot; play cost on card root — see [Ability — card cost & tributes](#ability--card-cost--tributes) |
 
 | `spirit` | `ability` | Extra deck only; optional `conditions` trait for summon rules |
 
@@ -152,9 +152,9 @@ Test sets (`MonsterTestset`, `TestActionset`, `TestWeaponset`) remain in the pro
 
 | `health` | Monster, spirit | Base HP |
 
-| `cost` | Any playable card | Single play cost (resources or tribute). See [Resources & costs](#resources--costs) |
+| `cost` | Any playable card | Single play cost (resources or tribute). See [Ability — card cost & tributes](#ability--card-cost--tributes) |
 
-| `costs` | Any playable card | Array of cost entries (resources + tributes combined) |
+| `costs` | Any playable card | Array of cost entries (resources + tributes combined). See [Ability — card cost & tributes](#ability--card-cost--tributes) |
 
 | `attack` | Weapon, spirit | Weapon strike value; spirit innate single-target strike (optional) |
 
@@ -164,7 +164,7 @@ Test sets (`MonsterTestset`, `TestActionset`, `TestWeaponset`) remain in the pro
 
 | `effectRecursion` | Weapon | Non-attack repeatable effects per turn (default `1`) |
 
-| `ability` | Monster, weapon, spirit | Trait array (see [Traits](#traits-in-json)) |
+| `ability` | Monster, weapon, spirit | Trait array (see [Traits](#traits-in-json)). Cost/tribute traits: [Ability — card cost & tributes](#ability--card-cost--tributes) |
 
 | `actionType` | Action | Trait array (see [Traits](#traits-in-json)) |
 
@@ -590,7 +590,7 @@ Spirits do not use `cardRarity` or tier labels — they show type only.
 
 
 
-Omit the `conditions` entry (or use `"ability": []`) for a spirit with no summon requirements.
+Omit the `conditions` entry (or use `"ability": []`) for a spirit with no summon requirements. Spirit **play/summon costs** and tribute discards use the same `cost` / `costs` rules as other cards — see [Ability — card cost & tributes](#ability--card-cost--tributes).
 
 
 
@@ -628,7 +628,7 @@ Weapons sit in the weapon slot below a monster in the same column.
 
 
 
-- **Effects (on equip)** — non-attack traits in `ability` fire when the weapon is placed, same as monster on-play: instant effects first, then targeting if needed (`heal`, `destroy`, `buff`, `add_cost`, tag pickers, etc.).
+- **Effects (on equip)** — non-attack traits in `ability` fire when the weapon is placed, same as monster on-play: instant effects first, then targeting if needed (`heal`, `destroy`, `buff`, tag pickers, etc.). `add_cost` is instant and does not use targeting.
 
 - **Effects (repeatable)** — traits with `repeat: true` also fire at **player turn start** via `battle_RefreshWeaponRepeatableEffects()`, up to each trait's `recursion` (capped by `effectRecursion` where applicable).
 
@@ -700,59 +700,11 @@ Battle **Resources** are shown on the HUD (red counter). Default pool is **10 / 
 
 
 
-### Card play costs (`cost` / `costs`)
+Card **play cost** (`cost` / `costs` on the card JSON), **tribute discards**, and ability traits that modify generated card cost (`add_cost`, `add_hand_with_cost`) are documented under [Ability — card cost & tributes](#ability--card-cost--tributes) in the Traits section.
 
 
 
-Any card played from hand can declare costs. Payment happens on drag-drop play (`SCR_Card_Cost`, `SCR_DragDrop_Init`).
-
-
-
-```json
-
-{ "cost": 2 }
-
-```
-
-
-
-```json
-
-{
-
-  "costs": [
-
-    { "amount": 2 },
-
-    { "tag": "Warrior", "amount": 1 },
-
-    { "id": 1001, "amount": 1 }
-
-  ]
-
-}
-
-```
-
-
-
-| Cost form | Meaning |
-
-|-----------|---------|
-
-| `amount` only | Spend that many **resources** |
-
-| `tag` + `amount` | Discard `amount` hand cards matching the tag (tribute) |
-
-| `id` / `card_id` + `amount` | Discard `amount` hand cards with that card id |
-
-
-
-Legacy single `"cost": N` is normalized into the `costs` array at load time.
-
-
-
-### Resource traits
+### Resource traits (battle pool)
 
 
 
@@ -764,13 +716,9 @@ Legacy single `"cost": N` is normalized into the `costs` array at load time.
 
 | `remove_counter` | `remove_counter(amount, slot)` | Reduces **max** while source monster stays on board. Restored when source is destroyed |
 
-| `add_cost` | `add_cost(target_card, tag\|id, amount)` | Pick a card on hand or board; append a cost entry to it |
-
-| `add_hand_with_cost` | `add_hand_with_cost(cost)` | Tag picker → add chosen card to hand; apply `cost` to that card |
 
 
-
-**Aliases:** `increase_counter` → `add_counter`, `decrease_counter` → `remove_counter`, `addtohandwithcost` → `add_hand_with_cost`
+**Aliases:** `increase_counter` → `add_counter`, `decrease_counter` → `remove_counter`
 
 
 
@@ -814,7 +762,7 @@ Traits are entries inside **`ability`** (monster / weapon / spirit) or **`action
 
 | `type` | Trait id (see table below) |
 
-| `amount` | Numeric strength (player cards) |
+| `amount` | Numeric strength (player cards). See [Ability — card cost & tributes](#ability--card-cost--tributes) for `add_cost` |
 
 | `value` | Alias for `amount` (enemies often use this) |
 
@@ -936,11 +884,189 @@ Preview text appends `(once per turn)` or `(Nx per turn)` automatically.
 
 | `remove_counter` | −max resources while source lives | `{ "type": "remove_counter", "amount": 3 }` | `SCR_Trait_Resources` |
 
-| `add_cost` | Append cost to a picked card | `{ "type": "add_cost", "tag": "Test", "amount": 1 }` | `SCR_Trait_Resources` |
+| `add_cost` | Append cost to cards added in the same ability chain | `{ "type": "add_cost", "amount": -2 }` — see [Ability — card cost & tributes](#ability--card-cost--tributes) | `SCR_Trait_Resources` |
 
 | `conditions` | Spirit summon rules | See spirit example | `SCR_Conditions` |
 
 | `none` | No ability (enemies) | `{ "type": "none" }` | — |
+
+
+
+### Ability — card cost & tributes
+
+
+
+Play cost is declared on the **card root** (`cost` / `costs`). **Ability** traits can add cards or change the cost on cards created during that ability (`add`, `add_*_tag`, etc.).
+
+
+
+#### Play cost (`cost` / `costs`)
+
+
+
+Any card played from hand (monster, weapon, action) can declare costs. Payment runs on drag-drop play (`SCR_Card_Cost`, `SCR_DragDrop_Init`).
+
+
+
+```json
+
+{ "cost": 2 }
+
+```
+
+
+
+```json
+
+{
+
+  "costs": [
+
+    { "amount": 2 },
+
+    { "tag": "Warrior", "amount": 1 },
+
+    { "id": 1001, "amount": 1 },
+
+    { "type": "monster", "amount": 1 }
+
+  ]
+
+}
+
+```
+
+
+
+| Cost entry | At play time |
+
+|------------|--------------|
+
+| `{ "amount": N }` only | Spend **N resources** from the HUD pool |
+
+| `{ "amount": -N }` | Reduces resource cost (usually from `add_cost` on a generated card). Total resource cost is clamped to **0** |
+
+| `{ "tag": "X", "amount": N }` | **Discard** (tribute) **N** hand cards whose `tag` includes `X` |
+
+| `{ "id": N, "amount": M }` | **Discard** **M** hand cards with that card **id** |
+
+| `{ "type": "monster", "amount": N }` | **Discard** **N** hand cards of that card type (`monster`, `weapon`, `action`, …) |
+
+
+
+Legacy single `"cost": N` is normalized into the `costs` array at load time. Multiple entries in `costs` are all paid together (resources + discards).
+
+
+
+#### Example — discount cards added by `ability`
+
+
+
+**Inspired Adventurer** adds two copies of Basic Strike, then applies a cost reduction via `add_cost`:
+
+
+
+```json
+
+{
+
+  "id": 5,
+
+  "name": "Inspired Adventurer",
+
+  "type": "monster",
+
+  "health": 5,
+
+  "ability": [
+
+    { "type": "self_buff", "amount": 1, "repeat": false, "recursion": 1 },
+
+    { "type": "add", "id": 7, "repeat": false, "recursion": 1 },
+
+    { "type": "add", "id": 7, "repeat": false, "recursion": 1 },
+
+    { "type": "add_cost", "amount": -2, "repeat": false, "recursion": 1 }
+
+  ]
+
+}
+
+```
+
+
+
+Basic Strike has `"cost": 2`. Each copy added to hand gets `{ "amount": -2 }` appended, so both play for **0 resources**. No target picker — `add_cost` only affects cards from earlier traits in the same `ability` / `actionType` list.
+
+
+
+#### `add_cost` (chain modifier)
+
+
+
+| JSON `type` | Script | Summary |
+
+|-------------|--------|---------|
+
+| `add_cost` | `SCR_Trait_Resources` | Append a cost entry to cards added in the same ability chain |
+
+
+
+`add_cost` does **not** open a target picker. It modifies cards created by other traits on the **same card** during the same ability resolution (monster on-play, weapon on-play, or action slot).
+
+
+
+**Applies to cards from:**
+
+
+
+- `add` — cards added directly to hand
+
+- `add_deck` / `add_extra_deck` — cards added to deck piles (cost applies when drawn into hand)
+
+- `add_hand_tag` / `add_deck_tag` / `add_extra_deck_tag` — cards chosen from the tag/search picker
+
+
+
+**Order:** Traits run top-to-bottom in `ability` / `actionType`. `add_cost` applies to all chain-added cards from **earlier** traits. If it appears **before** a search/add trait, the cost is **queued** and applied when the picker finishes or the later add resolves.
+
+
+
+```json
+
+{ "type": "add_cost", "amount": -2 }
+
+{ "type": "add_cost", "tag": "Mercenary", "amount": 1 }
+
+{ "type": "add_hand_tag", "tags": ["Warrior"] },
+
+{ "type": "add_cost", "amount": 1 }
+
+```
+
+
+
+| Field | Meaning |
+
+|-------|---------|
+
+| `amount` | Resource cost change. Positive adds resources required; **negative reduces** resource cost |
+
+| `tag` / `tags` | Optional — append a **tribute discard** cost (`amount` × cards matching tag) |
+
+| `id` / `card_id` | Optional — append a tribute discard for a specific card id |
+
+
+
+#### `add_hand_with_cost`
+
+
+
+Tag search → pick one card → add to **hand** and apply a fixed positive resource cost using the trait's **`cost`** field (not `amount`). Separate from `add_cost`; see trait table above.
+
+
+
+**Alias:** `addtohandwithcost` → `add_hand_with_cost`
 
 
 

@@ -14,7 +14,7 @@ function trait_ExecuteAttack(_ctx) {
     }
 
     if (_ctx.target_side == "player") {
-        return battle_DamagePlayer(_ctx.amount);
+        return battle_DamagePlayerSide(_ctx.amount, _ctx.target_player_slot);
     }
 
     return false;

@@ -32,6 +32,13 @@ function SCR_Battle_Init() {
 
     conditions_summon_Reset();
 
+    battle_skip_followup_input = false;
+
+    trait_chain_added_cards = [];
+    trait_chain_added_deck_ids = [];
+    trait_pending_add_cost_entries = [];
+    trait_chain_deck_id_costs = {};
+
     battle_InitZoneOwners();
 
     battle_PrepareBoardCards();

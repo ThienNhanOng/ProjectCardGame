@@ -60,12 +60,21 @@ function battle_DamagePlayerMonster(_slot_index, _amount) {
     if (!_slot.occupied || _slot.card == undefined) return false;
 
     battle_EnsureCardHealth(_slot.card);
+    var _hp_before = _slot.card.health;
     _slot.card.health = max(0, _slot.card.health - _amount);
     show_debug_message("Player slot " + string(_slot_index) + " took " + string(_amount) + " damage"
         + " | HP: " + string(_slot.card.health) + "/" + string(_slot.card.max_health));
 
     if (_slot.card.health <= 0) {
+        var _overflow = 0;
+        if (!battle_IsSpiritMonster(_slot.card)) {
+            _overflow = max(0, _amount - _hp_before);
+        }
         battle_DestroyPlayerMonster(_slot_index);
+        if (_overflow > 0) {
+            show_debug_message("Overflow " + string(_overflow) + " damage to player");
+            battle_DamagePlayer(_overflow);
+        }
     }
     return true;
 }

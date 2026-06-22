@@ -3,6 +3,7 @@
 function battle_OnMonsterPlayed(_slot_index, _card) {
     battle_EnsureCardHealth(_card);
     battle_CancelTargeting();
+    trait_ChainReset();
 
     var _traits = trait_GetFromCard(_card);
     for (var i = 0; i < array_length(_traits); i++) {
@@ -39,11 +40,13 @@ function battle_BeginMonsterOnPlayTargeting(_slot_index, _start_trait_index = 0)
     }
 
     battle_CancelTargeting();
+    trait_ChainFinish();
 }
 
 function battle_MonsterOnPlayContinue(_slot_index, _completed_trait_index) {
     battle_BeginMonsterOnPlayTargeting(_slot_index, _completed_trait_index + 1);
     if (!battle_IsTargeting()) {
+        trait_ChainFinish();
         show_debug_message("Monster on-play abilities finished");
     }
 }
@@ -99,6 +102,7 @@ function battle_ExecuteMonsterOnPlayHealTrait(_player_slot, _trait_index, _targe
 
 function battle_OnWeaponPlayed(_slot_index, _card) {
     battle_CancelTargeting();
+    trait_ChainReset();
     weapon_EnsureAttackData(_card);
 
     var _traits = trait_GetFromCard(_card);
@@ -173,11 +177,13 @@ function battle_BeginWeaponOnPlayTargeting(_slot_index, _start_trait_index = 0) 
     }
 
     battle_CancelTargeting();
+    trait_ChainFinish();
 }
 
 function battle_WeaponOnPlayContinue(_slot_index, _completed_trait_index) {
     battle_BeginWeaponOnPlayTargeting(_slot_index, _completed_trait_index + 1);
     if (!battle_IsTargeting()) {
+        trait_ChainFinish();
         show_debug_message("Weapon on-play abilities finished");
     }
 }
@@ -333,6 +339,9 @@ function battle_ExecuteActionTraitInstant(_trait_index) {
         case "add_extra_deck_tag":
             _ok = trait_ExecuteAddExtraDeckTag(_trait);
             break;
+        case "add_cost":
+            _ok = trait_ExecuteAddCostToChain(_trait);
+            break;
     }
 
     if (_ok) battle_ConsumeActionTrait(_trait_index);
@@ -342,6 +351,7 @@ function battle_ExecuteActionTraitInstant(_trait_index) {
 function battle_OnActionCardPlayed(_card) {
     battle_RefreshActionUses();
     battle_CancelTargeting();
+    trait_ChainReset();
 
     var _traits = trait_GetFromCard(_card);
 
@@ -431,6 +441,7 @@ function battle_NotifyCardPlaced(_slot, _card) {
     with (_bm) {
         switch (_slot.type) {
             case "monster":
+                battle_InitBoardMonsterLifespan(_card);
                 battle_OnMonsterPlayed(_slot.index, _card);
                 break;
             case "action":
@@ -473,5 +484,6 @@ function battle_TargetingContinueAfterAction(_last_trait_index) {
     }
 
     battle_CancelTargeting();
+    trait_ChainFinish();
     battle_ClearActionSlotIfFinished();
 }

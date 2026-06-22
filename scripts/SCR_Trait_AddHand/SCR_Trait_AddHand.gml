@@ -27,6 +27,10 @@ function trait_ExecuteAddHand(_ctx) {
 
     if (_added) {
         show_debug_message("Added " + _card.name + " (id " + string(_ctx.card_id) + ") to hand");
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone) {
+            with (_bm) trait_ChainRegisterAddedCard(_card);
+        }
     }
     return _added;
 }

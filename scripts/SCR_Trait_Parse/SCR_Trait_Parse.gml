@@ -65,6 +65,13 @@ function trait_NormalizeEntry(_raw) {
 
     if (_type == "increase_counter") _type = "add_counter";
     if (_type == "decrease_counter") _type = "remove_counter";
+    if (_type == "no_board_expire" || _type == "disable_board_expire" || _type == "board_persistent") _type = "no_board_expire";
+    if (_type == "extend_board_turns" || _type == "board_turns_plus" || _type == "add_board_turn") _type = "add_board_turns";
+    if (_type == "board_expire" || _type == "turn_disappear") {
+        if (variable_struct_exists(_raw, "value") && !(_raw.value == true || _raw.value == 1)) {
+            _type = "no_board_expire";
+        }
+    }
 
 
 
@@ -271,7 +278,7 @@ function trait_ActionNeedsTargeting(_type) {
 
     return _type == "attack" || _type == "attack_all" || _type == "heal" || _type == "self_buff" || _type == "buff"
 
-        || _type == "destroy" || _type == "silence" || _type == "add_cost";
+        || _type == "destroy" || _type == "silence";
 
 }
 
@@ -282,7 +289,8 @@ function trait_ActionIsAuto(_type) {
     return trait_IsDrawType(_type) || _type == "heal_all"
         || _type == "openzone"
         || _type == "add_counter" || _type == "remove_counter"
-        || _type == "add_hand_with_cost"
+        || _type == "no_board_expire" || _type == "add_board_turns"
+        || _type == "add_hand_with_cost" || _type == "add_cost"
         || _type == "add" || _type == "add_deck" || _type == "add_extra_deck"
         || _type == "add_hand_tag" || _type == "add_deck_tag" || _type == "add_extra_deck_tag";
 
@@ -307,7 +315,7 @@ function trait_OnPlayNeedsPlayerTarget(_type) {
 
 
 function trait_OnPlayNeedsAddCostTarget(_type) {
-    return _type == "add_cost";
+    return false;
 }
 
 
@@ -380,6 +388,12 @@ function trait_GetDisplayText(_trait) {
 
         case "remove_counter":
             return "Remove counter max -" + string(max(1, _trait.amount)) + " (while alive)";
+
+        case "no_board_expire":
+            return "Board expire: off";
+
+        case "add_board_turns":
+            return "Board turns +" + string(max(1, _trait.amount));
 
         case "add_cost":
             var _entry = card_BuildCostEntryFromTrait(_trait);
@@ -482,9 +496,17 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
 
             return trait_ExecuteRemoveCounter(_trait, _player_slot);
 
+        case "no_board_expire":
+
+            return trait_ExecuteNoBoardExpire(_trait, _player_slot);
+
+        case "add_board_turns":
+
+            return trait_ExecuteAddBoardTurns(_trait, _player_slot);
+
         case "add_cost":
 
-            return false;
+            return trait_ExecuteAddCostToChain(_trait);
 
         case "destroy":
 

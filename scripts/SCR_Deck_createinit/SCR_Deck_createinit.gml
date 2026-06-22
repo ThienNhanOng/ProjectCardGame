@@ -266,7 +266,14 @@ function card_CreateRuntimeInstance(_template) {
 }
 
 function deck_CreateRuntimeCard(_card_id) {
-    return card_CreateRuntimeInstance(deck_GetCardData(_card_id));
+    var _card = card_CreateRuntimeInstance(deck_GetCardData(_card_id));
+    if (_card != undefined) {
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone) {
+            with (_bm) trait_ChainApplyDeckIdCosts(_card, _card_id);
+        }
+    }
+    return _card;
 }
 
 function deck_GetCardName(card_id) {
