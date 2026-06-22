@@ -6,7 +6,7 @@
   "name":"SCR_MonsterAnim_OrcShaman",
   "parent":{
     "name":"OrcShaman",
-    "path":"folders/scripts/MonsterSystem/animations/OrcShaman.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/animations/OrcShaman.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

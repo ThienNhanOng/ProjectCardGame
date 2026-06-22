@@ -6,7 +6,7 @@
   "name":"SCR_Monster_AnimRegistry",
   "parent":{
     "name":"animations",
-    "path":"folders/scripts/MonsterSystem/animations.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/animations.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

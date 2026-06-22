@@ -6,7 +6,7 @@
   "name":"SCR_Trait_Parse",
   "parent":{
     "name":"core",
-    "path":"folders/scripts/Traits/core.yy",
+    "path":"folders/scripts/cardcollection/Traits/core.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

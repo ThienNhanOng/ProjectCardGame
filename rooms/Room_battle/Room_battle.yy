@@ -31,8 +31,8 @@
   ],
   "name":"Room_battle",
   "parent":{
-    "name":"rooms",
-    "path":"folders/rooms.yy",
+    "name":"card set up",
+    "path":"folders/rooms/card set up.yy",
   },
   "parentRoom":null,
   "physicsSettings":{

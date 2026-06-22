@@ -6,7 +6,7 @@
   "name":"SCR_Monster_Draw",
   "parent":{
     "name":"draw",
-    "path":"folders/scripts/MonsterSystem/draw.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/draw.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

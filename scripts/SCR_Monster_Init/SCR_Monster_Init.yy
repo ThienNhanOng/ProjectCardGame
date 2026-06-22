@@ -6,7 +6,7 @@
   "name":"SCR_Monster_Init",
   "parent":{
     "name":"create",
-    "path":"folders/scripts/MonsterSystem/create.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

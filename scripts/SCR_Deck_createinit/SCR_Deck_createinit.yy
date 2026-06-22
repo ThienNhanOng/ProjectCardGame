@@ -6,7 +6,7 @@
   "name":"SCR_Deck_createinit",
   "parent":{
     "name":"create",
-    "path":"folders/scripts/deck/create.yy",
+    "path":"folders/scripts/BoardManager/deck/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

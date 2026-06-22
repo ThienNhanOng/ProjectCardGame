@@ -6,7 +6,7 @@
   "name":"SCR_MonsterAnim_GoblinCommander",
   "parent":{
     "name":"GoblinCommander",
-    "path":"folders/scripts/MonsterSystem/animations/GoblinCommander.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/animations/GoblinCommander.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

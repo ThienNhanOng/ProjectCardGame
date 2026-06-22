@@ -6,7 +6,7 @@
   "name":"SCR_Monster_Queue",
   "parent":{
     "name":"queue",
-    "path":"folders/scripts/MonsterSystem/queue.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/queue.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

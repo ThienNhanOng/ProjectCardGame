@@ -6,7 +6,7 @@
   "name":"SCR_Conditions",
   "parent":{
     "name":"conditions",
-    "path":"folders/scripts/Traits/conditions.yy",
+    "path":"folders/scripts/cardcollection/Traits/conditions.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

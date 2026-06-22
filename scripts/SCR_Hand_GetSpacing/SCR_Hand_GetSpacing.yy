@@ -6,7 +6,7 @@
   "name":"SCR_Hand_GetSpacing",
   "parent":{
     "name":"draw",
-    "path":"folders/scripts/hand/draw.yy",
+    "path":"folders/scripts/BoardManager/hand/draw.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

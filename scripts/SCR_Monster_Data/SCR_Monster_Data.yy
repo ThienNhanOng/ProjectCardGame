@@ -6,7 +6,7 @@
   "name":"SCR_Monster_Data",
   "parent":{
     "name":"data",
-    "path":"folders/scripts/MonsterSystem/data.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/data.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

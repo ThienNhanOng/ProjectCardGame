@@ -6,7 +6,7 @@
   "name":"SCR_Trait_Resources",
   "parent":{
     "name":"resources",
-    "path":"folders/scripts/Traits/resources.yy",
+    "path":"folders/scripts/cardcollection/Traits/resources.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -6,7 +6,7 @@
   "name":"SCR_Battle_Load",
   "parent":{
     "name":"load",
-    "path":"folders/scripts/MonsterSystem/load.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/load.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

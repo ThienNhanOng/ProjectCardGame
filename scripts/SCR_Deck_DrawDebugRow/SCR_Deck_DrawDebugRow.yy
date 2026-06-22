@@ -6,7 +6,7 @@
   "name":"SCR_Deck_DrawDebugRow",
   "parent":{
     "name":"draw",
-    "path":"folders/scripts/deck/draw.yy",
+    "path":"folders/scripts/BoardManager/deck/draw.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

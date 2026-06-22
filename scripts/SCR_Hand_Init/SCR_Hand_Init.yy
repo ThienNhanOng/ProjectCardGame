@@ -6,7 +6,7 @@
   "name":"SCR_Hand_Init",
   "parent":{
     "name":"create",
-    "path":"folders/scripts/hand/create.yy",
+    "path":"folders/scripts/BoardManager/hand/create.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

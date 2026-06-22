@@ -6,7 +6,7 @@
   "name":"SCR_MonsterAnim_OrcBrute",
   "parent":{
     "name":"OrcBrute",
-    "path":"folders/scripts/MonsterSystem/animations/OrcBrute.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/animations/OrcBrute.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

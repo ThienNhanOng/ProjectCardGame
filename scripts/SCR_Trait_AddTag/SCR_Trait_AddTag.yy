@@ -6,7 +6,7 @@
   "name":"SCR_Trait_AddTag",
   "parent":{
     "name":"effects",
-    "path":"folders/scripts/Traits/effects.yy",
+    "path":"folders/scripts/cardcollection/Traits/effects.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

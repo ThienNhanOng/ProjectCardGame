@@ -6,7 +6,7 @@
   "name":"SCR_MonsterAnim_GoblinMage",
   "parent":{
     "name":"GoblinMage",
-    "path":"folders/scripts/MonsterSystem/animations/GoblinMage.yy",
+    "path":"folders/scripts/BoardManager/MonsterSystem/animations/GoblinMage.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
