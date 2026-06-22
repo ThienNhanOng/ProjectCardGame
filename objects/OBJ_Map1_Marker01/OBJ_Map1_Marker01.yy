@@ -3,6 +3,7 @@
   "%Name":"OBJ_Map1_Marker01",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
   "name":"OBJ_Map1_Marker01",
@@ -32,7 +33,13 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
-  "spriteMaskId":null,
+  "spriteId":{
+    "name":"Map_Marker_inactive",
+    "path":"sprites/Map_Marker_inactive/Map_Marker_inactive.yy",
+  },
+  "spriteMaskId":{
+    "name":"Map_Marker_inactive",
+    "path":"sprites/Map_Marker_inactive/Map_Marker_inactive.yy",
+  },
   "visible":true,
 }

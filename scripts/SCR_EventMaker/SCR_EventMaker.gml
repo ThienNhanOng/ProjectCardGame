@@ -23,6 +23,11 @@ function eventmarker_init() {
     if (!variable_instance_exists(id, "marker_battle")) marker_battle = "";
     if (!variable_instance_exists(id, "marker_battleset")) marker_battleset = "";
     if (!variable_instance_exists(id, "marker_replay_pool")) marker_replay_pool = "";
+
+    depth = -10;
+    sprite_index = Map_Marker_inactive;
+    image_blend = c_white;
+    image_alpha = 1;
 }
 
 /// @desc Set marker battle config — edit each Map marker object's Create event
@@ -35,20 +40,30 @@ function eventmarker_apply_config(_order, _label, _battle, _battleset, _replay_p
 }
 
 function eventmarker_refresh_visual() {
+    if (event_id <= 0) {
+        sprite_index = Map_Marker_inactive;
+        image_blend = c_white;
+        image_alpha = 0.55;
+        return;
+    }
+
     var _state = worldmap_GetEventState(event_id);
 
     switch (_state) {
         case WORLDMAP_EVENT_STATE.LOCKED:
             sprite_index = Map_Marker_inactive;
             image_blend = c_white;
+            image_alpha = 0.55;
             break;
         case WORLDMAP_EVENT_STATE.AVAILABLE:
             sprite_index = Map_Marker_orange;
             image_blend = c_white;
+            image_alpha = 1;
             break;
         case WORLDMAP_EVENT_STATE.CLEARED:
             sprite_index = Map_marker_Active;
-            image_blend = c_lime;
+            image_blend = c_white;
+            image_alpha = 1;
             break;
     }
 }
@@ -105,32 +120,23 @@ function eventmarker_do_transition() {
 }
 
 function eventmarker_draw_overlay() {
-    if (!worldmap_CanInteractEvent(event_id)) {
-        draw_set_halign(fa_center);
-        draw_set_color(c_ltgray);
-        draw_text(x, y - 28, "Event " + string(event_id));
-        draw_set_halign(fa_left);
-        draw_set_color(c_white);
-        return;
-    }
+    if (!worldmap_CanInteractEvent(event_id)) return;
 
     var _label = eventmarker_get_label();
-    var _state = worldmap_GetEventState(event_id);
     var _near = eventmarker_is_player_near();
 
     draw_set_halign(fa_center);
-    draw_set_color(_state == WORLDMAP_EVENT_STATE.CLEARED ? c_lime : c_white);
-    draw_text(x, y - 28, _label);
+    draw_set_valign(fa_bottom);
+    draw_set_color(c_white);
+    draw_text(x, y - 4, _label);
 
     if (_near) {
+        draw_set_valign(fa_top);
         draw_set_color(c_yellow);
         draw_text(x, y + sprite_height * 0.5 + 8, interact_hint);
-        if (marker_battle != "") {
-            draw_set_color(c_ltgray);
-            draw_text(x, y + sprite_height * 0.5 + 22, marker_battle);
-        }
     }
 
     draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
     draw_set_color(c_white);
 }

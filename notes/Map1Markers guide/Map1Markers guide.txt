@@ -76,10 +76,14 @@ Parameters for eventmarker_apply_config:
   4. marker_battleset — filename in datafiles/ (leave "" to use map default)
   5. marker_replay_pool — comma-separated battle ids for replays after clear
 
-Marker states (sprites):
-  locked    — blue/inactive (not yet reachable)
-  available — orange (current event — press E)
-  cleared   — green (done — can replay random battle from replay pool)
+Marker states (sprites in Sprites / Map / mapMarker):
+
+  locked    — Map_Marker_inactive  (dim blue crystal, 45% opacity)
+  available — Map_Marker_orange    (orange crystal — current event)
+  cleared   — Map_marker_Active    (bright blue crystal — done, can replay)
+
+State is shown by the sprite only. Locked markers draw no label text.
+Available/cleared markers show the event name above the icon when reachable.
 
 
 4. Room setup (Room_Worldmap1)
