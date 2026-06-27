@@ -19,7 +19,8 @@ function worldmap_InitGlobals() {
             cleared: [],
             active_event_id: -1,
             return_room: Room_Worldmap1,
-            victory_pending: false
+            victory_pending: false,
+            last_reward_text: ""
         };
     }
 
@@ -46,7 +47,10 @@ function worldmap_EnsureEventEntry(_event_id) {
             label: "Event " + _key,
             battle: "",
             battleset_file: "",
-            replay_pool: []
+            replay_pool: [],
+            reward_card_id: 0,
+            reward_pool: [],
+            reward_amount: 1
         };
     }
     return global.worldmap.events[$ _key];
@@ -129,7 +133,12 @@ function worldmap_LoadMapConfig(_filename) {
                 label: variable_struct_exists(_src, "label") ? string(_src.label) : ("Event " + _key),
                 battle: variable_struct_exists(_src, "battle") ? string(_src.battle) : "",
                 battleset_file: variable_struct_exists(_src, "battleset") ? string(_src.battleset) : "",
-                replay_pool: _pool
+                replay_pool: _pool,
+                reward_card_id: variable_struct_exists(_src, "reward_card_id") ? floor(_src.reward_card_id) : 0,
+                reward_pool: variable_struct_exists(_src, "reward_pool") && is_array(_src.reward_pool)
+                    ? _src.reward_pool : collection_ParseIdPoolString(
+                        variable_struct_exists(_src, "reward_pool_ids") ? string(_src.reward_pool_ids) : ""),
+                reward_amount: variable_struct_exists(_src, "reward_amount") ? max(1, floor(_src.reward_amount)) : 1
             };
 
             if (array_length(global.worldmap.event_flow) <= 0) {
@@ -293,12 +302,40 @@ function worldmap_SyncMarkersFromRoom() {
             array_push(_replay, _battle);
         }
 
+        var _reward_card = 0;
+        var _reward_pool = [];
+        var _reward_amount = 1;
+        if (variable_instance_exists(_inst, "marker_reward_card_id")) {
+            _reward_card = max(0, floor(_inst.marker_reward_card_id));
+        }
+        if (variable_instance_exists(_inst, "marker_reward_pool")) {
+            _reward_pool = collection_ParseIdPoolString(_inst.marker_reward_pool);
+        }
+        if (variable_instance_exists(_inst, "marker_reward_amount")) {
+            _reward_amount = max(1, floor(_inst.marker_reward_amount));
+        }
+
+        if (_reward_card <= 0 && array_length(_reward_pool) <= 0 && _json_def != undefined) {
+            if (variable_struct_exists(_json_def, "reward_card_id")) {
+                _reward_card = max(0, floor(_json_def.reward_card_id));
+            }
+            if (array_length(_reward_pool) <= 0 && is_array(_json_def.reward_pool)) {
+                _reward_pool = _json_def.reward_pool;
+            }
+            if (variable_struct_exists(_json_def, "reward_amount")) {
+                _reward_amount = max(1, floor(_json_def.reward_amount));
+            }
+        }
+
         global.worldmap.events[$ _key] = {
             id: _event_id,
             label: _label,
             battle: _battle,
             battleset_file: _battleset,
-            replay_pool: _replay
+            replay_pool: _replay,
+            reward_card_id: _reward_card,
+            reward_pool: _reward_pool,
+            reward_amount: _reward_amount
         };
         array_push(global.worldmap.event_flow, _event_id);
 

@@ -4,13 +4,15 @@ Map1 Markers — How It Works
 Table of Contents
 
 1. Quick overview
-2. Folder layout
-3. Map 1 markers (this folder)
-4. Room setup (Room_Worldmap1)
-5. Battlesets (which enemies spawn)
-6. Adding a new map 1 marker
-7. Starting map 2 (Map2Markers folder)
-8. Adding new monster JSON
+2. Card pool vs player collection
+3. Folder layout
+4. Map 1 markers (this folder)
+5. Card rewards on markers (first clear)
+6. Room setup (Room_Worldmap1)
+7. Battlesets (which enemies spawn)
+8. Adding a new map 1 marker
+9. Starting map 2 (Map2Markers folder)
+10. Adding new monster JSON
 
 
 1. Quick overview
@@ -22,6 +24,7 @@ Each marker object knows:
   - which battle to run (battle01, battle02, ...)
   - which battleset JSON file to read
   - replay battles after the event is cleared
+  - optional card reward on first clear (fixed id or random pool)
 
 Flow when the player presses E at a marker:
 
@@ -36,9 +39,30 @@ Flow when the player presses E at a marker:
   EnemyCollection01.json  (enemy stats, abilities, animation)
         ↓
   Room_battle
+        ↓
+  First clear → card added to player collection
 
 
-2. Folder layout
+2. Card pool vs player collection
+
+Two separate layers:
+
+  card_DB (card pool)
+    - Every card definition loaded from JSON (Merc_starterdeck01.json, etc.)
+    - Loaded at game start by SCR_LoadAllCollections()
+    - Cards WITHOUT "own" exist in the pool only — not given to the player at start
+
+  global.player_collection (player collection)
+    - Cards the player actually owns (owned count per card)
+    - Deckbuilder only shows cards from here
+    - Starting cards: JSON field "own" on a card (granted once at first boot)
+    - Earned cards: map marker rewards, future traits/saves, etc.
+
+Example — Advance Strike (id 8) has no "own" in JSON, so it is pool-only until
+Marker01 grants it on first clear.
+
+
+3. Folder layout
 
 Objects / WorldMapSystem
   EventMarkers
@@ -53,7 +77,7 @@ Objects / WorldMapSystem
     OBJ_Map2_Marker01        ← template for a second map
 
 
-3. Map 1 markers (this folder)
+4. Map 1 markers (this folder)
 
 Each marker is a child of OBJ_EventMarker.
 Battle settings live in that object's Create event.
@@ -86,7 +110,58 @@ State is shown by the sprite only. Locked markers draw no label text.
 Available/cleared markers show the event name above the icon when reachable.
 
 
-4. Room setup (Room_Worldmap1)
+5. Card rewards on markers (first clear)
+
+Rewards are configured in the same marker Create event, AFTER eventmarker_apply_config.
+
+Open the marker object (e.g. OBJ_Map1_Marker01) → Create event → add ONE of these lines:
+
+
+--- Fixed card reward (always this card id) ---
+
+  eventmarker_apply_reward(8, "", 1);
+
+  Card id 8 (Advance Strike), 1 copy, on first clear only.
+  Replays do NOT grant the card again.
+
+
+--- Random reward from a pool of card ids ---
+
+  eventmarker_apply_reward(0, "9,10,11", 1);
+
+  Picks one of ids 9, 10, or 11 at random on first clear.
+  First number must be 0 when using a pool.
+
+
+--- Multiple copies ---
+
+  eventmarker_apply_reward(12, "", 2);
+
+  Grants 2 copies of card id 12.
+
+
+Rules:
+  - Card ids must exist in card_DB (your JSON card pool).
+  - If reward_card_id > 0, that card is used (pool is ignored).
+  - If reward_card_id is 0, a random id is picked from the pool string.
+  - Leave off eventmarker_apply_reward entirely for battle-only markers (no card).
+  - Reward is granted when the player wins the fight the first time that marker is cleared.
+
+Full Marker01 example (battle + fixed reward):
+
+  event_inherited();
+  eventmarker_apply_config(1, "Trail Start", "battle01", "Grasslands_Battleset01_starter.json", "battle01,battle02,battle03,battle04,battle05");
+  eventmarker_apply_reward(8, "", 1);
+
+
+Full Marker03 example (battle + random reward):
+
+  event_inherited();
+  eventmarker_apply_config(3, "Rocky Pass", "battle03", "Grasslands_Battleset01_starter.json", "battle03,battle04,battle05");
+  eventmarker_apply_reward(0, "9,10,11", 1);
+
+
+6. Room setup (Room_Worldmap1)
 
 1. Open Room_Worldmap1 in the Room Editor.
 2. Drag marker objects from Map1Markers into the room.
@@ -98,7 +173,7 @@ Markers in the room are the source of truth. The JSON is only a fallback if a
 marker field is left blank.
 
 
-5. Battlesets (which enemies spawn)
+7. Battlesets (which enemies spawn)
 
 File: datafiles/Grasslands_Battleset01_starter.json
 
@@ -120,32 +195,34 @@ To point a marker at a fight, set marker_battle to "battle01" (or any battle id
 in the battleset file named in marker_battleset).
 
 
-6. Adding a new map 1 marker
+8. Adding a new map 1 marker
 
 1. In Asset Browser: right-click Map1Markers → Create Object
    (or duplicate OBJ_Map1_Marker05).
 2. Set Parent Object to OBJ_EventMarker.
 3. Open the new object's Create event and call eventmarker_apply_config(...).
-4. Register the object in the project if you created it manually (IDE usually does this).
-5. Place the instance in Room_Worldmap1.
+4. Optional: add eventmarker_apply_reward(...) for a card on first clear.
+5. Register the object in the project if you created it manually (IDE usually does this).
+6. Place the instance in Room_Worldmap1.
 
 Duplicate shortcut:
   Duplicate OBJ_Map1_Marker05 → rename to OBJ_Map1_Marker06 → edit Create event.
 
 
-7. Starting map 2 (Map2Markers folder)
+9. Starting map 2 (Map2Markers folder)
 
 Same pattern as map 1:
 
 1. Duplicate OBJ_Map2_Marker01 in Map2Markers.
 2. Edit Create → eventmarker_apply_config(order, label, battle, battleset, replays).
-3. Create Room_Worldmap2 (or duplicate Room_Worldmap1).
-4. Place Map2 marker instances in that room.
-5. Add OBJ_WorldMapController to the new room.
-6. Optional: change which map config JSON loads in SCR_WorldMapController_Init.
+3. Optional → eventmarker_apply_reward(card_id, pool, amount).
+4. Create Room_Worldmap2 (or duplicate Room_Worldmap1).
+5. Place Map2 marker instances in that room.
+6. Add OBJ_WorldMapController to the new room.
+7. Optional: change which map config JSON loads in SCR_WorldMapController_Init.
 
 
-8. Adding new monster JSON
+10. Adding new monster JSON
 
 Monsters are defined separately from battles and markers.
 
@@ -200,8 +277,20 @@ Step D — New battleset file (optional)
   2. Add to Included Files
   3. Set marker_battleset in the marker Create event to that filename
 
+Step E — Add a new earnable player card (optional)
+
+  1. Add the card to Merc_starterdeck01.json (or another loaded collection JSON).
+  2. Omit "own" (or set own to 0) so the player does NOT start with it.
+  3. Note the card "id" number.
+  4. On a marker Create event, add:
+       eventmarker_apply_reward(YOUR_ID, "", 1);
+     or for random:
+       eventmarker_apply_reward(0, "ID1,ID2,ID3", 1);
+
 Data chain summary:
 
-  Marker Create event     → which battle id + which battleset file
-  Battleset JSON          → which enemyIDs spawn in each wave
-  EnemyCollection JSON    → what those enemies actually are
+  Card JSON (no own)        → card pool only (card_DB)
+  Card JSON (own: N)        → starting player collection
+  Marker Create event       → which battle + optional card reward
+  Battleset JSON            → which enemyIDs spawn in each wave
+  EnemyCollection JSON      → what those enemies actually are

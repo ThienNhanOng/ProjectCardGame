@@ -1,7 +1,6 @@
 /// @description Draw a single extra deck card - matches collection card style exactly
-function SCR_ExtraDeck_DrawCard(_x, _y, _w, _h, _card_data) {
-    // Get hover transform from imported function
-    var _transform = SCR_DeckHover_GetTransform(_x, _y, _w, _h);
+function SCR_ExtraDeck_DrawCard(_x, _y, _w, _h, _card_data, _force_hover = undefined) {
+    var _transform = SCR_DeckHover_GetTransform(_x, _y, _w, _h, _force_hover);
     
     // Draw glow effect
     SCR_DeckHover_DrawGlow(_transform.draw_x, _transform.draw_y, _transform.w, _transform.h, _transform.is_hovered);

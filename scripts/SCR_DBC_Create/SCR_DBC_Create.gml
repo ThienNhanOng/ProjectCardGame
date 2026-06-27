@@ -4,9 +4,9 @@ function SCR_DBC_Create() {
     filter_type = "";
     search_text = "";
     search_focused = false;
-    SCR_DBC_InitPagination();
     SCR_DBC_InitDeck();
-    SetupTestCollection();
+    SetupPlayerCollection();
+    SCR_DBC_InitPagination();
     SCR_ExtraDeck_Init();
     SCR_DBC_LoadPage();
 

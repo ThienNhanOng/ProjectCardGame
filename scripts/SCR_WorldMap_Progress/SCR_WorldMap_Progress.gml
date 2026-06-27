@@ -55,7 +55,14 @@ function worldmap_LaunchEventBattle(_event_id) {
 function worldmap_NotifyBattleVictory() {
     worldmap_InitGlobals();
     if (global.worldmap.active_event_id <= 0) return;
+
     global.worldmap.victory_pending = true;
+    global.worldmap.last_reward_text = "";
+
+    var _event_id = global.worldmap.active_event_id;
+    if (!worldmap_IsEventCleared(_event_id)) {
+        global.worldmap.last_reward_text = worldmap_GrantEventRewards(_event_id);
+    }
 }
 
 function worldmap_ReturnToMapAfterVictory() {
@@ -70,6 +77,8 @@ function worldmap_ReturnToMapAfterVictory() {
 
     global.worldmap.active_event_id = -1;
     global.worldmap.victory_pending = false;
+    global.worldmap.last_reward_text = "";
+    battle_SyncExtraDeckFromBattleState();
     battle_EndSession();
 
     room_goto(_return_room);
@@ -98,7 +107,15 @@ function worldmap_DrawBattleVictoryPrompt() {
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
     draw_set_color(c_lime);
-    draw_text(room_width / 2, room_height - 48, "Victory! Press E / Enter / Click to return to map");
+
+    var _msg = "Victory! Press E / Enter / Click to return to map";
+    if (variable_struct_exists(global.worldmap, "last_reward_text")
+        && global.worldmap.last_reward_text != "") {
+        _msg = "Victory! Obtained: " + global.worldmap.last_reward_text
+            + " — Press E / Enter / Click to return";
+    }
+
+    draw_text(room_width / 2, room_height - 48, _msg);
     draw_set_halign(fa_left);
     draw_set_color(c_white);
 }
@@ -109,8 +126,41 @@ function worldmap_AssignEventMarkers() {
 
 function worldmap_InitRoom(_config_file = "Grasslands_WorldMap01.json") {
     worldmap_InitGlobals();
+    collection_EnsurePlayerInitialized();
     worldmap_LoadMapConfig(_config_file);
     worldmap_SyncMarkersFromRoom();
+}
+
+function worldmap_ResolveEventRewardCardId(_event_id) {
+    var _def = worldmap_GetEventDef(_event_id);
+    if (_def == undefined) return 0;
+
+    if (variable_struct_exists(_def, "reward_card_id") && _def.reward_card_id > 0) {
+        return floor(_def.reward_card_id);
+    }
+
+    if (variable_struct_exists(_def, "reward_pool") && is_array(_def.reward_pool)
+        && array_length(_def.reward_pool) > 0) {
+        return collection_PickRandomIdFromPool(_def.reward_pool);
+    }
+
+    return 0;
+}
+
+function worldmap_GrantEventRewards(_event_id) {
+    var _def = worldmap_GetEventDef(_event_id);
+    if (_def == undefined) return "";
+
+    var _card_id = worldmap_ResolveEventRewardCardId(_event_id);
+    if (_card_id <= 0) return "";
+
+    var _amount = 1;
+    if (variable_struct_exists(_def, "reward_amount")) {
+        _amount = max(1, floor(_def.reward_amount));
+    }
+
+    if (!collection_GrantBattleReward(_card_id, _amount)) return "";
+    return collection_FormatRewardText(_card_id, _amount);
 }
 
 function worldmap_RefreshAllMarkers() {

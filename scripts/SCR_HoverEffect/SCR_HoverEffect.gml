@@ -1,8 +1,9 @@
-function SCR_DeckHover_GetTransform(_x, _y, _w, _h) {
+function SCR_DeckHover_GetTransform(_x, _y, _w, _h, _override_hovered = undefined) {
     var _mx = mouse_x;
     var _my = mouse_y;
-    var _is_hovered = (_mx >= _x && _mx <= _x + _w &&
-                       _my >= _y && _my <= _y + _h);
+    var _is_hovered = (_override_hovered != undefined)
+        ? _override_hovered
+        : (_mx >= _x && _mx <= _x + _w && _my >= _y && _my <= _y + _h);
     
     var _draw_x = _x;
     var _draw_y = _y;

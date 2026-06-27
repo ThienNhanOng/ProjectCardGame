@@ -85,6 +85,46 @@ function battle_BeginSession() {
     show_debug_message("Battle session #" + string(global.battle_session_count) + " starting");
 }
 
+function battle_PermanentlyLoseSpirit(_card) {
+    if (_card == undefined || !battle_IsSpiritMonster(_card)) return false;
+    if (!variable_struct_exists(_card, "id")) return false;
+
+    var _card_id = floor(real(_card.id));
+    if (_card_id <= 0) return false;
+
+    collection_RemoveOwnedCopy(_card_id, 1);
+    show_debug_message(_card.name + " spirit lost permanently");
+    return true;
+}
+
+/// @desc After a fight, extra deck source = cards still in extra deck + spirits still alive on board.
+function battle_SyncExtraDeckFromBattleState() {
+    var _extra_ids = [];
+
+    var _deck = instance_find(OBJ_Deck, 0);
+    if (_deck != noone) {
+        with (_deck) {
+            for (var i = 0; i < extra_deck_Count; i++) {
+                array_push(_extra_ids, extra_deck[i]);
+            }
+        }
+    }
+
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board != noone) {
+        for (var s = 0; s < array_length(_board.player_monster_slots); s++) {
+            var _slot = _board.player_monster_slots[s];
+            if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
+            if (!battle_IsSpiritMonster(_slot.card)) continue;
+            if (!variable_struct_exists(_slot.card, "id")) continue;
+            array_push(_extra_ids, floor(real(_slot.card.id)));
+        }
+    }
+
+    battle_SaveDeckSources(battle_GetDeckSourceCopy(), _extra_ids);
+    show_debug_message("Extra deck synced: " + string(array_length(_extra_ids)) + " spirit copy/copies for next fight");
+}
+
 /// @desc Called when leaving Room_battle back to the map
 function battle_EndSession() {
     global.battle_runtime_config = undefined;

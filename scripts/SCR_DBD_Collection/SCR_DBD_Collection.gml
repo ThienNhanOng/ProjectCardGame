@@ -2,6 +2,8 @@
 function SCR_DBD_GetDeckCount(_card_id) {
     var _deckbuilder = instance_find(OBJ_DeckBuilder, 0);
     if (_deckbuilder == noone) return 0;
+    if (!variable_instance_exists(_deckbuilder, "selected_deck")
+        || !is_array(_deckbuilder.selected_deck)) return 0;
 
     var _count = 0;
     for (var i = 0; i < array_length(_deckbuilder.selected_deck); i++) {
@@ -84,6 +86,20 @@ function SCR_DBD_GetSpiritCards() {
         array_push(_spirits, _card);
     }
     return _spirits;
+}
+
+/// @description One entry per owned spirit copy (for horizontal extra deck display)
+function SCR_DBD_GetSpiritDeckCopyIds() {
+    var _ids = [];
+    for (var i = 0; i < array_length(global.player_collection); i++) {
+        var _card = global.player_collection[i];
+        if (_card.type != "spirit" && _card.type != "special_monster") continue;
+        var _owned = variable_struct_exists(_card, "owned") ? _card.owned : 0;
+        for (var c = 0; c < _owned; c++) {
+            array_push(_ids, _card.id);
+        }
+    }
+    return _ids;
 }
 
 function SCR_DBD_ShuffleSelectedDeck() {
@@ -412,36 +428,23 @@ function SCR_DBD_GetCardPreviewSprite(_card) {
 }
 
 function SCR_DBD_GetSpiritCardRowBounds(_row_index) {
-    var _cx = extra_x + (extra_w - extra_card_w) / 2;
-    var _cy = extra_y + 10 + _row_index * (extra_card_h + extra_gap);
-    return {
-        x: _cx,
-        y: _cy,
-        w: extra_card_w,
-        h: extra_card_h
-    };
+    return SCR_ExtraDeck_GetCardBounds(_row_index, extra_scroll);
 }
 
 function SCR_DBD_FindHoveredSpiritCard() {
+    var _ids = SCR_DBD_GetSpiritDeckCopyIds();
+    if (array_length(_ids) <= 0) return undefined;
+
     if (mouse_x < extra_x || mouse_x >= extra_x + extra_w
         || mouse_y < extra_y || mouse_y >= extra_y + extra_h) {
         return undefined;
     }
 
-    var _cards = SCR_DBD_GetSpiritCards();
-    var _start = extra_current_page * extra_cards_per_page;
-    var _end = min(_start + extra_cards_per_page, array_length(_cards));
+    SCR_ExtraDeck_ClampFocus(array_length(_ids));
+    var _picked = SCR_ExtraDeck_PickIndexAt(mouse_x, mouse_y, extra_scroll, array_length(_ids));
+    if (_picked >= 0) extra_focus_index = _picked;
 
-    for (var i = _start; i < _end; i++) {
-        var _row = i - _start;
-        var _bounds = SCR_DBD_GetSpiritCardRowBounds(_row);
-        if (mouse_x >= _bounds.x && mouse_x < _bounds.x + _bounds.w
-            && mouse_y >= _bounds.y && mouse_y < _bounds.y + _bounds.h) {
-            return _cards[i];
-        }
-    }
-
-    return undefined;
+    return deck_GetCardData(_ids[extra_focus_index]);
 }
 
 function SCR_DBD_FindHoveredPreviewCard() {

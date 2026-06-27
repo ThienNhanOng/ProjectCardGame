@@ -1,4 +1,4 @@
-/// @desc Load player card JSON into card_DB
+/// @desc Load card JSON into card_DB (full card pool — not the same as player ownership)
 
 function collection_EnsureDatabase() {
     if (!variable_global_exists("card_DB") || !is_struct(card_DB)) {

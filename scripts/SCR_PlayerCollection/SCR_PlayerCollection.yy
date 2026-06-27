@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_TestCollection",
+  "%Name":"SCR_PlayerCollection",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_TestCollection",
+  "name":"SCR_PlayerCollection",
   "parent":{
     "name":"cardcollection",
     "path":"folders/scripts/cardcollection.yy",

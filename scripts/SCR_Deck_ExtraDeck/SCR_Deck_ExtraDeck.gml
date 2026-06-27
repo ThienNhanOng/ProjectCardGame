@@ -1,16 +1,18 @@
 /// @desc Extra deck zone display + horizontal picker in battle
 
 function deck_GetExtraDeckZoneBounds() {
-    var _stack = max(0, extra_deck_Count - 1) * 0.4;
-    var _cx = extra_deck_X + _stack;
-    var _cy = extra_deck_Y - _stack;
+    var _visible = max(1, min(extra_deck_Count, 6));
+    var _spacing = 10;
+    var _stack_w = max(extra_deck_Width, (_visible - 1) * _spacing + extra_deck_Width * 0.6);
+    var _cx = extra_deck_X;
+    var _cy = extra_deck_Y;
 
     return {
         cx: _cx,
         cy: _cy,
-        left: _cx - extra_deck_Width / 2,
+        left: _cx - _stack_w / 2,
         top: _cy - extra_deck_Height / 2,
-        right: _cx + extra_deck_Width / 2,
+        right: _cx + _stack_w / 2,
         bottom: _cy + extra_deck_Height / 2
     };
 }
@@ -44,11 +46,13 @@ function deck_ExtraDeckPicker_Open() {
     if (tag_picker_open) deck_TagPicker_Close();
     extra_deck_picker_open = true;
     extra_deck_picker_scroll = 0;
+    extra_deck_picker_focus = 0;
 }
 
 function deck_ExtraDeckPicker_Close() {
     extra_deck_picker_open = false;
     extra_deck_picker_scroll = 0;
+    extra_deck_picker_focus = 0;
 }
 
 function deck_ExtraDeckPicker_GetExtraDeckIds() {
@@ -104,7 +108,12 @@ function deck_DrawExtraDeckZone() {
     if (extra_deck_Count <= 0) {
         draw_sprite(SPR_Cardback, 0, extra_deck_X, extra_deck_Y);
     } else {
-        for (var i = 0; i < extra_deck_Count; i++) {
+        var _visible = min(extra_deck_Count, 6);
+        var _spacing = 10;
+        var _total_w = (_visible - 1) * _spacing;
+        var _start_x = extra_deck_X - _total_w / 2;
+
+        for (var i = 0; i < _visible; i++) {
             var _card_id = extra_deck[i];
             var _card_data = deck_GetCardData(_card_id);
             if (_card_data == undefined) continue;
@@ -113,7 +122,18 @@ function deck_DrawExtraDeckZone() {
             if (_card_data.type == "weapon") _spr = SPR_Weaponplaceholder;
             else if (_card_data.type == "action") _spr = SPR_Actionplaceholder;
 
-            draw_sprite(_spr, 0, extra_deck_X + (i * 0.4), extra_deck_Y - (i * 0.4));
+            draw_sprite(_spr, 0, _start_x + i * _spacing, extra_deck_Y);
+        }
+
+        if (extra_deck_Count > _visible) {
+            draw_set_halign(fa_center);
+            draw_set_valign(fa_bottom);
+            draw_set_color(c_yellow);
+            draw_text(extra_deck_X, extra_deck_Y + extra_deck_Height / 2 + 4,
+                "+" + string(extra_deck_Count - _visible));
+            draw_set_halign(fa_left);
+            draw_set_valign(fa_top);
+            draw_set_color(c_white);
         }
     }
 
@@ -137,14 +157,19 @@ function deck_ExtraDeck_Step() {
         }
 
         var _ids = deck_ExtraDeckPicker_GetExtraDeckIds();
-        extra_deck_picker_scroll = deck_ScrollPicker_ApplyScrollInput(_ids, extra_deck_picker_scroll);
+        var _input = deck_ScrollPicker_ApplyScrollInput(_ids, extra_deck_picker_scroll, extra_deck_picker_focus);
+        extra_deck_picker_scroll = _input.scroll;
+        extra_deck_picker_focus = _input.focus;
 
         if (mouse_check_button_pressed(mb_left)) {
             var _layout = deck_ScrollPicker_GetLayout();
             if (mouse_x >= _layout.left && mouse_x <= _layout.right &&
                 mouse_y >= _layout.top && mouse_y <= _layout.bottom) {
                 var _picked = deck_ExtraDeckPicker_PickIndexAt(mouse_x, mouse_y);
-                if (_picked >= 0) deck_ExtraDeckPicker_SelectCard(_picked);
+                if (_picked >= 0) {
+                    extra_deck_picker_focus = _picked;
+                    deck_ExtraDeckPicker_SelectCard(_picked);
+                }
             } else {
                 deck_ExtraDeckPicker_Close();
             }

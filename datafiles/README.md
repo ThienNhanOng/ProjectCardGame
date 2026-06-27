@@ -174,9 +174,13 @@ Test sets (`MonsterTestset`, `TestActionset`, `TestWeaponset`) remain in the pro
 
 
 
-- **`own`** — at collection init, `collection_GrantFromDatabase()` in `SCR_TestCollection` grants that many copies into `global.player_collection`.
+- **Card pool (`card_DB`)** — all card definitions from loaded JSON files. Every card in the game lives here.
 
-- Cards **without** `own` exist in the DB but are not owned until earned via traits/rewards.
+- **Player collection (`global.player_collection`)** — cards the player owns (`owned` count). Deckbuilder only lists these.
+
+- **`own`** — at first game boot, `collection_GrantFromDatabase()` grants that many copies into the player collection. Omit `own` for cards that must be earned (map markers, traits, etc.).
+
+- Cards **without** `own` exist in the card pool only until earned via map marker rewards or other grants.
 
 - **Deck copy caps** (even if `own` is higher):
 
@@ -1158,9 +1162,45 @@ Used inside a `conditions` trait's `requirements` array:
 
 | `discard_weapon` | `amount` | Discard weapon cards from hand |
 
+| `discard_tag` | `amount`, `tags` or `tag`, optional `types` / `card_types` / `card_type` | Discard hand cards with matching tag(s); optional type filter (`monster`, `action`, `weapon`, `any`, or a mix) |
 
 
-**Aliases:** `sacrifice_ally` → `sacrifice_monster`, `destroy_weapon` → `destroy_weapons`, `turn_plus` / `turn_minimum` → `min_turn`, `sacrifice_tags` → `sacrifice_tag`.
+
+**Aliases:** `sacrifice_ally` → `sacrifice_monster`, `destroy_weapon` → `destroy_weapons`, `turn_plus` / `turn_minimum` → `min_turn`, `sacrifice_tags` → `sacrifice_tag`, `discard_tags` → `discard_tag`.
+
+
+
+**`discard_tag` — discard tagged cards from hand**
+
+
+
+Discard cards from the player's hand that match one or more tags. Optionally restrict by card type (`monster`, `action`, `weapon`, or a mix). Omit the type fields (or use `"any"`) to allow any card type with the tag.
+
+
+
+```json
+
+{ "type": "discard_tag", "amount": 2, "tags": ["Mercenary"], "types": ["monster", "action"] }
+
+{ "type": "discard_tag", "amount": 1, "tag": "Warrior", "card_type": "weapon" }
+
+{ "type": "discard_tag", "amount": 1, "tags": ["Spirit"] }
+
+```
+
+
+
+| Field | Purpose |
+
+|-------|---------|
+
+| `tags` / `tag` | Tag(s) the discarded card must have (same matching rules as `sacrifice_tag`) |
+
+| `types` / `card_types` / `card_type` | Optional type filter; array or single string. `special_monster` counts as `monster`. Omit for any type. |
+
+
+
+During summon the player clicks matching hand cards to discard them. This step cannot be cancelled (same as `discard_action`, `discard_monster`, and `discard_weapon`).
 
 
 
@@ -1470,7 +1510,7 @@ Battle room then loads `Battle01.json` (or override) into the enemy spawn queue.
 
 
 
-Player ownership for deckbuilder is built in `SCR_TestCollection` from cards with `own` in the JSON at collection room start.
+Player ownership for deckbuilder is built in `SCR_PlayerCollection` from cards with `own` in the JSON at collection room start.
 
 
 
@@ -1528,7 +1568,7 @@ Player ownership for deckbuilder is built in `SCR_TestCollection` from cards wit
 
 | Resource traits | `scripts/SCR_Trait_Resources/SCR_Trait_Resources.gml` |
 
-| Collection / ownership | `scripts/SCR_TestCollection/SCR_TestCollection.gml` |
+| Collection / ownership | `scripts/SCR_PlayerCollection/SCR_PlayerCollection.gml` |
 
 | Card preview UI | `scripts/SCR_DBD_Collection/SCR_DBD_Collection.gml` |
 

@@ -24,6 +24,10 @@ function eventmarker_init() {
     if (!variable_instance_exists(id, "marker_battleset")) marker_battleset = "";
     if (!variable_instance_exists(id, "marker_replay_pool")) marker_replay_pool = "";
 
+    marker_reward_card_id = 0;
+    marker_reward_pool = "";
+    marker_reward_amount = 1;
+
     depth = -10;
     sprite_index = Map_Marker_inactive;
     image_blend = c_white;
@@ -37,6 +41,16 @@ function eventmarker_apply_config(_order, _label, _battle, _battleset, _replay_p
     marker_battle = _battle;
     marker_battleset = _battleset;
     marker_replay_pool = _replay_pool;
+}
+
+/// @desc Card reward on first clear — fixed id OR random pool (not both; fixed wins if set)
+/// @param _card_id  Card id from card_DB (0 = none, use pool instead)
+/// @param _pool     Comma-separated card ids, e.g. "8,9,12" (used when _card_id is 0)
+/// @param _amount   Copies granted (default 1)
+function eventmarker_apply_reward(_card_id = 0, _pool = "", _amount = 1) {
+    marker_reward_card_id = max(0, floor(_card_id));
+    marker_reward_pool = string(_pool);
+    marker_reward_amount = max(1, floor(_amount));
 }
 
 function eventmarker_refresh_visual() {

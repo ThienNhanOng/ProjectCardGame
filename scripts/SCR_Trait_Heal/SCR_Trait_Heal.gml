@@ -87,7 +87,12 @@ function battle_DestroyPlayerMonster(_slot_index) {
     var _monster_slot = _board.player_monster_slots[_slot_index];
     if (!_monster_slot.occupied || _monster_slot.card == undefined) return false;
 
-    var _name = _monster_slot.card.name;
+    var _card = _monster_slot.card;
+    var _name = _card.name;
+
+    if (battle_IsSpiritMonster(_card)) {
+        battle_PermanentlyLoseSpirit(_card);
+    }
 
     var _bm = instance_find(OBJ_BattleManager, 0);
     if (_bm != noone) {

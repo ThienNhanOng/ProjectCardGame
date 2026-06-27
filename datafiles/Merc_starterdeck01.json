@@ -3,11 +3,11 @@
   "cards": [
     {
       "id": 1,
-      "own": 3,
+      "own": 2,
       "cardRarity": 0,
       "name": "Mercenary Warrior I",
       "type": "monster",
-      "tag": ["Mercenary", "Warrior"],
+      "tag": ["Mercenary"],
       "sprite": "SPR_Monsterplaceholder",
       "health": 10,
       "ability": [
@@ -27,11 +27,11 @@
     },
     {
       "id": 2,
-      "own": 3,
-      "cardRarity": 0,
+      "own": 1,
+      "cardRarity": 1,
       "name": "Mercenary Warrior II",
       "type": "monster",
-      "tag": ["Mercenary", "Warrior"],
+      "tag": ["Mercenary"],
       "sprite": "SPR_Monsterplaceholder",
       "health": 20,
       "ability": [
@@ -62,15 +62,15 @@
         {
           "type": "add_deck",
           "id": 1,
-          "repeat": true,
-          "recursion": 2
+          "repeat": false,
+          "recursion": 1
         }
       ]
     },
     {
       "id": 4,
-      "own": 2,
-      "cardRarity": 0,
+      "own": 1,
+      "cardRarity": 1,
       "name": "Mercenary Recruiter II",
       "type": "monster",
       "tag": ["Mercenary", "Warrior"],
@@ -87,7 +87,6 @@
     },
     {
       "id": 5,
-      "own": 1,
       "cardRarity": 1,
       "name": "Mercenary Reinforcement",
       "type": "monster",
@@ -110,12 +109,24 @@
       ]
     },
     {
+      "id": 6,
+      "own": 3,
+      "cardRarity": 0,
+      "name": "Mercenary Footman",
+      "type": "monster",
+      "tag": ["Mercenary"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 8,
+      "ability": [
+      ]
+    },
+    {
       "id": 7,
-      "own": 2,
+      "own": 3,
       "cardRarity": 0,
       "name": "Basic Strike",
       "type": "action",
-      "tag": ["Mercenary"],
+      "tag": ["Generic"],
       "sprite": "SPR_Actionplaceholder",
       "cost": 2,
       "actionType": [
@@ -129,11 +140,11 @@
     },
     {
       "id": 8,
-      "own": 1,
-      "cardRarity": 0,
+      "own": 2,
+      "cardRarity": 1,
       "name": "Advance Strike",
       "type": "action",
-      "tag": ["Mercenary"],
+      "tag": ["Generic"],
       "sprite": "SPR_Actionplaceholder",
       "cost": 3,
       "actionType": [
@@ -147,7 +158,6 @@
     },
     {
       "id": 9,
-      "own": 2,
       "cardRarity": 0,
       "name": "Mercenary Supply",
       "type": "action",
@@ -165,7 +175,7 @@
     },
     {
       "id": 10,
-      "own": 3,
+      "own": 1,
       "cardRarity": 1,
       "name": "Double Payment",
       "type": "action",
@@ -189,7 +199,6 @@
     },
     {
       "id": 11,
-      "own": 1,
       "cardRarity": 1,
       "name": "Bounty Fulfilled",
       "type": "action",
@@ -207,7 +216,7 @@
     },
     {
       "id": 12,
-      "own": 3,
+      "own": 1,
       "cardRarity": 0,
       "name": "Scammed Thrift Sword",
       "type": "weapon",
@@ -225,7 +234,7 @@
       "tag": ["Mercenary"],
       "sprite": "SPR_Monsterplaceholder",
       "health": 20,
-      "attack": 15,
+      "attack": 5,
       "ability": [
         {
           "type": "conditions",
@@ -248,7 +257,6 @@
       "tag": ["Mercenary"],
       "sprite": "SPR_Monsterplaceholder",
       "health": 10,
-      "attack": 5,
       "ability": [
         {
           "type": "conditions",
@@ -256,9 +264,11 @@
           "recursion": 1,
           "requirements": [
             {
-              "type": "sacrifice_monster",
-              "amount": 1
-            }
+          "type": "discard_tag",
+          "amount": 1,
+          "tags": ["Mercenary"],
+          "types": ["monster"]
+        }
           ]
         },
         {

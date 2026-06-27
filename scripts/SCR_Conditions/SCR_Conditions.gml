@@ -33,6 +33,7 @@ function conditions_NormalizeEntry(_raw) {
     if (_type == "min_turn" || _type == "turn_plus" || _type == "turn_minimum") _type = "min_turn";
     if (_type == "sacrifice_tag" || _type == "sacrifice_tags") _type = "sacrifice_tag";
     if (_type == "sacrifice_card" || _type == "sacrifice_cards") _type = "sacrifice_id";
+    if (_type == "discard_tag" || _type == "discard_tags") _type = "discard_tag";
 
     if (variable_struct_exists(_raw, "id")) _id = floor(real(_raw.id));
     else if (variable_struct_exists(_raw, "card_id")) _id = floor(real(_raw.card_id));
@@ -51,7 +52,32 @@ function conditions_NormalizeEntry(_raw) {
         }
     }
 
-    return { type: _type, amount: max(1, floor(_amount)), tags: _tags, slots: _slots, id: _id };
+    var _card_types = conditions_NormalizeCardTypes(_raw);
+
+    return { type: _type, amount: max(1, floor(_amount)), tags: _tags, slots: _slots, id: _id, card_types: _card_types };
+}
+
+function conditions_NormalizeCardTypes(_raw) {
+    var _types = [];
+
+    if (variable_struct_exists(_raw, "types") && is_array(_raw.types)) {
+        for (var i = 0; i < array_length(_raw.types); i++) {
+            var _t = string_lower(string_trim(_raw.types[i]));
+            if (_t == "" || _t == "any") continue;
+            array_push(_types, _t);
+        }
+    } else if (variable_struct_exists(_raw, "card_types") && is_array(_raw.card_types)) {
+        for (var i = 0; i < array_length(_raw.card_types); i++) {
+            var _t = string_lower(string_trim(_raw.card_types[i]));
+            if (_t == "" || _t == "any") continue;
+            array_push(_types, _t);
+        }
+    } else if (variable_struct_exists(_raw, "card_type")) {
+        var _single = string_lower(string_trim(_raw.card_type));
+        if (_single != "" && _single != "any") array_push(_types, _single);
+    }
+
+    return _types;
 }
 
 function conditions_GetTrait(_card) {
@@ -88,6 +114,9 @@ function conditions_GetRequirementText(_cond) {
         case "discard_action": return "Discard " + string(_cond.amount) + " action card(s)";
         case "discard_monster": return "Discard " + string(_cond.amount) + " monster card(s)";
         case "discard_weapon": return "Discard " + string(_cond.amount) + " weapon card(s)";
+        case "discard_tag":
+            var _type_label = conditions_FormatCardTypesLabel(_cond.card_types);
+            return "Discard " + string(_cond.amount) + " [" + conditions_JoinTags(_cond.tags) + "] " + _type_label + " card(s)";
         default: return string(_cond.type);
     }
 }
@@ -108,6 +137,31 @@ function conditions_JoinTags(_tags) {
         _txt += _tags[i];
     }
     return _txt;
+}
+
+function conditions_FormatCardTypesLabel(_types) {
+    if (!is_array(_types) || array_length(_types) <= 0) return "any type";
+    var _txt = "";
+    for (var i = 0; i < array_length(_types); i++) {
+        if (i > 0) _txt += "/";
+        _txt += _types[i];
+    }
+    return _txt;
+}
+
+function conditions_CardMatchesTypeFilter(_card, _type_filter) {
+    if (_card == undefined) return false;
+    if (!is_array(_type_filter) || array_length(_type_filter) <= 0) return true;
+
+    for (var i = 0; i < array_length(_type_filter); i++) {
+        var _want = _type_filter[i];
+        if (_want == "monster") {
+            if (_card.type == "monster" || _card.type == "special_monster") return true;
+        } else if (_card.type == _want) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function conditions_CardHasTag(_card, _tags) {
@@ -131,6 +185,22 @@ function conditions_HandCountOfType(_type) {
     with (_hand) {
         for (var i = 0; i < hand_Count; i++) {
             if (hand[i] != undefined && hand[i].type == _type) _count++;
+        }
+    }
+    return _count;
+}
+
+function conditions_CountHandDiscardTagCandidates(_tags, _type_filter) {
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand == noone) return 0;
+
+    var _count = 0;
+    with (_hand) {
+        for (var i = 0; i < hand_Count; i++) {
+            if (hand[i] == undefined) continue;
+            if (!conditions_CardHasTag(hand[i], _tags)) continue;
+            if (!conditions_CardMatchesTypeFilter(hand[i], _type_filter)) continue;
+            _count++;
         }
     }
     return _count;
@@ -274,6 +344,8 @@ function conditions_CanMeetRequirement(_cond) {
             return conditions_HandCountOfType("monster") + conditions_HandCountOfType("special_monster") >= _cond.amount;
         case "discard_weapon":
             return conditions_HandCountOfType("weapon") >= _cond.amount;
+        case "discard_tag":
+            return conditions_CountHandDiscardTagCandidates(_cond.tags, _cond.card_types) >= _cond.amount;
         default:
             return true;
     }
@@ -435,6 +507,12 @@ function conditions_ProcessNext() {
             conditions_summon_prompt = "Select " + string(_cond.amount) + " weapon card(s) to discard";
             break;
 
+        case "discard_tag":
+            conditions_summon_mode = "discard_tag";
+            var _discard_type_label = conditions_FormatCardTypesLabel(_cond.card_types);
+            conditions_summon_prompt = "Select " + string(_cond.amount) + " [" + conditions_JoinTags(_cond.tags) + "] " + _discard_type_label + " card(s) to discard";
+            break;
+
         default:
             array_delete(conditions_summon_queue, 0, 1);
             conditions_ProcessNext();
@@ -502,6 +580,20 @@ function conditions_IsValidDiscardHandIndex(_index, _required_type) {
         return (_card.type == "monster" || _card.type == "special_monster");
     }
     return _card.type == _required_type;
+}
+
+function conditions_IsValidDiscardTagHandIndex(_index) {
+    if (conditions_summon_mode != "discard_tag") return false;
+    if (conditions_summon_current == undefined) return false;
+
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand == noone) return false;
+    if (_index < 0 || _index >= _hand.hand_Count) return false;
+
+    var _card = _hand.hand[_index];
+    if (_card == undefined) return false;
+    if (!conditions_CardHasTag(_card, conditions_summon_current.tags)) return false;
+    return conditions_CardMatchesTypeFilter(_card, conditions_summon_current.card_types);
 }
 
 function conditions_GetDiscardRequiredType() {
@@ -610,8 +702,14 @@ function conditions_TryPickSacrificeHand(_index) {
 }
 
 function conditions_TryPickDiscardHand(_index) {
-    var _req = conditions_GetDiscardRequiredType();
-    if (!conditions_IsValidDiscardHandIndex(_index, _req)) return false;
+    var _valid = false;
+    if (conditions_summon_mode == "discard_tag") {
+        _valid = conditions_IsValidDiscardTagHandIndex(_index);
+    } else {
+        var _req = conditions_GetDiscardRequiredType();
+        _valid = conditions_IsValidDiscardHandIndex(_index, _req);
+    }
+    if (!_valid) return false;
 
     var _hand = instance_find(OBJ_Hand, 0);
     if (_hand == noone) return false;
@@ -627,7 +725,7 @@ function conditions_TryPickDiscardHand(_index) {
 }
 
 function conditions_summon_CanCancel() {
-    return conditions_summon_mode != "discard_hand";
+    return conditions_summon_mode != "discard_hand" && conditions_summon_mode != "discard_tag";
 }
 
 function conditions_summon_Step() {
@@ -675,7 +773,7 @@ function conditions_summon_Step() {
         return;
     }
 
-    if (conditions_summon_mode == "discard_hand") {
+    if (conditions_summon_mode == "discard_hand" || conditions_summon_mode == "discard_tag") {
         var _hand = instance_find(OBJ_Hand, 0);
         if (_hand == noone) return;
         var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
@@ -746,7 +844,7 @@ function conditions_summon_Draw() {
         }
     }
 
-    if (conditions_summon_mode == "discard_hand") {
+    if (conditions_summon_mode == "discard_hand" || conditions_summon_mode == "discard_tag") {
         var _hand = instance_find(OBJ_Hand, 0);
         if (_hand == noone) return;
 
@@ -755,7 +853,10 @@ function conditions_summon_Draw() {
         var _start_x = SCR_Hand_GetStartX(_hand.hand_Count, _spacing);
 
         for (var h = 0; h < _hand.hand_Count; h++) {
-            if (!conditions_IsValidDiscardHandIndex(h, _req)) continue;
+            var _discard_ok = (conditions_summon_mode == "discard_tag")
+                ? conditions_IsValidDiscardTagHandIndex(h)
+                : conditions_IsValidDiscardHandIndex(h, _req);
+            if (!_discard_ok) continue;
             var _box = SCR_Hand_GetCardHitbox(h, _hand.hand_Count, _spacing, _hand.hand_Y, _start_x, false);
             draw_set_color(c_red);
             draw_rectangle(_box.left, _box.top, _box.right, _box.bottom, true);

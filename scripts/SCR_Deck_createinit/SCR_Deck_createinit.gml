@@ -13,7 +13,7 @@ function SCR_Deck_createinit() {
     deck_Count = 0;
     deck_Head = 0;
 
-    extra_deck_Max = 40;
+    extra_deck_Max = 9999;
     extra_deck_Count = 0;
     extra_deck = [];
 
@@ -34,9 +34,11 @@ function SCR_Deck_createinit() {
     extra_deck_Height = 101;
     extra_deck_picker_open = false;
     extra_deck_picker_scroll = 0;
+    extra_deck_picker_focus = 0;
 
     tag_picker_open = false;
     tag_picker_scroll = 0;
+    tag_picker_focus = 0;
     tag_picker_card_ids = [];
     tag_picker_destination = "";
     tag_picker_amount = 1;
@@ -134,11 +136,6 @@ function deck_AddCard(card_id) {
 }
 
 function deck_AddExtraCard(card_id) {
-    if (extra_deck_Count >= extra_deck_Max) {
-        show_debug_message("Extra deck full! Cannot add card " + string(card_id));
-        return false;
-    }
-
     var _data = deck_GetCardData(card_id);
     if (_data == undefined) {
         show_debug_message("Extra deck add failed: card id " + string(card_id) + " not found");

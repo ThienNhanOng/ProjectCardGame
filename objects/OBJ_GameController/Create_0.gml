@@ -7,3 +7,4 @@ if (!variable_global_exists("card_DB") || !is_struct(card_DB) || array_length(ca
 }
 
 battle_EnsureMonsterDatabase();
+collection_EnsurePlayerInitialized();
