@@ -112,53 +112,90 @@ Available/cleared markers show the event name above the icon when reachable.
 
 5. Card rewards on markers (first clear)
 
-Rewards are configured in the same marker Create event, AFTER eventmarker_apply_config.
+Rewards use a **reward set**: how many cards to grant, whether to randomize, and a list of
+{id, chance} entries. Configured in the marker Create event AFTER eventmarker_apply_config.
 
-Open the marker object (e.g. OBJ_Map1_Marker01) → Create event → add ONE of these lines:
-
-
---- Fixed card reward (always this card id) ---
-
-  eventmarker_apply_reward(8, "", 1);
-
-  Card id 8 (Advance Strike), 1 copy, on first clear only.
-  Replays do NOT grant the card again.
+Only granted on **first clear** — replays give battles only, no cards.
 
 
---- Random reward from a pool of card ids ---
+--- Parameter reference ---
 
-  eventmarker_apply_reward(0, "9,10,11", 1);
+eventmarker_apply_reward(gift_count, randomize, rewardset?)
 
-  Picks one of ids 9, 10, or 11 at random on first clear.
-  First number must be 0 when using a pool.
+  gift_count   How many cards to grant (number of picks from the set)
+  randomize    true = weighted roll each pick | false = walk entries in order
+  rewardset    Optional — array or string "id:chance,..."; omit to use reward_add lines
+
+eventmarker_reward_add(card_id, chance, collection?)
+
+  card_id      Card id from card_DB
+  chance       Weight / percent (20 = 20% when entries sum to ~100)
+  collection   Optional JSON collection name (only if ids overlap across files)
 
 
---- Multiple copies ---
+--- Manual lines (recommended) ---
 
-  eventmarker_apply_reward(12, "", 2);
+  eventmarker_apply_reward(2, true);
+  eventmarker_reward_add(8, 20);
+  eventmarker_reward_add(9, 10);
+  eventmarker_reward_add(12, 70);
 
-  Grants 2 copies of card id 12.
+  Grants 2 cards. Each pick rolls 20% / 10% / 70% from the set.
+
+
+--- Fixed card #7, once ---
+
+  eventmarker_apply_reward(1, true);
+  eventmarker_reward_add(7, 100);
+
+
+--- One-liner string ---
+
+  eventmarker_apply_reward(1, true, "8:20,9:80");
+
+
+--- Array preset ---
+
+  eventmarker_apply_reward(3, true, [
+      { id: 1, chance: 25 },
+      { id: 2, chance: 25 },
+      { id: 3, chance: 25 },
+      { id: 4, chance: 25 }
+  ]);
+
+  Grants 3 cards — each pick rolls independently from the weighted set.
+
+
+--- String with optional collection ---
+
+  eventmarker_apply_reward(1, true, "8:20:Merc_starterdeck01,9:80");
+
+  Format per entry: id:chance or id:chance:collection_name
+
+
+--- Non-random (grant in list order) ---
+
+  eventmarker_apply_reward(2, false);
+  eventmarker_reward_add(8, 100);
+  eventmarker_reward_add(9, 100);
+
+  First pick → card 8, second pick → card 9 (chance values ignored).
 
 
 Rules:
-  - Card ids must exist in card_DB (your JSON card pool).
-  - If reward_card_id > 0, that card is used (pool is ignored).
-  - If reward_card_id is 0, a random id is picked from the pool string.
-  - Leave off eventmarker_apply_reward entirely for battle-only markers (no card).
-  - Reward is granted when the player wins the fight the first time that marker is cleared.
+  - Card ids must exist in card_DB.
+  - gift_count = 0 or empty reward set → no card reward (battle-only marker).
+  - randomize true → each of gift_count picks uses chance weights.
+  - randomize false → picks follow entry order (0, 1, 2…).
+  - First clear only. Replays use replay_pool battles, never grant cards again.
 
-Full Marker01 example (battle + fixed reward):
+
+Full Marker01 example:
 
   event_inherited();
   eventmarker_apply_config(1, "Trail Start", "battle01", "Grasslands_Battleset01_starter.json", "battle01,battle02,battle03,battle04,battle05");
-  eventmarker_apply_reward(8, "", 1);
-
-
-Full Marker03 example (battle + random reward):
-
-  event_inherited();
-  eventmarker_apply_config(3, "Rocky Pass", "battle03", "Grasslands_Battleset01_starter.json", "battle03,battle04,battle05");
-  eventmarker_apply_reward(0, "9,10,11", 1);
+  eventmarker_apply_reward(1, true);
+  eventmarker_reward_add(8, 100);
 
 
 6. Room setup (Room_Worldmap1)
@@ -215,7 +252,7 @@ Same pattern as map 1:
 
 1. Duplicate OBJ_Map2_Marker01 in Map2Markers.
 2. Edit Create → eventmarker_apply_config(order, label, battle, battleset, replays).
-3. Optional → eventmarker_apply_reward(card_id, pool, amount).
+3. Optional → eventmarker_apply_reward(gift_count, randomize) + eventmarker_reward_add lines.
 4. Create Room_Worldmap2 (or duplicate Room_Worldmap1).
 5. Place Map2 marker instances in that room.
 6. Add OBJ_WorldMapController to the new room.
@@ -282,10 +319,8 @@ Step E — Add a new earnable player card (optional)
   1. Add the card to Merc_starterdeck01.json (or another loaded collection JSON).
   2. Omit "own" (or set own to 0) so the player does NOT start with it.
   3. Note the card "id" number.
-  4. On a marker Create event, add:
-       eventmarker_apply_reward(YOUR_ID, "", 1);
-     or for random:
-       eventmarker_apply_reward(0, "ID1,ID2,ID3", 1);
+  4. On a marker Create event, configure rewards with eventmarker_apply_reward + eventmarker_reward_add.
+     See section 5 for examples.
 
 Data chain summary:
 

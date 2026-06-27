@@ -6,6 +6,7 @@ function SCR_DBC_Create() {
     search_focused = false;
     SCR_DBC_InitDeck();
     SetupPlayerCollection();
+    player_deck_LoadSavedDeck();
     SCR_DBC_InitPagination();
     SCR_ExtraDeck_Init();
     SCR_DBC_LoadPage();

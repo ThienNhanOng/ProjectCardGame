@@ -4,8 +4,7 @@ function SCR_DBS_HandleDeckListScrolling() {
     var _layout = SCR_DBD_GetDeckListLayout();
     if (!SCR_DBD_IsMouseOverDeckList(_layout)) return false;
 
-    var _entries = SCR_DBD_GetDeckListSummary(selected_deck);
-    var _count = array_length(_entries);
+    var _rows = SCR_DBD_BuildDeckListRows(selected_deck);
     var _scroll = SCR_DBD_GetDeckListScroll();
     var _step = SCR_DBD_GetDeckListRowStep(_layout);
     var _changed = false;
@@ -20,7 +19,7 @@ function SCR_DBS_HandleDeckListScrolling() {
     }
 
     if (_changed) {
-        SCR_DBD_SetDeckListScroll(SCR_DBD_ClampDeckListScroll(_layout, _scroll, _count));
+        SCR_DBD_SetDeckListScroll(SCR_DBD_ClampDeckListScroll(_layout, _scroll, _rows));
     }
 
     return true;

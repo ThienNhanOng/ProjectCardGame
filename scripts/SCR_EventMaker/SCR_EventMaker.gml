@@ -24,9 +24,9 @@ function eventmarker_init() {
     if (!variable_instance_exists(id, "marker_battleset")) marker_battleset = "";
     if (!variable_instance_exists(id, "marker_replay_pool")) marker_replay_pool = "";
 
-    marker_reward_card_id = 0;
-    marker_reward_pool = "";
-    marker_reward_amount = 1;
+    marker_reward_gift_count = 0;
+    marker_reward_randomize = true;
+    marker_reward_entries = [];
 
     depth = -10;
     sprite_index = Map_Marker_inactive;
@@ -34,7 +34,12 @@ function eventmarker_init() {
     image_alpha = 1;
 }
 
-/// @desc Set marker battle config — edit each Map marker object's Create event
+/// @desc Set marker battle config — call in each map marker object's Create event (after event_inherited())
+/// @param _order       Unlock order in the map chain (1 = first event, 2 = second, …)
+/// @param _label       Name shown on the map when the marker is active
+/// @param _battle      Battle id for the **first** clear (must exist in the battleset JSON)
+/// @param _battleset   Battleset filename, e.g. "Grasslands_Battleset01_starter.json"
+/// @param _replay_pool Comma-separated battle ids for **replays** after first clear, e.g. "battle01,battle02"
 function eventmarker_apply_config(_order, _label, _battle, _battleset, _replay_pool) {
     marker_order = _order;
     marker_label = _label;
@@ -43,14 +48,87 @@ function eventmarker_apply_config(_order, _label, _battle, _battleset, _replay_p
     marker_replay_pool = _replay_pool;
 }
 
-/// @desc Card reward on first clear — fixed id OR random pool (not both; fixed wins if set)
-/// @param _card_id  Card id from card_DB (0 = none, use pool instead)
-/// @param _pool     Comma-separated card ids, e.g. "8,9,12" (used when _card_id is 0)
-/// @param _amount   Copies granted (default 1)
-function eventmarker_apply_reward(_card_id = 0, _pool = "", _amount = 1) {
-    marker_reward_card_id = max(0, floor(_card_id));
-    marker_reward_pool = string(_pool);
-    marker_reward_amount = max(1, floor(_amount));
+/// @desc Configure card rewards on **first clear only** (not replays)
+/// @param _gift_count  How many cards to grant (number of picks from the reward set)
+/// @param _randomize   true = weighted roll each pick | false = walk entries in order
+/// @param _rewardset   Optional preset — array of { id, chance [, collection] } or string "id:chance,..."
+function eventmarker_apply_reward(_gift_count, _randomize, _rewardset = undefined) {
+    marker_reward_gift_count = max(0, floor(_gift_count));
+    marker_reward_randomize = _randomize;
+    marker_reward_entries = (_rewardset == undefined)
+        ? []
+        : eventmarker_NormalizeRewardSet(_rewardset);
+}
+
+/// @desc Add one card line to the reward set (call after eventmarker_apply_reward)
+/// @param _card_id     Card id from card_DB
+/// @param _chance      Weight / percent-style chance (20 = 20% when entries sum to 100)
+/// @param _collection  Optional JSON collection name when ids overlap across files
+function eventmarker_reward_add(_card_id, _chance, _collection = "") {
+    if (!is_array(marker_reward_entries)) marker_reward_entries = [];
+    array_push(marker_reward_entries, {
+        id: max(0, floor(_card_id)),
+        chance: max(0, real(_chance)),
+        collection: string(_collection)
+    });
+}
+
+function eventmarker_NormalizeRewardEntry(_raw) {
+    if (!is_struct(_raw)) return { id: 0, chance: 0, collection: "" };
+
+    var _id = variable_struct_exists(_raw, "id") ? floor(_raw.id) : 0;
+    var _chance = 100;
+    if (variable_struct_exists(_raw, "chance")) _chance = real(_raw.chance);
+    else if (variable_struct_exists(_raw, "weight")) _chance = real(_raw.weight);
+
+    var _collection = "";
+    if (variable_struct_exists(_raw, "collection")) _collection = string(_raw.collection);
+    else if (variable_struct_exists(_raw, "cardset")) _collection = string(_raw.cardset);
+
+    return { id: _id, chance: max(0, _chance), collection: _collection };
+}
+
+function eventmarker_ParseRewardEntryToken(_token) {
+    var _trimmed = string_trim(_token);
+    if (_trimmed == "") return eventmarker_NormalizeRewardEntry(undefined);
+
+    var _parts = string_split(_trimmed, ":");
+    var _id = floor(real(string_trim(_parts[0])));
+    var _chance = (array_length(_parts) > 1) ? real(string_trim(_parts[1])) : 100;
+    var _collection = (array_length(_parts) > 2) ? string_trim(_parts[2]) : "";
+
+    return { id: _id, chance: max(0, _chance), collection: _collection };
+}
+
+function eventmarker_NormalizeRewardSet(_rewardset) {
+    var _entries = [];
+
+    if (is_array(_rewardset)) {
+        for (var i = 0; i < array_length(_rewardset); i++) {
+            var _entry = eventmarker_NormalizeRewardEntry(_rewardset[i]);
+            if (_entry.id > 0 && _entry.chance > 0) array_push(_entries, _entry);
+        }
+        return _entries;
+    }
+
+    if (is_string(_rewardset) && _rewardset != "") {
+        var _parts = string_split(_rewardset, ",");
+        for (var s = 0; s < array_length(_parts); s++) {
+            var _entry = eventmarker_ParseRewardEntryToken(_parts[s]);
+            if (_entry.id > 0 && _entry.chance > 0) array_push(_entries, _entry);
+        }
+    }
+
+    return _entries;
+}
+
+function eventmarker_CopyRewardEntries(_entries) {
+    var _copy = [];
+    if (!is_array(_entries)) return _copy;
+    for (var i = 0; i < array_length(_entries); i++) {
+        array_push(_copy, eventmarker_NormalizeRewardEntry(_entries[i]));
+    }
+    return _copy;
 }
 
 function eventmarker_refresh_visual() {

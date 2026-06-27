@@ -1518,6 +1518,126 @@ Player ownership for deckbuilder is built in `SCR_PlayerCollection` from cards w
 
 
 
+## Map marker card rewards (world map)
+
+
+
+Earnable cards can be granted when the player **first clears** a world-map battle marker. Replays do not grant cards again (only battles from the marker's replay pool).
+
+
+
+Configure rewards in each marker object's **Create** event (after `eventmarker_apply_config`). Full walkthrough: [`notes/Map1Markers guide/Map1Markers guide.txt`](../notes/Map1Markers%20guide/Map1Markers%20guide.txt).
+
+
+
+### API
+
+
+
+```gml
+eventmarker_apply_reward(gift_count, randomize, rewardset?);
+eventmarker_reward_add(card_id, chance, collection?);
+```
+
+
+
+| Function / param | Meaning |
+
+|------------------|---------|
+
+| `gift_count` | How many cards to grant (number of picks from the set) |
+
+| `randomize` | `true` = weighted roll each pick · `false` = entries in order |
+
+| `rewardset` | Optional array or `"id:chance,..."` string; omit to use `reward_add` lines |
+
+| `card_id` | Card id from `card_DB` |
+
+| `chance` | Weight / percent (`20` = 20% when entries sum to ~100) |
+
+| `collection` | Optional JSON collection name if ids overlap across files |
+
+
+
+### Examples
+
+
+
+**Manual lines (recommended):**
+
+```gml
+eventmarker_apply_reward(2, true);
+eventmarker_reward_add(8, 20);
+eventmarker_reward_add(9, 10);
+eventmarker_reward_add(12, 70);
+```
+
+Grants **2** cards. Each pick rolls 20% / 10% / 70% from the set.
+
+
+
+**Fixed card #7, once:**
+
+```gml
+eventmarker_apply_reward(1, true);
+eventmarker_reward_add(7, 100);
+```
+
+
+
+**One-liner string:**
+
+```gml
+eventmarker_apply_reward(1, true, "8:20,9:80");
+```
+
+
+
+**Array preset:**
+
+```gml
+eventmarker_apply_reward(3, true, [
+    { id: 1, chance: 25 },
+    { id: 2, chance: 25 },
+    { id: 3, chance: 25 },
+    { id: 4, chance: 25 }
+]);
+```
+
+Grants **3** cards — each pick rolls independently.
+
+
+
+**Non-random (list order):**
+
+```gml
+eventmarker_apply_reward(2, false);
+eventmarker_reward_add(8, 100);
+eventmarker_reward_add(9, 100);
+```
+
+First pick → card 8, second → card 9 (chance values ignored).
+
+
+
+### Rules
+
+
+
+- Card ids must exist in `card_DB`.
+
+- `gift_count = 0` or empty reward set → battle-only marker (no card).
+
+- **First clear only** — not on replays.
+
+- Implementation: `scripts/SCR_EventMaker/SCR_EventMaker.gml`, `scripts/SCR_WorldMap_Progress/SCR_WorldMap_Progress.gml`
+
+
+
+---
+
+
+
 ## Reference files
 
 
@@ -1561,6 +1681,8 @@ Player ownership for deckbuilder is built in `SCR_PlayerCollection` from cards w
 | Weapon attack rules | `scripts/SCR_Battle_Attack/SCR_Battle_Attack.gml` |
 
 | Spirit conditions | `scripts/SCR_Conditions/SCR_Conditions.gml` |
+
+| Map marker rewards | `scripts/SCR_EventMaker/SCR_EventMaker.gml` |
 
 | Resources HUD & pool | `scripts/SCR_Battle_Resources/SCR_Battle_Resources.gml` |
 

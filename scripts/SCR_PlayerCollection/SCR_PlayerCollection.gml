@@ -250,20 +250,82 @@ function collection_ParseIdPoolString(_raw) {
 
     if (_raw == undefined || string(_raw) == "") return _pool;
 
+    var _parsed = collection_ParseRewardPoolString(_raw);
+    return _parsed.ids;
 
+}
+
+
+
+/// @desc Parse reward pool string — equal ids "1,2,3" or weighted "8:10,9:90"
+function collection_ParseRewardPoolString(_raw) {
+    var _parsed = {
+        weighted: false,
+        ids: [],
+        entries: []
+    };
+
+    if (_raw == undefined || string(_raw) == "") return _parsed;
 
     var _parts = string_split(string(_raw), ",");
-
     for (var i = 0; i < array_length(_parts); i++) {
+        var _part = string_trim(_parts[i]);
+        if (_part == "") continue;
 
-        var _id = floor(real(string_trim(_parts[i])));
-
-        if (_id > 0) array_push(_pool, _id);
-
+        if (string_pos(":", _part) > 0) {
+            var _colon = string_pos(":", _part);
+            var _id_str = string_trim(string_copy(_part, 1, _colon - 1));
+            var _wt_str = string_trim(string_copy(_part, _colon + 1, string_length(_part) - _colon));
+            var _id = floor(real(_id_str));
+            var _weight = real(_wt_str);
+            if (_id > 0 && _weight > 0) {
+                array_push(_parsed.entries, { id: _id, weight: _weight });
+                _parsed.weighted = true;
+            }
+        } else {
+            var _id = floor(real(_part));
+            if (_id > 0) array_push(_parsed.ids, _id);
+        }
     }
 
-    return _pool;
+    return _parsed;
+}
 
+
+
+function collection_PickWeightedIdFromEntries(_entries) {
+    if (!is_array(_entries) || array_length(_entries) <= 0) return 0;
+
+    var _total = 0;
+    for (var i = 0; i < array_length(_entries); i++) {
+        _total += _entries[i].weight;
+    }
+    if (_total <= 0) return 0;
+
+    var _roll = random(_total);
+    var _acc = 0;
+    for (var i = 0; i < array_length(_entries); i++) {
+        _acc += _entries[i].weight;
+        if (_roll < _acc) return _entries[i].id;
+    }
+
+    return _entries[array_length(_entries) - 1].id;
+}
+
+
+
+function collection_PickFromRewardPool(_parsed) {
+    if (_parsed == undefined) return 0;
+
+    if (_parsed.weighted && is_array(_parsed.entries) && array_length(_parsed.entries) > 0) {
+        return collection_PickWeightedIdFromEntries(_parsed.entries);
+    }
+
+    if (is_array(_parsed.ids) && array_length(_parsed.ids) > 0) {
+        return collection_PickRandomIdFromPool(_parsed.ids);
+    }
+
+    return 0;
 }
 
 

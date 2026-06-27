@@ -88,20 +88,6 @@ function SCR_DBD_GetSpiritCards() {
     return _spirits;
 }
 
-/// @description One entry per owned spirit copy (for horizontal extra deck display)
-function SCR_DBD_GetSpiritDeckCopyIds() {
-    var _ids = [];
-    for (var i = 0; i < array_length(global.player_collection); i++) {
-        var _card = global.player_collection[i];
-        if (_card.type != "spirit" && _card.type != "special_monster") continue;
-        var _owned = variable_struct_exists(_card, "owned") ? _card.owned : 0;
-        for (var c = 0; c < _owned; c++) {
-            array_push(_ids, _card.id);
-        }
-    }
-    return _ids;
-}
-
 function SCR_DBD_ShuffleSelectedDeck() {
     var _builder = instance_find(OBJ_DeckBuilder, 0);
     if (_builder == noone) return;
@@ -124,9 +110,62 @@ function SCR_DBD_GetDeckListLayout() {
         list_y_start: 80,
         list_viewport_bottom: 550,
         line_h: 22,
+        header_h: 26,
         line_gap: 4,
+        section_gap: 8,
         text_pad_x: 8
     };
+}
+
+function SCR_DBD_GetDeckListRowHeight(_layout, _row) {
+    if (_row.kind == "header") return _layout.header_h;
+    return _layout.line_h;
+}
+
+function SCR_DBD_GetDeckListRowGap(_layout, _row, _next_row) {
+    if (_next_row == undefined) return 0;
+    if (_row.kind == "header") return _layout.line_gap;
+    if (_next_row.kind == "header") return _layout.section_gap;
+    return _layout.line_gap;
+}
+
+/// @desc Flat draw/hit-test rows: type headers + card lines (monster, action, weapon)
+function SCR_DBD_BuildDeckListRows(_selected_deck) {
+    var _sections = [
+        { type: "monster", label: "Monster", color: make_color_rgb(70, 130, 230) },
+        { type: "action", label: "Action", color: make_color_rgb(210, 70, 70) },
+        { type: "weapon", label: "Weapon", color: make_color_rgb(230, 150, 50) }
+    ];
+
+    var _summary = SCR_DBD_GetDeckListSummary(_selected_deck);
+    var _rows = [];
+
+    for (var s = 0; s < array_length(_sections); s++) {
+        var _sec = _sections[s];
+        var _cards = [];
+        for (var i = 0; i < array_length(_summary); i++) {
+            if (_summary[i].type == _sec.type) array_push(_cards, _summary[i]);
+        }
+        if (array_length(_cards) <= 0) continue;
+
+        array_push(_rows, {
+            kind: "header",
+            label: _sec.label,
+            color: _sec.color
+        });
+
+        for (var c = 0; c < array_length(_cards); c++) {
+            array_push(_rows, {
+                kind: "card",
+                id: _cards[c].id,
+                name: _cards[c].name,
+                type: _cards[c].type,
+                count: _cards[c].count
+            });
+        }
+    }
+
+    return _rows;
 }
 
 function SCR_DBD_GetDeckListRowStep(_layout) {
@@ -149,18 +188,27 @@ function SCR_DBD_SetDeckListScroll(_scroll) {
     with (_builder) deck_list_scroll = _scroll;
 }
 
-function SCR_DBD_GetDeckListContentHeight(_layout, _entry_count) {
-    return _entry_count * SCR_DBD_GetDeckListRowStep(_layout);
+function SCR_DBD_GetDeckListContentHeight(_layout, _rows) {
+    if (!is_array(_rows) || array_length(_rows) <= 0) return 0;
+
+    var _h = 0;
+    for (var i = 0; i < array_length(_rows); i++) {
+        _h += SCR_DBD_GetDeckListRowHeight(_layout, _rows[i]);
+        if (i < array_length(_rows) - 1) {
+            _h += SCR_DBD_GetDeckListRowGap(_layout, _rows[i], _rows[i + 1]);
+        }
+    }
+    return _h;
 }
 
-function SCR_DBD_GetDeckListMaxScroll(_layout, _entry_count) {
+function SCR_DBD_GetDeckListMaxScroll(_layout, _rows) {
     var _viewport_h = _layout.list_viewport_bottom - _layout.list_y_start;
-    var _content_h = SCR_DBD_GetDeckListContentHeight(_layout, _entry_count);
+    var _content_h = SCR_DBD_GetDeckListContentHeight(_layout, _rows);
     return max(0, _content_h - _viewport_h);
 }
 
-function SCR_DBD_ClampDeckListScroll(_layout, _scroll, _entry_count) {
-    return clamp(_scroll, 0, SCR_DBD_GetDeckListMaxScroll(_layout, _entry_count));
+function SCR_DBD_ClampDeckListScroll(_layout, _scroll, _rows) {
+    return clamp(_scroll, 0, SCR_DBD_GetDeckListMaxScroll(_layout, _rows));
 }
 
 function SCR_DBD_IsMouseOverDeckList(_layout) {
@@ -172,14 +220,21 @@ function SCR_DBD_IsDeckListRowInViewport(_layout, _bounds) {
     return (_bounds.y + _bounds.h > _layout.list_y_start && _bounds.y < _layout.list_viewport_bottom);
 }
 
-function SCR_DBD_GetDeckListRowBounds(_layout, _index, _scroll = undefined) {
+function SCR_DBD_GetDeckListRowBounds(_layout, _rows, _index, _scroll = undefined) {
     if (_scroll == undefined) _scroll = SCR_DBD_GetDeckListScroll();
-    var _y = _layout.list_y_start + (_index * SCR_DBD_GetDeckListRowStep(_layout)) - _scroll;
+
+    var _y = _layout.list_y_start - _scroll;
+    for (var i = 0; i < _index; i++) {
+        _y += SCR_DBD_GetDeckListRowHeight(_layout, _rows[i]);
+        _y += SCR_DBD_GetDeckListRowGap(_layout, _rows[i], _rows[i + 1]);
+    }
+
     return {
         x: _layout.list_x,
         y: _y,
         w: _layout.list_w,
-        h: _layout.line_h
+        h: SCR_DBD_GetDeckListRowHeight(_layout, _rows[_index]),
+        row: _rows[_index]
     };
 }
 
@@ -208,6 +263,21 @@ function SCR_DBD_DrawDeckListRow(_layout, _bounds, _text, _is_hovered) {
     draw_set_halign(fa_left);
     draw_set_valign(fa_middle);
     draw_text(_x1 + _layout.text_pad_x, _y1 + (_bounds.h * 0.5), _text);
+}
+
+function SCR_DBD_DrawDeckListSectionHeader(_layout, _bounds, _label, _color) {
+    var _x1 = _bounds.x;
+    var _y1 = _bounds.y;
+    var _x2 = _bounds.x + _bounds.w;
+    var _y2 = _bounds.y + _bounds.h;
+
+    draw_set_color(_color);
+    draw_rectangle(_x1, _y1, _x2, _y2, true);
+
+    draw_set_color(_color);
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_middle);
+    draw_text(_x1 + _layout.text_pad_x, _y1 + (_bounds.h * 0.5), _label);
 }
 
 /// @description Unique deck entries with copy counts (matches deck list draw order)
@@ -428,23 +498,36 @@ function SCR_DBD_GetCardPreviewSprite(_card) {
 }
 
 function SCR_DBD_GetSpiritCardRowBounds(_row_index) {
-    return SCR_ExtraDeck_GetCardBounds(_row_index, extra_scroll);
+    var _cx = extra_x + (extra_w - extra_card_w) / 2;
+    var _cy = extra_y + 10 + _row_index * (extra_card_h + extra_gap);
+    return {
+        x: _cx,
+        y: _cy,
+        w: extra_card_w,
+        h: extra_card_h
+    };
 }
 
 function SCR_DBD_FindHoveredSpiritCard() {
-    var _ids = SCR_DBD_GetSpiritDeckCopyIds();
-    if (array_length(_ids) <= 0) return undefined;
-
     if (mouse_x < extra_x || mouse_x >= extra_x + extra_w
         || mouse_y < extra_y || mouse_y >= extra_y + extra_h) {
         return undefined;
     }
 
-    SCR_ExtraDeck_ClampFocus(array_length(_ids));
-    var _picked = SCR_ExtraDeck_PickIndexAt(mouse_x, mouse_y, extra_scroll, array_length(_ids));
-    if (_picked >= 0) extra_focus_index = _picked;
+    var _cards = SCR_DBD_GetSpiritCards();
+    var _start = extra_current_page * extra_cards_per_page;
+    var _end = min(_start + extra_cards_per_page, array_length(_cards));
 
-    return deck_GetCardData(_ids[extra_focus_index]);
+    for (var i = _start; i < _end; i++) {
+        var _row = i - _start;
+        var _bounds = SCR_DBD_GetSpiritCardRowBounds(_row);
+        if (mouse_x >= _bounds.x && mouse_x < _bounds.x + _bounds.w
+            && mouse_y >= _bounds.y && mouse_y < _bounds.y + _bounds.h) {
+            return _cards[i];
+        }
+    }
+
+    return undefined;
 }
 
 function SCR_DBD_FindHoveredPreviewCard() {
@@ -452,15 +535,16 @@ function SCR_DBD_FindHoveredPreviewCard() {
     if (_spirit != undefined) return _spirit;
 
     var _layout = SCR_DBD_GetDeckListLayout();
-    var _entries = SCR_DBD_GetDeckListSummary(selected_deck);
-    var _scroll = SCR_DBD_ClampDeckListScroll(_layout, SCR_DBD_GetDeckListScroll(), array_length(_entries));
+    var _rows = SCR_DBD_BuildDeckListRows(selected_deck);
+    var _scroll = SCR_DBD_ClampDeckListScroll(_layout, SCR_DBD_GetDeckListScroll(), _rows);
     SCR_DBD_SetDeckListScroll(_scroll);
 
-    for (var i = 0; i < array_length(_entries); i++) {
-        var _bounds = SCR_DBD_GetDeckListRowBounds(_layout, i, _scroll);
+    for (var i = 0; i < array_length(_rows); i++) {
+        var _bounds = SCR_DBD_GetDeckListRowBounds(_layout, _rows, i, _scroll);
         if (!SCR_DBD_IsDeckListRowInViewport(_layout, _bounds)) continue;
+        if (_rows[i].kind != "card") continue;
         if (SCR_DBD_IsDeckListRowHovered(_bounds)) {
-            return SCR_DBD_ResolveCardDefinition(_entries[i].id);
+            return SCR_DBD_ResolveCardDefinition(_rows[i].id);
         }
     }
 

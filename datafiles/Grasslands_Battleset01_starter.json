@@ -5,33 +5,25 @@
       "active_slots": 1,
       "wave": [
         { "collection": "enemyCollection01", "enemyID": 1 },
-        { "collection": "enemyCollection01", "enemyID": 1 },
-        { "collection": "enemyCollection01", "enemyID": 1 },
-        { "collection": "enemyCollection01", "enemyID": 1 },
         { "collection": "enemyCollection01", "enemyID": 1 }
       ]
     },
     {
       "battle": "battle02",
-      "active_slots": 3,
+      "active_slots": 2,
       "wave": [
         { "collection": "enemyCollection01", "enemyID": 1 },
-        { "collection": "enemyCollection01", "enemyID": 1 },
-        { "collection": "enemyCollection01", "enemyID": 1 },
         { "collection": "enemyCollection01", "enemyID": 2 },
-        { "collection": "enemyCollection01", "enemyID": 1 },
         { "collection": "enemyCollection01", "enemyID": 1 }
       ]
     },
     {
       "battle": "battle03",
-      "active_slots": 2,
+      "active_slots": 3,
       "wave": [
         { "collection": "enemyCollection01", "enemyID": 1 },
         { "collection": "enemyCollection01", "enemyID": 2 },
-        { "collection": "enemyCollection01", "enemyID": 3 },
-        { "collection": "enemyCollection01", "enemyID": 1 },
-        { "collection": "enemyCollection01", "enemyID": 2 }
+        { "collection": "enemyCollection01", "enemyID": 3 }
       ]
     },
     {

@@ -124,6 +124,7 @@
     {"id":{"name":"Room_battle","path":"rooms/Room_battle/Room_battle.yy",},},
     {"id":{"name":"Room_collection","path":"rooms/Room_collection/Room_collection.yy",},},
     {"id":{"name":"Room_Worldmap1","path":"rooms/Room_Worldmap1/Room_Worldmap1.yy",},},
+    {"id":{"name":"Room_WorldMapParent","path":"rooms/Room_WorldMapParent/Room_WorldMapParent.yy",},},
     {"id":{"name":"deck_Clear","path":"scripts/deck_Clear/deck_Clear.yy",},},
     {"id":{"name":"LoadCollection","path":"scripts/LoadCollection/LoadCollection.yy",},},
     {"id":{"name":"LoadMonsters","path":"scripts/LoadMonsters/LoadMonsters.yy",},},
@@ -252,6 +253,7 @@
     {"roomId":{"name":"Room_collection","path":"rooms/Room_collection/Room_collection.yy",},},
     {"roomId":{"name":"Room_Worldmap1","path":"rooms/Room_Worldmap1/Room_Worldmap1.yy",},},
     {"roomId":{"name":"Room_battle","path":"rooms/Room_battle/Room_battle.yy",},},
+    {"roomId":{"name":"Room_WorldMapParent","path":"rooms/Room_WorldMapParent/Room_WorldMapParent.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

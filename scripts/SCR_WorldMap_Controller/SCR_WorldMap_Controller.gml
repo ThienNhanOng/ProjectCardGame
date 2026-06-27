@@ -1,22 +1,34 @@
-/// @desc Initializes grasslands world map progression for this room
+/// @desc Initializes world map progression for the current map room
 
 function SCR_WorldMapController_Init() {
-    worldmap_InitRoom("Grasslands_WorldMap01.json");
+    var _config = worldmap_GetRoomConfigFile();
+    if (variable_global_exists("worldmap_room_config_file")
+        && is_string(global.worldmap_room_config_file)
+        && global.worldmap_room_config_file != "") {
+        _config = global.worldmap_room_config_file;
+    }
+    worldmap_InitRoom(_config);
 }
 
 function SCR_WorldMapController_Step() {
     worldmap_RefreshAllMarkers();
+    worldmap_HandleCollectionButton();
 }
 
 function SCR_WorldMapController_DrawHUD() {
     worldmap_InitGlobals();
 
+    var _gw = display_get_gui_width();
+    var _gh = display_get_gui_height();
+
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
     draw_set_color(c_white);
-    draw_text(12, room_height - 72, "Map: " + global.worldmap.map_id);
-    draw_text(12, room_height - 56, "Progress: " + string(array_length(global.worldmap.cleared))
+    draw_text(12, _gh - 72, "Map: " + global.worldmap.map_id);
+    draw_text(12, _gh - 56, "Progress: " + string(array_length(global.worldmap.cleared))
         + " / " + string(array_length(global.worldmap.event_flow)));
-    draw_text(12, room_height - 40, "WASD move | E interact at active markers");
+    draw_text(12, _gh - 40, "WASD move | E interact at active markers");
     draw_set_color(c_white);
+
+    worldmap_DrawCollectionButton();
 }

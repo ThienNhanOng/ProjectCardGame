@@ -105,6 +105,7 @@ function SCR_DBS_HandleCollectionRightClick() {
             if (_builder.selected_deck[i].id == card_id) {
                 array_delete(_builder.selected_deck, i, 1);
                 show_debug_message("Returned " + card_data.name + " to collection");
+                player_deck_PersistSelectedDeck(_builder);
                 SCR_DBD_RebuildGrid();
                 break;
             }
@@ -116,22 +117,25 @@ function SCR_DBS_HandleDeckClick() {
     if (!mouse_check_button_pressed(mb_left)) return;
 
     var _layout = SCR_DBD_GetDeckListLayout();
-    var _entries = SCR_DBD_GetDeckListSummary(selected_deck);
+    var _rows = SCR_DBD_BuildDeckListRows(selected_deck);
     var _scroll = SCR_DBD_GetDeckListScroll();
 
-    for (var i = 0; i < array_length(_entries); i++) {
-        var _bounds = SCR_DBD_GetDeckListRowBounds(_layout, i, _scroll);
+    for (var i = 0; i < array_length(_rows); i++) {
+        if (_rows[i].kind != "card") continue;
+
+        var _bounds = SCR_DBD_GetDeckListRowBounds(_layout, _rows, i, _scroll);
         if (!SCR_DBD_IsDeckListRowInViewport(_layout, _bounds)) continue;
 
         if (mouse_x >= _bounds.x && mouse_x < _bounds.x + _bounds.w
             && mouse_y >= _bounds.y && mouse_y < _bounds.y + _bounds.h) {
 
-            var _removed_id = _entries[i].id;
+            var _removed_id = _rows[i].id;
 
             for (var d = 0; d < array_length(selected_deck); d++) {
                 if (selected_deck[d].id == _removed_id) {
                     show_debug_message("Returned " + selected_deck[d].name + " to collection");
                     array_delete(selected_deck, d, 1);
+                    player_deck_PersistSelectedDeck();
                     break;
                 }
             }

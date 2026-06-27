@@ -27,6 +27,7 @@ function SCR_CardSlot_AddToDeck() {
             };
             array_push(_deckbuilder.selected_deck, _copy);
             SCR_DBD_ShuffleSelectedDeck();
+            player_deck_PersistSelectedDeck(_deckbuilder);
             
             // Update badge display (available after this add)
             count = _available - 1;

@@ -19,6 +19,7 @@ function worldmap_InitGlobals() {
             cleared: [],
             active_event_id: -1,
             return_room: Room_Worldmap1,
+            collection_return_room: noone,
             victory_pending: false,
             last_reward_text: ""
         };
@@ -30,6 +31,10 @@ function worldmap_InitGlobals() {
 
     if (!variable_global_exists("battle_runtime_config")) {
         global.battle_runtime_config = undefined;
+    }
+
+    if (!variable_struct_exists(global.worldmap, "collection_return_room")) {
+        global.worldmap.collection_return_room = noone;
     }
 }
 
@@ -48,9 +53,9 @@ function worldmap_EnsureEventEntry(_event_id) {
             battle: "",
             battleset_file: "",
             replay_pool: [],
-            reward_card_id: 0,
-            reward_pool: [],
-            reward_amount: 1
+            reward_gift_count: 0,
+            reward_randomize: true,
+            reward_entries: []
         };
     }
     return global.worldmap.events[$ _key];
@@ -128,17 +133,47 @@ function worldmap_LoadMapConfig(_filename) {
                 }
             }
 
+            var _reward_entries = [];
+            var _reward_gift_count = 0;
+            var _reward_randomize = true;
+
+            if (variable_struct_exists(_src, "reward_entries") && is_array(_src.reward_entries)) {
+                _reward_entries = eventmarker_CopyRewardEntries(_src.reward_entries);
+            } else if (variable_struct_exists(_src, "reward_set") && is_string(_src.reward_set)) {
+                _reward_entries = eventmarker_NormalizeRewardSet(_src.reward_set);
+            }
+
+            if (variable_struct_exists(_src, "reward_gift_count")) {
+                _reward_gift_count = max(0, floor(_src.reward_gift_count));
+            } else if (variable_struct_exists(_src, "reward_amount")) {
+                _reward_gift_count = max(0, floor(_src.reward_amount));
+            }
+
+            if (variable_struct_exists(_src, "reward_randomize")) {
+                _reward_randomize = _src.reward_randomize;
+            }
+
+            if (array_length(_reward_entries) <= 0) {
+                var _legacy = worldmap_BuildRewardFromLegacySource(_src);
+                if (array_length(_legacy.entries) > 0) {
+                    _reward_entries = _legacy.entries;
+                    if (_reward_gift_count <= 0) _reward_gift_count = _legacy.gift_count;
+                }
+            }
+
+            if (array_length(_reward_entries) > 0 && _reward_gift_count <= 0) {
+                _reward_gift_count = 1;
+            }
+
             global.worldmap.events[$ _key] = {
                 id: _id,
                 label: variable_struct_exists(_src, "label") ? string(_src.label) : ("Event " + _key),
                 battle: variable_struct_exists(_src, "battle") ? string(_src.battle) : "",
                 battleset_file: variable_struct_exists(_src, "battleset") ? string(_src.battleset) : "",
                 replay_pool: _pool,
-                reward_card_id: variable_struct_exists(_src, "reward_card_id") ? floor(_src.reward_card_id) : 0,
-                reward_pool: variable_struct_exists(_src, "reward_pool") && is_array(_src.reward_pool)
-                    ? _src.reward_pool : collection_ParseIdPoolString(
-                        variable_struct_exists(_src, "reward_pool_ids") ? string(_src.reward_pool_ids) : ""),
-                reward_amount: variable_struct_exists(_src, "reward_amount") ? max(1, floor(_src.reward_amount)) : 1
+                reward_gift_count: _reward_gift_count,
+                reward_randomize: _reward_randomize,
+                reward_entries: _reward_entries
             };
 
             if (array_length(global.worldmap.event_flow) <= 0) {
@@ -151,6 +186,45 @@ function worldmap_LoadMapConfig(_filename) {
         + " | Events: " + string(array_length(global.worldmap.event_flow))
         + " | Battleset: " + global.worldmap.battleset_file);
     return true;
+}
+
+function worldmap_BuildRewardFromLegacySource(_src) {
+    var _gift_count = 0;
+    var _randomize = true;
+    var _entries = [];
+    if (!is_struct(_src)) {
+        return { gift_count: 0, randomize: true, entries: [] };
+    }
+
+    if (variable_struct_exists(_src, "reward_card_id") && _src.reward_card_id > 0) {
+        _gift_count = variable_struct_exists(_src, "reward_amount")
+            ? max(1, floor(_src.reward_amount)) : 1;
+        array_push(_entries, { id: floor(_src.reward_card_id), chance: 100, collection: "" });
+        return { gift_count: _gift_count, randomize: true, entries: _entries };
+    }
+
+    var _pool_raw = "";
+    if (variable_struct_exists(_src, "reward_pool_ids")) _pool_raw = string(_src.reward_pool_ids);
+    else if (variable_struct_exists(_src, "reward_set")) _pool_raw = string(_src.reward_set);
+
+    if (_pool_raw != "") {
+        _entries = eventmarker_NormalizeRewardSet(_pool_raw);
+        _gift_count = variable_struct_exists(_src, "reward_amount")
+            ? max(1, floor(_src.reward_amount)) : 1;
+        return { gift_count: _gift_count, randomize: true, entries: _entries };
+    }
+
+    if (variable_struct_exists(_src, "reward_pool") && is_array(_src.reward_pool)
+        && array_length(_src.reward_pool) > 0) {
+        var _equal = 100 / array_length(_src.reward_pool);
+        for (var p = 0; p < array_length(_src.reward_pool); p++) {
+            array_push(_entries, { id: floor(_src.reward_pool[p]), chance: _equal, collection: "" });
+        }
+        _gift_count = variable_struct_exists(_src, "reward_amount")
+            ? max(1, floor(_src.reward_amount)) : 1;
+    }
+
+    return { gift_count: _gift_count, randomize: _randomize, entries: _entries };
 }
 
 function worldmap_GetEventDef(_event_id) {
@@ -302,29 +376,30 @@ function worldmap_SyncMarkersFromRoom() {
             array_push(_replay, _battle);
         }
 
-        var _reward_card = 0;
-        var _reward_pool = [];
-        var _reward_amount = 1;
-        if (variable_instance_exists(_inst, "marker_reward_card_id")) {
-            _reward_card = max(0, floor(_inst.marker_reward_card_id));
+        var _reward_gift_count = 0;
+        var _reward_randomize = true;
+        var _reward_entries = [];
+
+        if (variable_instance_exists(_inst, "marker_reward_gift_count")) {
+            _reward_gift_count = max(0, floor(_inst.marker_reward_gift_count));
         }
-        if (variable_instance_exists(_inst, "marker_reward_pool")) {
-            _reward_pool = collection_ParseIdPoolString(_inst.marker_reward_pool);
+        if (variable_instance_exists(_inst, "marker_reward_randomize")) {
+            _reward_randomize = _inst.marker_reward_randomize;
         }
-        if (variable_instance_exists(_inst, "marker_reward_amount")) {
-            _reward_amount = max(1, floor(_inst.marker_reward_amount));
+        if (variable_instance_exists(_inst, "marker_reward_entries")
+            && is_array(_inst.marker_reward_entries)) {
+            _reward_entries = eventmarker_CopyRewardEntries(_inst.marker_reward_entries);
         }
 
-        if (_reward_card <= 0 && array_length(_reward_pool) <= 0 && _json_def != undefined) {
-            if (variable_struct_exists(_json_def, "reward_card_id")) {
-                _reward_card = max(0, floor(_json_def.reward_card_id));
-            }
-            if (array_length(_reward_pool) <= 0 && is_array(_json_def.reward_pool)) {
-                _reward_pool = _json_def.reward_pool;
-            }
-            if (variable_struct_exists(_json_def, "reward_amount")) {
-                _reward_amount = max(1, floor(_json_def.reward_amount));
-            }
+        if (array_length(_reward_entries) <= 0 && _reward_gift_count <= 0 && _json_def != undefined) {
+            var _legacy = worldmap_BuildRewardFromLegacySource(_json_def);
+            _reward_entries = _legacy.entries;
+            _reward_gift_count = _legacy.gift_count;
+            _reward_randomize = _legacy.randomize;
+        }
+
+        if (array_length(_reward_entries) > 0 && _reward_gift_count <= 0) {
+            _reward_gift_count = 1;
         }
 
         global.worldmap.events[$ _key] = {
@@ -333,9 +408,9 @@ function worldmap_SyncMarkersFromRoom() {
             battle: _battle,
             battleset_file: _battleset,
             replay_pool: _replay,
-            reward_card_id: _reward_card,
-            reward_pool: _reward_pool,
-            reward_amount: _reward_amount
+            reward_gift_count: _reward_gift_count,
+            reward_randomize: _reward_randomize,
+            reward_entries: _reward_entries
         };
         array_push(global.worldmap.event_flow, _event_id);
 

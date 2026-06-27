@@ -60,9 +60,7 @@ function worldmap_NotifyBattleVictory() {
     global.worldmap.last_reward_text = "";
 
     var _event_id = global.worldmap.active_event_id;
-    if (!worldmap_IsEventCleared(_event_id)) {
-        global.worldmap.last_reward_text = worldmap_GrantEventRewards(_event_id);
-    }
+    global.worldmap.last_reward_text = worldmap_GrantEventRewards(_event_id);
 }
 
 function worldmap_ReturnToMapAfterVictory() {
@@ -127,40 +125,147 @@ function worldmap_AssignEventMarkers() {
 function worldmap_InitRoom(_config_file = "Grasslands_WorldMap01.json") {
     worldmap_InitGlobals();
     collection_EnsurePlayerInitialized();
+    global.worldmap.return_room = room;
     worldmap_LoadMapConfig(_config_file);
     worldmap_SyncMarkersFromRoom();
 }
 
-function worldmap_ResolveEventRewardCardId(_event_id) {
-    var _def = worldmap_GetEventDef(_event_id);
-    if (_def == undefined) return 0;
+/// @desc Default JSON config per map room (override via room creation code global)
+function worldmap_GetRoomConfigFile(_room = room) {
+    switch (_room) {
+        case Room_Worldmap1: return "Grasslands_WorldMap01.json";
+        default: return "Grasslands_WorldMap01.json";
+    }
+}
 
-    if (variable_struct_exists(_def, "reward_card_id") && _def.reward_card_id > 0) {
-        return floor(_def.reward_card_id);
+function worldmap_GetCollectionButtonBounds() {
+    var _w = display_get_gui_width();
+    var _h = display_get_gui_height();
+    return {
+        x1: _w - 150,
+        y1: _h - 48,
+        x2: _w - 20,
+        y2: _h - 12
+    };
+}
+
+function worldmap_DrawCollectionButton() {
+    var _bounds = worldmap_GetCollectionButtonBounds();
+    var _mx = device_mouse_x_to_gui(0);
+    var _my = device_mouse_y_to_gui(0);
+    var _hover = (_mx >= _bounds.x1 && _mx <= _bounds.x2
+        && _my >= _bounds.y1 && _my <= _bounds.y2);
+
+    draw_set_color(_hover ? c_aqua : make_color_rgb(40, 90, 140));
+    draw_rectangle(_bounds.x1, _bounds.y1, _bounds.x2, _bounds.y2, false);
+    draw_set_color(c_white);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_text((_bounds.x1 + _bounds.x2) * 0.5, (_bounds.y1 + _bounds.y2) * 0.5, "Collection");
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+}
+
+function worldmap_HandleCollectionButton() {
+    if (!mouse_check_button_pressed(mb_left)) return;
+
+    var _mx = device_mouse_x_to_gui(0);
+    var _my = device_mouse_y_to_gui(0);
+    var _bounds = worldmap_GetCollectionButtonBounds();
+    if (_mx < _bounds.x1 || _mx > _bounds.x2
+        || _my < _bounds.y1 || _my > _bounds.y2) {
+        return;
     }
 
-    if (variable_struct_exists(_def, "reward_pool") && is_array(_def.reward_pool)
-        && array_length(_def.reward_pool) > 0) {
-        return collection_PickRandomIdFromPool(_def.reward_pool);
+    worldmap_OpenCollection();
+}
+
+function worldmap_OpenCollection() {
+    worldmap_InitGlobals();
+    global.worldmap.collection_return_room = room;
+    room_goto(Room_collection);
+}
+
+function worldmap_GetCollectionReturnRoom() {
+    worldmap_InitGlobals();
+    var _dest = global.worldmap.collection_return_room;
+    if (_dest == noone) _dest = Room_Worldmap1;
+    return _dest;
+}
+
+function worldmap_NormalizeRewardEntry(_raw) {
+    return eventmarker_NormalizeRewardEntry(_raw);
+}
+
+function worldmap_PickWeightedRewardEntry(_entries) {
+    if (!is_array(_entries) || array_length(_entries) <= 0) {
+        return worldmap_NormalizeRewardEntry(undefined);
     }
 
-    return 0;
+    var _total = 0;
+    for (var i = 0; i < array_length(_entries); i++) {
+        var _entry = worldmap_NormalizeRewardEntry(_entries[i]);
+        _total += _entry.chance;
+    }
+    if (_total <= 0) return worldmap_NormalizeRewardEntry(undefined);
+
+    var _roll = random(_total);
+    var _acc = 0;
+    for (var j = 0; j < array_length(_entries); j++) {
+        var _pick = worldmap_NormalizeRewardEntry(_entries[j]);
+        _acc += _pick.chance;
+        if (_roll < _acc) return _pick;
+    }
+
+    return worldmap_NormalizeRewardEntry(_entries[array_length(_entries) - 1]);
+}
+
+function worldmap_PickRewardEntry(_entries, _randomize, _pick_index) {
+    if (!is_array(_entries) || array_length(_entries) <= 0) {
+        return worldmap_NormalizeRewardEntry(undefined);
+    }
+
+    if (!_randomize) {
+        var _slot = _pick_index mod array_length(_entries);
+        return worldmap_NormalizeRewardEntry(_entries[_slot]);
+    }
+
+    return worldmap_PickWeightedRewardEntry(_entries);
+}
+
+function worldmap_JoinRewardTexts(_texts) {
+    var _txt = "";
+    for (var i = 0; i < array_length(_texts); i++) {
+        if (_texts[i] == "") continue;
+        if (_txt != "") _txt += ", ";
+        _txt += _texts[i];
+    }
+    return _txt;
 }
 
 function worldmap_GrantEventRewards(_event_id) {
     var _def = worldmap_GetEventDef(_event_id);
     if (_def == undefined) return "";
 
-    var _card_id = worldmap_ResolveEventRewardCardId(_event_id);
-    if (_card_id <= 0) return "";
+    var _gift_count = variable_struct_exists(_def, "reward_gift_count")
+        ? max(0, floor(_def.reward_gift_count)) : 0;
+    var _entries = variable_struct_exists(_def, "reward_entries") && is_array(_def.reward_entries)
+        ? _def.reward_entries : [];
+    var _randomize = !variable_struct_exists(_def, "reward_randomize") || _def.reward_randomize;
 
-    var _amount = 1;
-    if (variable_struct_exists(_def, "reward_amount")) {
-        _amount = max(1, floor(_def.reward_amount));
+    if (_gift_count <= 0 || array_length(_entries) <= 0) return "";
+
+    var _granted = [];
+    for (var g = 0; g < _gift_count; g++) {
+        var _pick = worldmap_PickRewardEntry(_entries, _randomize, g);
+        if (_pick.id <= 0) continue;
+
+        if (collection_GrantBattleReward(_pick.id, 1, _pick.collection)) {
+            array_push(_granted, collection_FormatRewardText(_pick.id, 1));
+        }
     }
 
-    if (!collection_GrantBattleReward(_card_id, _amount)) return "";
-    return collection_FormatRewardText(_card_id, _amount);
+    return worldmap_JoinRewardTexts(_granted);
 }
 
 function worldmap_RefreshAllMarkers() {
