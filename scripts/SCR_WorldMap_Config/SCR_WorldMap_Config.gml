@@ -21,7 +21,8 @@ function worldmap_InitGlobals() {
             return_room: Room_Worldmap1,
             collection_return_room: noone,
             victory_pending: false,
-            last_reward_text: ""
+            last_reward_text: "",
+            rewards_obtained: []
         };
     }
 
@@ -35,6 +36,11 @@ function worldmap_InitGlobals() {
 
     if (!variable_struct_exists(global.worldmap, "collection_return_room")) {
         global.worldmap.collection_return_room = noone;
+    }
+
+    if (!variable_struct_exists(global.worldmap, "rewards_obtained")
+        || !is_array(global.worldmap.rewards_obtained)) {
+        global.worldmap.rewards_obtained = [];
     }
 }
 

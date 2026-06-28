@@ -9,8 +9,8 @@
   "name":"OBJ_Map1_Marker04",
   "overriddenProperties":[],
   "parent":{
-    "name":"Map1Markers",
-    "path":"folders/objects/WorldMapSystem/Map1Markers.yy",
+    "name":"map1Markers",
+    "path":"folders/objects/WorldMapSystem/Map1Assets/map1Markers.yy",
   },
   "parentObjectId":{
     "name":"OBJ_EventMarker",

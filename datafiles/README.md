@@ -1164,6 +1164,8 @@ Used inside a `conditions` trait's `requirements` array:
 
 | `discard_tag` | `amount`, `tags` or `tag`, optional `types` / `card_types` / `card_type` | Discard hand cards with matching tag(s); optional type filter (`monster`, `action`, `weapon`, `any`, or a mix) |
 
+| `astral` | *(none)* | Metadata only — not saved to extra deck after battle (temporary spirit) |
+
 
 
 **Aliases:** `sacrifice_ally` → `sacrifice_monster`, `destroy_weapon` → `destroy_weapons`, `turn_plus` / `turn_minimum` → `min_turn`, `sacrifice_tags` → `sacrifice_tag`, `discard_tags` → `discard_tag`.
@@ -1185,6 +1187,14 @@ Discard cards from the player's hand that match one or more tags. Optionally res
 { "type": "discard_tag", "amount": 1, "tag": "Warrior", "card_type": "weapon" }
 
 { "type": "discard_tag", "amount": 1, "tags": ["Spirit"] }
+
+**`astral` — temporary extra-deck spirit**
+
+```json
+{ "type": "astral" }
+```
+
+Also allowed as a top-level card flag: `"astral": true`. Astral cards can be added mid-battle (e.g. `add_extra_deck`) but are **removed when the battle ends** — they are not written to `battle_extra_deck_source`. If an astral spirit dies on board, it does **not** reduce your collection owned count.
 
 ```
 
@@ -1536,7 +1546,7 @@ Configure rewards in each marker object's **Create** event (after `eventmarker_a
 
 ```gml
 eventmarker_apply_reward(gift_count, randomize, rewardset?);
-eventmarker_reward_add(card_id, chance, collection?);
+eventmarker_reward_add(card_id, chance, collection?, once?);
 ```
 
 
@@ -1556,6 +1566,19 @@ eventmarker_reward_add(card_id, chance, collection?);
 | `chance` | Weight / percent (`20` = 20% when entries sum to ~100) |
 
 | `collection` | Optional JSON collection name if ids overlap across files |
+
+| `once` | `true` = one-time reward — removed from all reward pools after obtained once |
+
+
+
+**One-time reward (never drops again after obtained):**
+
+```gml
+eventmarker_apply_reward(1, true);
+eventmarker_reward_add(8, 100, "", true);
+// or JSON: { "id": 8, "chance": 100, "once": true }
+// or string: "8:100::once"
+```
 
 
 

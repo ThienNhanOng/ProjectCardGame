@@ -126,11 +126,21 @@ eventmarker_apply_reward(gift_count, randomize, rewardset?)
   randomize    true = weighted roll each pick | false = walk entries in order
   rewardset    Optional — array or string "id:chance,..."; omit to use reward_add lines
 
-eventmarker_reward_add(card_id, chance, collection?)
+eventmarker_reward_add(card_id, chance, collection?, once?)
 
   card_id      Card id from card_DB
   chance       Weight / percent (20 = 20% when entries sum to ~100)
   collection   Optional JSON collection name (only if ids overlap across files)
+  once         true = one-time — after obtained, never rolls from any reward pool again
+
+
+--- One-time reward ---
+
+  eventmarker_apply_reward(1, true);
+  eventmarker_reward_add(8, 100, "", true);
+
+  String form: "8:100::once"  (4th field = once)
+  JSON form:   { "id": 8, "chance": 100, "once": true }
 
 
 --- Manual lines (recommended) ---

@@ -64,17 +64,19 @@ function eventmarker_apply_reward(_gift_count, _randomize, _rewardset = undefine
 /// @param _card_id     Card id from card_DB
 /// @param _chance      Weight / percent-style chance (20 = 20% when entries sum to 100)
 /// @param _collection  Optional JSON collection name when ids overlap across files
-function eventmarker_reward_add(_card_id, _chance, _collection = "") {
+/// @param _once        true = can only be obtained once ever from rewards (removed from pool after)
+function eventmarker_reward_add(_card_id, _chance, _collection = "", _once = false) {
     if (!is_array(marker_reward_entries)) marker_reward_entries = [];
     array_push(marker_reward_entries, {
         id: max(0, floor(_card_id)),
         chance: max(0, real(_chance)),
-        collection: string(_collection)
+        collection: string(_collection),
+        once: _once
     });
 }
 
 function eventmarker_NormalizeRewardEntry(_raw) {
-    if (!is_struct(_raw)) return { id: 0, chance: 0, collection: "" };
+    if (!is_struct(_raw)) return { id: 0, chance: 0, collection: "", once: false };
 
     var _id = variable_struct_exists(_raw, "id") ? floor(_raw.id) : 0;
     var _chance = 100;
@@ -85,7 +87,11 @@ function eventmarker_NormalizeRewardEntry(_raw) {
     if (variable_struct_exists(_raw, "collection")) _collection = string(_raw.collection);
     else if (variable_struct_exists(_raw, "cardset")) _collection = string(_raw.cardset);
 
-    return { id: _id, chance: max(0, _chance), collection: _collection };
+    var _once = false;
+    if (variable_struct_exists(_raw, "once")) _once = _raw.once;
+    else if (variable_struct_exists(_raw, "one_time")) _once = _raw.one_time;
+
+    return { id: _id, chance: max(0, _chance), collection: _collection, once: _once };
 }
 
 function eventmarker_ParseRewardEntryToken(_token) {
@@ -97,7 +103,13 @@ function eventmarker_ParseRewardEntryToken(_token) {
     var _chance = (array_length(_parts) > 1) ? real(string_trim(_parts[1])) : 100;
     var _collection = (array_length(_parts) > 2) ? string_trim(_parts[2]) : "";
 
-    return { id: _id, chance: max(0, _chance), collection: _collection };
+    var _once = false;
+    if (array_length(_parts) > 3) {
+        var _flag = string_lower(string_trim(_parts[3]));
+        _once = (_flag == "once" || _flag == "1" || _flag == "true");
+    }
+
+    return { id: _id, chance: max(0, _chance), collection: _collection, once: _once };
 }
 
 function eventmarker_NormalizeRewardSet(_rewardset) {

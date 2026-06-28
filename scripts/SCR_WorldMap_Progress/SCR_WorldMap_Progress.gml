@@ -197,6 +197,48 @@ function worldmap_NormalizeRewardEntry(_raw) {
     return eventmarker_NormalizeRewardEntry(_raw);
 }
 
+function worldmap_GetRewardTrackKey(_entry) {
+    var _norm = worldmap_NormalizeRewardEntry(_entry);
+    return string(_norm.id) + "|" + _norm.collection;
+}
+
+function worldmap_IsRewardObtained(_entry) {
+    worldmap_InitGlobals();
+    var _key = worldmap_GetRewardTrackKey(_entry);
+
+    for (var i = 0; i < array_length(global.worldmap.rewards_obtained); i++) {
+        if (global.worldmap.rewards_obtained[i] == _key) return true;
+    }
+    return false;
+}
+
+function worldmap_MarkRewardObtained(_entry) {
+    worldmap_InitGlobals();
+    var _norm = worldmap_NormalizeRewardEntry(_entry);
+    if (!_norm.once) return;
+
+    var _key = worldmap_GetRewardTrackKey(_norm);
+    if (worldmap_IsRewardObtained(_norm)) return;
+
+    array_push(global.worldmap.rewards_obtained, _key);
+    show_debug_message("One-time reward obtained: card id " + string(_norm.id)
+        + (_norm.collection != "" ? " (" + _norm.collection + ")" : ""));
+}
+
+/// @desc Drop one-time entries already obtained; keep repeatable entries
+function worldmap_FilterAvailableRewardEntries(_entries) {
+    var _filtered = [];
+    if (!is_array(_entries)) return _filtered;
+
+    for (var i = 0; i < array_length(_entries); i++) {
+        var _entry = worldmap_NormalizeRewardEntry(_entries[i]);
+        if (_entry.id <= 0 || _entry.chance <= 0) continue;
+        if (_entry.once && worldmap_IsRewardObtained(_entry)) continue;
+        array_push(_filtered, _entry);
+    }
+    return _filtered;
+}
+
 function worldmap_PickWeightedRewardEntry(_entries) {
     if (!is_array(_entries) || array_length(_entries) <= 0) {
         return worldmap_NormalizeRewardEntry(undefined);
@@ -249,19 +291,23 @@ function worldmap_GrantEventRewards(_event_id) {
 
     var _gift_count = variable_struct_exists(_def, "reward_gift_count")
         ? max(0, floor(_def.reward_gift_count)) : 0;
-    var _entries = variable_struct_exists(_def, "reward_entries") && is_array(_def.reward_entries)
+    var _all_entries = variable_struct_exists(_def, "reward_entries") && is_array(_def.reward_entries)
         ? _def.reward_entries : [];
     var _randomize = !variable_struct_exists(_def, "reward_randomize") || _def.reward_randomize;
 
-    if (_gift_count <= 0 || array_length(_entries) <= 0) return "";
+    if (_gift_count <= 0 || array_length(_all_entries) <= 0) return "";
 
     var _granted = [];
     for (var g = 0; g < _gift_count; g++) {
-        var _pick = worldmap_PickRewardEntry(_entries, _randomize, g);
+        var _pool = worldmap_FilterAvailableRewardEntries(_all_entries);
+        if (array_length(_pool) <= 0) break;
+
+        var _pick = worldmap_PickRewardEntry(_pool, _randomize, g);
         if (_pick.id <= 0) continue;
 
         if (collection_GrantBattleReward(_pick.id, 1, _pick.collection)) {
             array_push(_granted, collection_FormatRewardText(_pick.id, 1));
+            worldmap_MarkRewardObtained(_pick);
         }
     }
 

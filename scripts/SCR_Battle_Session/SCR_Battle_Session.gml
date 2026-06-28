@@ -87,6 +87,10 @@ function battle_BeginSession() {
 
 function battle_PermanentlyLoseSpirit(_card) {
     if (_card == undefined || !battle_IsSpiritMonster(_card)) return false;
+    if (card_IsAstral(_card)) {
+        show_debug_message(_card.name + " astral spirit dismissed (not removed from collection)");
+        return false;
+    }
     if (!variable_struct_exists(_card, "id")) return false;
 
     var _card_id = floor(real(_card.id));
@@ -105,7 +109,9 @@ function battle_SyncExtraDeckFromBattleState() {
     if (_deck != noone) {
         with (_deck) {
             for (var i = 0; i < extra_deck_Count; i++) {
-                array_push(_extra_ids, extra_deck[i]);
+                var _id = extra_deck[i];
+                if (card_IsAstral(_id)) continue;
+                array_push(_extra_ids, _id);
             }
         }
     }
@@ -116,13 +122,15 @@ function battle_SyncExtraDeckFromBattleState() {
             var _slot = _board.player_monster_slots[s];
             if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
             if (!battle_IsSpiritMonster(_slot.card)) continue;
+            if (card_IsAstral(_slot.card)) continue;
             if (!variable_struct_exists(_slot.card, "id")) continue;
             array_push(_extra_ids, floor(real(_slot.card.id)));
         }
     }
 
     battle_SaveDeckSources(battle_GetDeckSourceCopy(), _extra_ids);
-    show_debug_message("Extra deck synced: " + string(array_length(_extra_ids)) + " spirit copy/copies for next fight");
+    show_debug_message("Extra deck synced: " + string(array_length(_extra_ids))
+        + " persistent spirit copy/copies for next fight");
 }
 
 /// @desc Called when leaving Room_battle back to the map

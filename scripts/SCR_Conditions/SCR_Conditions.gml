@@ -34,6 +34,7 @@ function conditions_NormalizeEntry(_raw) {
     if (_type == "sacrifice_tag" || _type == "sacrifice_tags") _type = "sacrifice_tag";
     if (_type == "sacrifice_card" || _type == "sacrifice_cards") _type = "sacrifice_id";
     if (_type == "discard_tag" || _type == "discard_tags") _type = "discard_tag";
+    if (_type == "astral") _amount = 1;
 
     if (variable_struct_exists(_raw, "id")) _id = floor(real(_raw.id));
     else if (variable_struct_exists(_raw, "card_id")) _id = floor(real(_raw.card_id));
@@ -117,6 +118,8 @@ function conditions_GetRequirementText(_cond) {
         case "discard_tag":
             var _type_label = conditions_FormatCardTypesLabel(_cond.card_types);
             return "Discard " + string(_cond.amount) + " [" + conditions_JoinTags(_cond.tags) + "] " + _type_label + " card(s)";
+        case "astral":
+            return "Astral — removed after battle";
         default: return string(_cond.type);
     }
 }
@@ -346,6 +349,8 @@ function conditions_CanMeetRequirement(_cond) {
             return conditions_HandCountOfType("weapon") >= _cond.amount;
         case "discard_tag":
             return conditions_CountHandDiscardTagCandidates(_cond.tags, _cond.card_types) >= _cond.amount;
+        case "astral":
+            return true;
         default:
             return true;
     }
@@ -364,6 +369,31 @@ function conditions_GetSummonFailReason(_card) {
         }
     }
     return "";
+}
+
+/// @desc True when this spirit/extra-deck card is battle-only (not saved to extra deck source)
+function card_IsAstral(_card_or_id) {
+    var _def = undefined;
+
+    if (is_struct(_card_or_id)) {
+        if (variable_struct_exists(_card_or_id, "astral") && _card_or_id.astral) return true;
+        if (variable_struct_exists(_card_or_id, "id")) {
+            _def = deck_GetCardData(_card_or_id.id);
+        } else {
+            _def = _card_or_id;
+        }
+    } else {
+        _def = deck_GetCardData(floor(_card_or_id));
+    }
+
+    if (_def == undefined) return false;
+    if (variable_struct_exists(_def, "astral") && _def.astral) return true;
+
+    var _reqs = conditions_GetRequirements(_def);
+    for (var i = 0; i < array_length(_reqs); i++) {
+        if (_reqs[i].type == "astral") return true;
+    }
+    return false;
 }
 
 function conditions_CanSummon(_card) {
@@ -427,7 +457,7 @@ function conditions_BeginSummon(_card_id, _runtime_card) {
 
     var _conds = conditions_GetRequirements(_runtime_card);
     for (var i = 0; i < array_length(_conds); i++) {
-        if (_conds[i].type == "min_turn") continue;
+        if (_conds[i].type == "min_turn" || _conds[i].type == "astral") continue;
         array_push(conditions_summon_queue, _conds[i]);
     }
 
