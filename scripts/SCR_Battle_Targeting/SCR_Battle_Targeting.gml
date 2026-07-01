@@ -218,13 +218,13 @@ function battle_HandleEnemyTargetPick(_enemy_slot) {
 
 function SCR_Battle_Targeting_Step() {
 
-    if (battle_phase != "player" || !battle_IsTargeting()) return;
+    if (!battle_IsPlayerPhase() || !battle_IsTargeting()) return;
 
 
 
     if (keyboard_check_pressed(vk_escape) || mouse_check_button_pressed(mb_right)) {
 
-        battle_CancelTargeting();
+        battle_CancelCurrentAction();
 
         return;
 
@@ -241,6 +241,11 @@ function SCR_Battle_Targeting_Step() {
         var _player_slot = battle_GetPlayerMonsterSlotAt(mouse_x, mouse_y);
 
         if (_player_slot < 0) return;
+
+        if (battle_IsPlayerMonsterSlotShrouded(_player_slot)) {
+            show_debug_message("Cannot attack — that monster is shrouded");
+            return;
+        }
 
         pending_player_slot = _player_slot;
 
@@ -457,6 +462,7 @@ function SCR_Battle_Targeting_Draw() {
             var _slot = _board.player_monster_slots[i];
 
             if (!_slot.visible || !_slot.occupied) continue;
+            if (battle_IsPlayerMonsterSlotShrouded(i)) continue;
 
             draw_set_color(c_aqua);
 

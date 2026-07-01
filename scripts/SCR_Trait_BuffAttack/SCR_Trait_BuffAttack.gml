@@ -28,7 +28,7 @@ function card_GetSummaryTotalAttack(_card) {
     }
 
     if (battle_IsSpiritMonster(_card)) {
-        return battle_GetMonsterStrikeAmount(_card) + card_GetAttackBuff(_card);
+        return battle_GetMonsterStrikeAmount(_card);
     }
 
     return card_GetAttackBuff(_card);
@@ -44,6 +44,28 @@ function card_DrawAttackGainBadge(_x, _y, _w, _h, _amount) {
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
     draw_set_color(c_white);
+}
+
+function card_GetBoardAttackDisplay(_card, _column = -1) {
+    if (_card == undefined) return 0;
+
+    if (variable_struct_exists(_card, "base_attack")) {
+        var _total = max(0, floor(_card.base_attack)) + card_GetAttackBuff(_card);
+        if (variable_struct_exists(_card, "attack")) {
+            _total = max(_total, max(0, floor(_card.attack)));
+        }
+        return _total;
+    }
+
+    if (battle_IsSpiritMonster(_card) && _column >= 0) {
+        return battle_GetPlayerMonsterSummaryAttack(_card, _column);
+    }
+
+    if (battle_IsSpiritMonster(_card)) {
+        return battle_GetMonsterStrikeAmount(_card);
+    }
+
+    return card_GetSummaryTotalAttack(_card);
 }
 
 function trait_ExecuteBuffAttack(_ctx) {

@@ -13,6 +13,8 @@ function battle_ConsumeSkipFollowUpInput() {
 function SCR_Battle_Step() {
     if (battle_IsPlayerDefeated()) return;
 
+    battle_EnemyLog_Step();
+
     var _bm = instance_find(OBJ_BattleManager, 0);
     var _deck = instance_find(OBJ_Deck, 0);
 
@@ -46,5 +48,19 @@ function SCR_Battle_Step() {
                 battle_HandleEndTurnButton();
             }
         }
+        return;
+    }
+
+    if (battle_IsEnemyPhase()) {
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone) {
+            with (_bm) {
+                if (monsterAbility_picker_active) {
+                    monsterAbility_Picker_Step();
+                    return;
+                }
+            }
+        }
+        battle_EnemyTurn_Step();
     }
 }

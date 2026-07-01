@@ -156,6 +156,16 @@ function deck_ScrollPicker_ScrollToFocus(_card_ids, _scroll, _focus) {
 
 
 
+function deck_ScrollPicker_GetPreviewCard(_card_ids, _scroll, _focus) {
+    if (array_length(_card_ids) <= 0) return undefined;
+
+    var _idx = deck_ScrollPicker_PickIndexAt(mouse_x, mouse_y, _card_ids, _scroll);
+    if (_idx < 0) _idx = deck_ScrollPicker_ClampFocus(_card_ids, _focus);
+    if (_idx < 0 || _idx >= array_length(_card_ids)) return undefined;
+
+    return deck_GetCardData(_card_ids[_idx]);
+}
+
 function deck_ScrollPicker_PickIndexAt(_mx, _my, _card_ids, _scroll) {
 
     var _layout = deck_ScrollPicker_GetLayout();
@@ -410,7 +420,7 @@ function deck_AllPickers_Draw() {
 
         for (var i = 0; i < extra_deck_Count; i++) {
 
-            array_push(_ids, extra_deck[i]);
+            array_push(_ids, extraDeck_GetCardId(extra_deck[i]));
 
         }
 

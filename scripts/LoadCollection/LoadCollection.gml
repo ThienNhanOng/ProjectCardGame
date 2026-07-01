@@ -6,15 +6,29 @@ function collection_EnsureDatabase() {
     }
 }
 
+function load_Collection_ResolvePath(_filename) {
+    if (file_exists(_filename)) return _filename;
+
+    var _alts = [
+        "datafiles/test set/" + _filename,
+        "datafiles/" + _filename
+    ];
+    for (var i = 0; i < array_length(_alts); i++) {
+        if (file_exists(_alts[i])) return _alts[i];
+    }
+    return _filename;
+}
+
 function load_Collection(_filename) {
     collection_EnsureDatabase();
 
-    if (!file_exists(_filename)) {
+    var _path = load_Collection_ResolvePath(_filename);
+    if (!file_exists(_path)) {
         show_debug_message("Collection not found: " + _filename);
         return;
     }
 
-    var _file = file_text_open_read(_filename);
+    var _file = file_text_open_read(_path);
     var _json_str = "";
     while (!file_text_eof(_file)) {
         _json_str += file_text_read_string(_file);
@@ -39,6 +53,7 @@ function SCR_LoadAllCollections() {
     card_DB.cards = [];
 
     load_Collection("Merc_starterdeck01.json");
+    load_Collection("AbilityTestCards.json");
 
     show_debug_message("Total cards in DB: " + string(array_length(card_DB.cards)));
 }

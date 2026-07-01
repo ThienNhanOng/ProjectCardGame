@@ -41,10 +41,44 @@ function status_InitUnit(_unit) {
     if (_unit == undefined) return;
 
     if (!variable_struct_exists(_unit, "silenced_turns")) _unit.silenced_turns = 0;
+    if (!variable_struct_exists(_unit, "shrouded_turns")) _unit.shrouded_turns = 0;
 
 }
 
 
+
+function status_IsShrouded(_unit) {
+    if (_unit == undefined) return false;
+    status_InitUnit(_unit);
+    return _unit.shrouded_turns > 0;
+}
+
+function battle_IsPlayerMonsterSlotShrouded(_slot_index) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return false;
+    if (_slot_index < 0 || _slot_index >= array_length(_board.player_monster_slots)) return false;
+
+    var _slot = _board.player_monster_slots[_slot_index];
+    if (!_slot.visible || !_slot.occupied || _slot.card == undefined) return false;
+    return status_IsShrouded(_slot.card);
+}
+
+function status_ShroudUnit(_unit, _turns) {
+    if (_unit == undefined) return false;
+
+    _turns = floor(max(1, real(_turns)));
+    status_InitUnit(_unit);
+    _unit.shrouded_turns = max(_unit.shrouded_turns, _turns);
+    return true;
+}
+
+function status_TickShroud(_unit) {
+    if (_unit == undefined) return;
+    status_InitUnit(_unit);
+    if (_unit.shrouded_turns <= 0) return;
+
+    _unit.shrouded_turns--;
+}
 
 function status_IsSilenced(_unit) {
 
@@ -109,6 +143,10 @@ function status_SilenceUnit(_unit, _turns) {
     _unit.ability = [{ type: "none" }];
 
     _unit.silenced_turns = max(_unit.silenced_turns, _turns);
+
+    if (variable_struct_exists(_unit, "base_attack")) {
+        monsterAbility_ClearPending(_unit);
+    }
 
     return true;
 
@@ -194,6 +232,7 @@ function status_DecrementPlayerSilence(_board) {
 
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
 
+        status_TickShroud(_slot.card);
         status_TickSilence(_slot.card);
 
     }
@@ -209,6 +248,10 @@ function status_GetDisplayText(_unit) {
 
 
     status_InitUnit(_unit);
+
+    if (_unit.shrouded_turns > 0) {
+        return "Shrouded " + string(_unit.shrouded_turns) + " enemy turn(s)";
+    }
 
     if (_unit.silenced_turns > 0) {
 

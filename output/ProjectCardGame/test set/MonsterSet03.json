@@ -1,0 +1,101 @@
+{
+  "collection": "enemySet_03",
+  "enemy": [
+    {
+      "enemyID": 1,
+      "enemyname": "Elite [Heal All + Buff + Heal]",
+      "type": "monster",
+      "tag": ["Set3"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 12,
+      "enemyhealthvalue": 16,
+      "enemyattackvalue": 3,
+      "elite": true,
+      "enemyability": [
+        { "type": "heal_all", "value": 2 },
+        { "type": "self_buff", "value": 2 },
+        { "type": "heal", "value": 3 }
+      ]
+    },
+    {
+      "enemyID": 2,
+      "enemyname": "Elite [Attack All + Silence + Burn]",
+      "type": "monster",
+      "tag": ["Set3"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 12,
+      "enemyhealthvalue": 14,
+      "enemyattackvalue": 3,
+      "elite": true,
+      "enemyability": [
+        { "type": "attack_all", "value": 2 },
+        { "type": "silence", "value": 1 },
+        { "type": "silence", "value": 2 }
+      ]
+    },
+    {
+      "enemyID": 3,
+      "enemyname": "Elite [Destroy + Heal All + Buff]",
+      "type": "monster",
+      "tag": ["Set3"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 12,
+      "enemyhealthvalue": 15,
+      "enemyattackvalue": 2,
+      "elite": true,
+      "enemyability": [
+        { "type": "destroy", "value": 1 },
+        { "type": "heal_all", "value": 1 },
+        { "type": "self_buff", "value": 1 }
+      ]
+    },
+    {
+      "enemyID": 4,
+      "enemyname": "Elite [Poison + Silence + Heal]",
+      "type": "monster",
+      "tag": ["Set3"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 12,
+      "enemyhealthvalue": 13,
+      "enemyattackvalue": 2,
+      "elite": true,
+      "enemyability": [
+        { "type": "silence", "value": 1 },
+        { "type": "silence", "value": 2 },
+        { "type": "heal", "value": 2 }
+      ]
+    },
+    {
+      "enemyID": 5,
+      "enemyname": "Elite [Shock + Attack All + Heal All]",
+      "type": "monster",
+      "tag": ["Set3"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 12,
+      "enemyhealthvalue": 14,
+      "enemyattackvalue": 3,
+      "elite": true,
+      "enemyability": [
+        { "type": "silence", "value": 2 },
+        { "type": "attack_all", "value": 1 },
+        { "type": "heal_all", "value": 2 }
+      ]
+    },
+    {
+      "enemyID": 6,
+      "enemyname": "Elite [Silence + Destroy + Burn]",
+      "type": "monster",
+      "tag": ["Set3"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 12,
+      "enemyhealthvalue": 18,
+      "enemyattackvalue": 4,
+      "elite": true,
+      "enemyability": [
+        { "type": "silence", "value": 1 },
+        { "type": "destroy", "value": 1 },
+        { "type": "silence", "value": 2 }
+      ]
+    }
+  ]
+}

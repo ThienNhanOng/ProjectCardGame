@@ -1,277 +1,200 @@
-/// @desc Enemy turn — support abilities when useful, otherwise attack (elite: worthwhile effects + attack)
+/// @desc Enemy turn — sequential steps with delays; every enemy attacks each turn
 
-function battle_EnemyNeedsHeal() {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    var _mm = instance_find(OBJ_MonsterManager, 0);
-    if (_board == noone || _mm == noone) return false;
+#macro ENEMY_TURN_STEP_DELAY room_speed
 
-    for (var i = 0; i < _mm.active_slot_count; i++) {
-        var _slot = _board.enemy_slots[i];
-        if (!_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
-        if (_slot.card.health < _slot.card.max_health) return true;
-    }
-    return false;
-}
-
-function battle_EnemyEffectIsWorthUsing(_enemy_slot_index, _monster, _trait) {
-    if (_trait == undefined) return false;
-
-    switch (_trait.type) {
-        case "heal":
-        case "heal_all":
-            return battle_EnemyNeedsHeal();
-
-        case "self_buff":
-            var _board = instance_find(OBJ_BoardManager, 0);
-            var _mm = instance_find(OBJ_MonsterManager, 0);
-            if (_board == noone || _mm == noone) return false;
-
-            var _target = battle_EnemyPickBuffTarget(_enemy_slot_index);
-            var _slot = _board.enemy_slots[_target];
-            if (!_slot.occupied || _slot.card == undefined) return false;
-            return card_GetAttackBuff(_slot.card) <= 0;
-
-        case "buff":
-            return battle_PickRandomAnyBuffTarget().slot >= 0;
-
-        case "attack_all":
-            return !battle_IsPlayerDefeated();
-
-        case "destroy":
-        case "silence":
-            return battle_PlayerMonsterCount() > 0;
-
-        default:
-            return false;
+function battle_EnemyTurn_Init() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return;
+    with (_bm) {
+        enemy_turn_active = false;
+        enemy_turn_waiting = false;
+        enemy_turn_timer = 0;
+        enemy_turn_slot_index = 0;
+        enemy_turn_step_index = 0;
+        monsterAbility_Picker_Init();
     }
 }
 
-function battle_EnemyTryUseOneEffect(_enemy_slot_index, _monster) {
-    if (status_IsSilenced(_monster)) return false;
-
-    var _traits = trait_GetFromMonster(_monster);
-    for (var i = 0; i < array_length(_traits); i++) {
-        var _type = _traits[i].type;
-        if (_type == "none" || _type == "attack") continue;
-        if (!battle_EnemyEffectIsWorthUsing(_enemy_slot_index, _monster, _traits[i])) continue;
-        if (battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _traits[i])) return true;
-    }
-    return false;
+function battle_EnemyTurn_IsActive() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return false;
+    with (_bm) return enemy_turn_active;
 }
 
-function battle_EnemyUseWorthwhileEffects(_enemy_slot_index, _monster) {
-    if (status_IsSilenced(_monster)) return false;
-
-    var _traits = trait_GetFromMonster(_monster);
-    var _used = false;
-
-    for (var i = 0; i < array_length(_traits); i++) {
-        var _type = _traits[i].type;
-        if (_type == "none" || _type == "attack") continue;
-        if (!battle_EnemyEffectIsWorthUsing(_enemy_slot_index, _monster, _traits[i])) continue;
-        if (battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _traits[i])) _used = true;
-    }
-
-    return _used;
-}
-
-function battle_EnemyPickHealTarget(_preferred_slot) {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    var _mm = instance_find(OBJ_MonsterManager, 0);
-    if (_board == noone || _mm == noone) return _preferred_slot;
-
-    var _best = _preferred_slot;
-    var _best_ratio = 1;
-
-    for (var i = 0; i < _mm.active_slot_count; i++) {
-        var _slot = _board.enemy_slots[i];
-        if (!_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
-
-        var _ratio = (_slot.card.max_health > 0) ? _slot.card.health / _slot.card.max_health : 0;
-        if (_ratio < _best_ratio) {
-            _best_ratio = _ratio;
-            _best = i;
-        }
-    }
-
-    return _best;
-}
-
-function battle_EnemyPickBuffTarget(_source_slot) {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    var _mm = instance_find(OBJ_MonsterManager, 0);
-    if (_board == noone || _mm == noone) return _source_slot;
-
-    var _best = _source_slot;
-    var _best_atk = infinity;
-
-    for (var i = 0; i < _mm.active_slot_count; i++) {
-        var _slot = _board.enemy_slots[i];
-        if (!_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
-
-        if (_slot.card.attack < _best_atk) {
-            _best_atk = _slot.card.attack;
-            _best = i;
-        }
-    }
-
-    return _best;
-}
-
-function battle_EnemyUseEffectTrait(_enemy_slot_index, _monster, _trait) {
-    if (_trait == undefined) return false;
-    if (status_IsSilenced(_monster)) return false;
-
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board == noone) return false;
-
-    switch (_trait.type) {
-        case "heal":
-            var _heal_target = battle_EnemyPickHealTarget(_enemy_slot_index);
-            var _heal_slot = _board.enemy_slots[_heal_target];
-            var _hp_before = _heal_slot.card.health;
-            var _hp_max = _heal_slot.card.max_health;
-            var _heal_ok = trait_Execute(_trait, trait_CreateHealContext(_trait.amount, "enemy", _heal_target));
-            if (_heal_ok) {
-                battle_EnemyLog_Heal(_enemy_slot_index, _monster, _heal_target, _trait.amount,
-                    _hp_before, _heal_slot.card.health, _hp_max);
-            }
-            return _heal_ok;
-
-        case "heal_all":
-            var _heal_all_ok = trait_Execute(_trait, trait_CreateHealAllContext(_trait.amount, "enemy"));
-            if (_heal_all_ok) {
-                battle_EnemyLog_Write("Turn " + string(battle_EnemyLog_GetTurn())
-                    + " | " + _monster.name + " (slot " + string(_enemy_slot_index) + ")"
-                    + " | ABILITY heal_all +" + string(_trait.amount));
-            }
-            return _heal_all_ok;
-
-        case "self_buff":
-            var _buff_target = battle_EnemyPickBuffTarget(_enemy_slot_index);
-            var _buff_slot = _board.enemy_slots[_buff_target];
-            var _atk_before = _buff_slot.card.attack;
-            var _buff_ok = trait_Execute(_trait, trait_CreateBuffAttackContext(_trait.amount, "enemy", _buff_target));
-            if (_buff_ok) {
-                battle_EnemyLog_BuffAttack(_enemy_slot_index, _monster, _buff_target, _trait.amount,
-                    _atk_before, _buff_slot.card.attack);
-            }
-            return _buff_ok;
-
-        case "buff":
-            var _any_target = battle_PickRandomAnyBuffTarget();
-            if (_any_target.slot < 0) return false;
-            var _any_ok = battle_ExecuteBuffAt(_any_target.side, _any_target.slot, _trait.amount);
-            if (_any_ok) {
-                battle_EnemyLog_Write("Turn " + string(battle_EnemyLog_GetTurn())
-                    + " | " + _monster.name + " (slot " + string(_enemy_slot_index) + ")"
-                    + " | ABILITY buff +" + string(_trait.amount)
-                    + " -> " + _any_target.side + " slot " + string(_any_target.slot));
-            }
-            return _any_ok;
-
-        case "attack_all":
-            var _atk_all_ok = trait_Execute(_trait, trait_CreateAttackAllContext(_trait.amount, "player"));
-            if (_atk_all_ok) {
-                battle_EnemyLog_Write("Turn " + string(battle_EnemyLog_GetTurn())
-                    + " | " + _monster.name + " (slot " + string(_enemy_slot_index) + ")"
-                    + " | ABILITY attack_all " + string(_trait.amount));
-            }
-            return _atk_all_ok;
-
-        case "destroy":
-            var _player_target = battle_PickRandomPlayerMonsterSlot();
-            if (_player_target < 0) {
-                battle_EnemyLog_Skipped(_enemy_slot_index, _monster, "no player target for destroy");
-                return false;
-            }
-            var _destroy_ok = trait_Execute(_trait, trait_CreateDestroyContext(_trait.amount, "player", _player_target));
-            if (_destroy_ok) {
-                battle_EnemyLog_Write("Turn " + string(battle_EnemyLog_GetTurn())
-                    + " | " + _monster.name + " (slot " + string(_enemy_slot_index) + ")"
-                    + " | ABILITY destroy " + string(_trait.amount));
-            }
-            return _destroy_ok;
-
-        case "silence":
-            var _silence_target = battle_PickRandomPlayerMonsterSlot();
-            if (_silence_target < 0) return false;
-            var _silence_ok = trait_Execute(_trait, trait_CreateSilenceContext(max(1, _trait.amount), "player", _silence_target));
-            if (_silence_ok) {
-                battle_EnemyLog_Write("Turn " + string(battle_EnemyLog_GetTurn())
-                    + " | " + _monster.name + " (slot " + string(_enemy_slot_index) + ")"
-                    + " | ABILITY silence -> player slot " + string(_silence_target));
-            }
-            return _silence_ok;
-
-        default:
-            battle_EnemyLog_Skipped(_enemy_slot_index, _monster, "effect not implemented: " + _trait.type);
-            show_debug_message(_monster.name + " effect pending: " + _trait.type);
-            return false;
-    }
-}
-
-function battle_EnemyAttack(_enemy_slot_index, _monster) {
-    if (battle_IsPlayerDefeated()) return false;
-
-    var _player_target = battle_PickRandomPlayerMonsterSlot();
-    var _ctx = trait_CreateAttackContext(_monster.attack, "player", _player_target);
-    var _ok = trait_ExecuteAttack(_ctx);
-    if (_ok) {
-        battle_EnemyLog_Attack(_enemy_slot_index, _monster, _player_target, _monster.attack);
-        if (_player_target >= 0) {
-            show_debug_message(_monster.name + " attacked player monster slot "
-                + string(_player_target) + " for " + string(_monster.attack));
-        } else {
-            show_debug_message(_monster.name + " attacked player for " + string(_monster.attack));
-        }
-    }
-    return _ok;
-}
-
-function battle_EnemyTakeTurn(_enemy_slot_index, _monster) {
-    if (battle_IsPlayerDefeated()) return;
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board != noone
-        && _enemy_slot_index >= 0
-        && _enemy_slot_index < array_length(_board.enemy_slots)) {
-        var _live_slot = _board.enemy_slots[_enemy_slot_index];
-        if (_live_slot.occupied && _live_slot.card != undefined) {
-            _monster = _live_slot.card;
-        }
-    }
-
-    if (_monster == undefined || !_monster.alive) return;
-
-    if (status_IsSilenced(_monster)) {
-        battle_EnemyLog_Skipped(_enemy_slot_index, _monster, "silenced — skipped turn");
-        show_debug_message(_monster.name + " is silenced and skips this enemy phase");
+function battle_BeginEnemyTurn() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) {
+        battle_CompleteEnemyTurn();
         return;
     }
 
-    if (monster_IsElite(_monster)) {
-        battle_EnemyUseWorthwhileEffects(_enemy_slot_index, _monster);
-        battle_EnemyAttack(_enemy_slot_index, _monster);
+    with (_bm) {
+        enemy_turn_active = true;
+        enemy_turn_waiting = false;
+        enemy_turn_timer = 0;
+        enemy_turn_slot_index = -1;
+        enemy_turn_step_index = 0;
+    }
+
+    battle_EnemyLog_Write("--- Enemy phase ---");
+    battle_EnemyTurn_QueueDelay();
+}
+
+function battle_CompleteEnemyTurn() {
+    monsterAbility_TickAllTimedBuffs();
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm != noone) {
+        with (_bm) {
+            enemy_turn_active = false;
+            enemy_turn_waiting = false;
+            enemy_turn_timer = 0;
+        }
+    }
+
+    if (!battle_IsPlayerDefeated()) {
+        battle_BeginNextPlayerTurn();
+    }
+}
+
+function battle_EnemyTurn_QueueDelay() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return;
+    with (_bm) {
+        enemy_turn_waiting = true;
+        enemy_turn_timer = ENEMY_TURN_STEP_DELAY;
+    }
+}
+
+function battle_EnemyTurn_GetLiveMonster(_slot_index) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return undefined;
+    if (_slot_index < 0 || _slot_index >= array_length(_board.enemy_slots)) return undefined;
+
+    var _slot = _board.enemy_slots[_slot_index];
+    if (!_slot.visible || !_slot.occupied || _slot.card == undefined || !_slot.card.alive) {
+        return undefined;
+    }
+    return _slot.card;
+}
+
+function battle_EnemyTurn_FindNextSlot(_start_index) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_board == noone || _mm == noone) return -1;
+
+    for (var i = _start_index; i < _mm.active_slot_count; i++) {
+        if (battle_EnemyTurn_GetLiveMonster(i) != undefined) return i;
+    }
+    return -1;
+}
+
+function battle_EnemyTurn_RunCurrentStep(_slot_index, _monster) {
+    switch (enemy_turn_step_index) {
+        case 0:
+            monsterAbility_InitState(_monster);
+            if (!status_IsSilenced(_monster)) {
+                monsterAbility_LogCountdown(_slot_index, _monster);
+            }
+            break;
+
+        case 1:
+            if (!status_IsSilenced(_monster)) {
+                monsterAbility_TryActivateStep(_slot_index, _monster);
+            }
+            break;
+
+        case 2:
+            monsterAbility_PerformAttack(_slot_index, _monster);
+            break;
+
+        case 3:
+            battle_EnemyLog_Action(_monster.name + " ended its turn.");
+            break;
+
+        case 4:
+            if (!status_IsSilenced(_monster)) {
+                monsterAbility_TickDelayedCountdown(_monster);
+                monsterAbility_AdvanceCycle(_monster);
+            }
+            status_TickSilence(_monster);
+            break;
+    }
+}
+
+function battle_EnemyTurn_AdvanceStep() {
+    if (battle_IsPlayerDefeated()) {
+        battle_CompleteEnemyTurn();
         return;
     }
 
-    if (!battle_EnemyTryUseOneEffect(_enemy_slot_index, _monster)) {
-        battle_EnemyAttack(_enemy_slot_index, _monster);
+    var _board = instance_find(OBJ_BoardManager, 0);
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_board == noone || _mm == noone) {
+        battle_CompleteEnemyTurn();
+        return;
+    }
+
+    if (enemy_turn_slot_index < 0) {
+        enemy_turn_slot_index = battle_EnemyTurn_FindNextSlot(0);
+        if (enemy_turn_slot_index < 0) {
+            battle_CompleteEnemyTurn();
+            return;
+        }
+        enemy_turn_step_index = 0;
+    }
+
+    var _monster = battle_EnemyTurn_GetLiveMonster(enemy_turn_slot_index);
+    if (_monster == undefined) {
+        enemy_turn_slot_index = battle_EnemyTurn_FindNextSlot(enemy_turn_slot_index + 1);
+        enemy_turn_step_index = 0;
+        if (enemy_turn_slot_index < 0) {
+            battle_CompleteEnemyTurn();
+            return;
+        }
+        battle_EnemyTurn_QueueDelay();
+        return;
+    }
+
+    battle_EnemyTurn_RunCurrentStep(enemy_turn_slot_index, _monster);
+
+    if (enemy_turn_picker_pause || monsterAbility_picker_active) {
+        return;
+    }
+
+    enemy_turn_step_index++;
+    if (enemy_turn_step_index > 4) {
+        enemy_turn_step_index = 0;
+        enemy_turn_slot_index = battle_EnemyTurn_FindNextSlot(enemy_turn_slot_index + 1);
+        if (enemy_turn_slot_index < 0) {
+            battle_CompleteEnemyTurn();
+            return;
+        }
+    }
+
+    battle_EnemyTurn_QueueDelay();
+}
+
+function battle_EnemyTurn_Step() {
+    if (!battle_IsEnemyPhase()) return;
+    if (!battle_EnemyTurn_IsActive()) return;
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return;
+
+    with (_bm) {
+        if (enemy_turn_picker_pause || monsterAbility_picker_active) {
+            return;
+        }
+        if (enemy_turn_waiting) {
+            enemy_turn_timer--;
+            if (enemy_turn_timer > 0) return;
+            enemy_turn_waiting = false;
+        }
+        battle_EnemyTurn_AdvanceStep();
     }
 }
 
 function battle_RunEnemyTurn() {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    var _mm = instance_find(OBJ_MonsterManager, 0);
-    if (_board == noone || _mm == noone) return;
-
-    battle_EnemyLog_Write("--- Enemy phase (player turn " + string(battle_EnemyLog_GetTurn()) + " ended) ---");
-
-    for (var i = 0; i < _mm.active_slot_count; i++) {
-        if (battle_IsPlayerDefeated()) break;
-        var _slot = _board.enemy_slots[i];
-        if (!_slot.visible || !_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
-        battle_EnemyTakeTurn(i, _slot.card);
-        status_TickSilence(_slot.card);
-    }
+    battle_BeginEnemyTurn();
 }

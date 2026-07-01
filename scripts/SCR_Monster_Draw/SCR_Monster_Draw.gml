@@ -34,7 +34,7 @@ function monster_DrawActive(_slot, _monster) {
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
     draw_set_color(c_maroon);
-    draw_text(_layout.stats_cx, _layout.atk_y, "ATK " + string(_monster.attack));
+    draw_text(_layout.stats_cx, _layout.atk_y, "ATK " + string(card_GetBoardAttackDisplay(_monster)));
 
     card_DrawAttackGainBadge(_slot.x, _slot.y, _layout.card_w, _layout.card_h, card_GetAttackBuff(_monster));
 

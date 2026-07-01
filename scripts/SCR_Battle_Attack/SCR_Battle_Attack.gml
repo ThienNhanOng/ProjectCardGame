@@ -6,16 +6,7 @@ function battle_IsSpiritMonster(_card) {
 
 function battle_GetMonsterStrikeAmount(_card) {
     if (_card == undefined || !battle_IsSpiritMonster(_card)) return 0;
-
-    var _atk = 0;
-    if (variable_struct_exists(_card, "attack")) _atk = real(_card.attack);
-
-    if (_atk <= 0) {
-        var _trait = trait_FindFirst(trait_GetFromCard(_card), "attack");
-        if (_trait != undefined && _trait.amount > 0) _atk = _trait.amount;
-    }
-
-    return max(0, floor(_atk));
+    return battle_GetMonsterBaseStrikeAmount(_card) + card_GetAttackBuff(_card);
 }
 
 function battle_GetMonsterBaseStrikeAmount(_card) {
@@ -186,8 +177,14 @@ function battle_GetColumnAttackRecursion(_column) {
     if (_board == noone) return 1;
     if (_column < 0 || _column >= array_length(_board.player_weapon_slots)) return 1;
 
+    var _monster_slot = _board.player_monster_slots[_column];
     var _weapon_slot = _board.player_weapon_slots[_column];
+
     if (_weapon_slot.visible && _weapon_slot.occupied && _weapon_slot.card != undefined) {
+        if (_monster_slot.visible && _monster_slot.occupied && _monster_slot.card != undefined
+            && battle_IsSpiritMonster(_monster_slot.card)) {
+            return 1;
+        }
         return weapon_GetAttackRecursion(_weapon_slot.card);
     }
     return 1;
@@ -255,7 +252,7 @@ function weapon_EnsureAttackData(_card) {
 }
 
 function battle_CanColumnAttack(_monster_slot_index) {
-    if (battle_phase != "player") return false;
+    if (!battle_IsPlayerPhase()) return false;
     if (_monster_slot_index < 0 || _monster_slot_index >= array_length(weapon_attacks_used)) return false;
     if (battle_GetColumnAttackUsesLeft(_monster_slot_index) <= 0) return false;
 
@@ -264,6 +261,7 @@ function battle_CanColumnAttack(_monster_slot_index) {
 
     var _monster_slot = _board.player_monster_slots[_monster_slot_index];
     if (!_monster_slot.visible || !_monster_slot.occupied || _monster_slot.card == undefined) return false;
+    if (status_IsShrouded(_monster_slot.card)) return false;
 
     var _parts = battle_GetColumnStrikeParts(_monster_slot_index);
 
@@ -413,6 +411,10 @@ function battle_ExecuteActionAttackAll(_trait_index, _player_slot_index) {
         show_debug_message("Invalid attacking monster slot");
         return false;
     }
+    if (status_IsShrouded(_player_slot.card)) {
+        show_debug_message("Cannot attack — " + _player_slot.card.name + " is shrouded");
+        return false;
+    }
 
     var _traits = battle_GetActionTraits();
     if (_trait_index >= array_length(_traits)) return false;
@@ -446,6 +448,10 @@ function battle_ExecuteActionAttack(_trait_index, _player_slot_index, _enemy_slo
     var _player_slot = _board.player_monster_slots[_player_slot_index];
     if (!_player_slot.visible || !_player_slot.occupied || _player_slot.card == undefined) {
         show_debug_message("Invalid attacking monster slot");
+        return false;
+    }
+    if (status_IsShrouded(_player_slot.card)) {
+        show_debug_message("Cannot attack — " + _player_slot.card.name + " is shrouded");
         return false;
     }
 

@@ -239,7 +239,7 @@
       "type": "spirit",
       "tag": ["Mercenary"],
       "sprite": "SPR_Monsterplaceholder",
-      "health": 20,
+      "health": 2000,
       "attack": 5,
       "ability": [
         {

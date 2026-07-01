@@ -565,7 +565,7 @@ function SCR_DBD_ShouldShowPreviewTags(_card) {
     return true;
 }
 
-function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_lines, _title_color = c_white, _condition_lines = undefined) {
+function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_lines, _title_color = c_white, _condition_lines = undefined, _ability_before_summary = false) {
     var _pad = 12;
     var _line_h = 16;
 
@@ -596,8 +596,9 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
 
     var _img_w = min(108, floor(_inner_w * 0.38));
     var _img_h = 136;
-    var _summary_x = _cx + _img_w + 10;
-    var _summary_w = max(80, _inner_w - _img_w - 10);
+    var _side_x = _cx + _img_w + 10;
+    var _side_w = max(80, _inner_w - _img_w - 10);
+    var _side_start_y = _cy;
 
     draw_set_color(make_color_rgb(18, 18, 22));
     draw_rectangle(_cx, _cy, _cx + _img_w, _cy + _img_h, false);
@@ -614,30 +615,41 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
         draw_sprite_ext(_spr, 0, _cx + (_img_w * 0.5), _cy + (_img_h * 0.5), _scale, _scale, 0, c_white, 1);
     }
 
+    var _side_title = _ability_before_summary ? "Ability" : "Summary";
+    var _side_lines = _ability_before_summary ? _ability_lines : _summary_lines;
+    var _side_color = _ability_before_summary ? c_white : c_ltgray;
+    var _side_prefix = _ability_before_summary ? "• " : "";
+
     draw_set_color(c_yellow);
-    draw_text(_summary_x, _cy, "Summary");
-    var _sum_y = _cy + _line_h + 2;
-    draw_set_color(c_ltgray);
-    for (var s = 0; s < array_length(_summary_lines); s++) {
-        draw_text_ext(_summary_x, _sum_y, _summary_lines[s], _line_h, _summary_w);
-        _sum_y += string_height_ext(_summary_lines[s], _line_h, _summary_w) + 3;
+    draw_text(_side_x, _side_start_y, _side_title);
+    var _side_y = _side_start_y + _line_h + 2;
+    draw_set_color(_side_color);
+    for (var s = 0; s < array_length(_side_lines); s++) {
+        var _side_line = _side_prefix + _side_lines[s];
+        draw_text_ext(_side_x, _side_y, _side_line, _line_h, _side_w);
+        _side_y += string_height_ext(_side_line, _line_h, _side_w) + 3;
     }
 
-    _cy = max(_cy + _img_h, _sum_y) + 14;
+    _cy = max(_cy + _img_h, _side_y) + 14;
 
     draw_set_color(make_color_rgb(80, 80, 90));
     draw_line(_cx, _cy, _cx + _inner_w, _cy);
     _cy += 10;
 
+    var _full_title = _ability_before_summary ? "Summary" : "Ability";
+    var _full_lines = _ability_before_summary ? _summary_lines : _ability_lines;
+    var _full_color = _ability_before_summary ? c_ltgray : c_white;
+    var _full_prefix = _ability_before_summary ? "" : "• ";
+
     draw_set_color(c_yellow);
-    draw_text(_cx, _cy, "Ability");
+    draw_text(_cx, _cy, _full_title);
     _cy += _line_h + 4;
 
-    draw_set_color(c_white);
-    for (var t = 0; t < array_length(_ability_lines); t++) {
-        var _ability_line = "• " + _ability_lines[t];
-        draw_text_ext(_cx, _cy, _ability_line, _line_h, _inner_w);
-        _cy += string_height_ext(_ability_line, _line_h, _inner_w) + 4;
+    draw_set_color(_full_color);
+    for (var t = 0; t < array_length(_full_lines); t++) {
+        var _full_line = _full_prefix + _full_lines[t];
+        draw_text_ext(_cx, _cy, _full_line, _line_h, _inner_w);
+        _cy += string_height_ext(_full_line, _line_h, _inner_w) + 4;
     }
 
     if (_condition_lines != undefined) {

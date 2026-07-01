@@ -415,6 +415,47 @@ function battle_IsActionCardFinished() {
     return true;
 }
 
+function battle_AbortActionCardPlay() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return false;
+
+    var _removed = undefined;
+    with (_board) {
+        if (!action_slot.occupied || action_slot.card == undefined) return false;
+        _removed = SCR_Board_RemoveCard(action_slot);
+    }
+
+    if (_removed == undefined) return false;
+
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand != noone) {
+        with (_hand) hand_AddCard(_removed);
+    }
+
+    action_trait_uses = [];
+    trait_ChainFinish();
+    show_debug_message("Action card play cancelled: " + _removed.name);
+    return true;
+}
+
+function battle_CancelCurrentAction() {
+    var _source = pending_trait_source;
+
+    battle_CancelTargeting();
+
+    if (_source == "action") {
+        battle_AbortActionCardPlay();
+        return;
+    }
+
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board != noone && _board.is_dragging) {
+        with (_board) SCR_DragDrop_Cancel();
+    }
+
+    trait_ChainFinish();
+}
+
 function battle_ClearActionSlotIfFinished() {
     if (!battle_IsActionCardFinished()) return;
 

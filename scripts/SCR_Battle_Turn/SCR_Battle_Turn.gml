@@ -4,11 +4,15 @@
 #macro BOARD_MONSTER_TURN_LIMIT 3
 
 function battle_IsPlayerPhase() {
-    return battle_phase == "player";
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return false;
+    with (_bm) return battle_phase == "player";
 }
 
 function battle_IsEnemyPhase() {
-    return battle_phase == "enemy";
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return false;
+    with (_bm) return battle_phase == "enemy";
 }
 
 function battle_CanEndTurn() {
@@ -55,9 +59,6 @@ function battle_EndTurn() {
     battle_phase = "enemy";
     show_debug_message("=== Enemy turn ===");
     battle_RunEnemyTurn();
-    if (!battle_IsPlayerDefeated()) {
-        battle_BeginNextPlayerTurn();
-    }
 }
 
 function battle_ResetTurnUses() {

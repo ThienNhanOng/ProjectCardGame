@@ -159,6 +159,7 @@ function SCR_LoadAllMonsters() {
     global.monster_DB.enemies = [];
 
     load_MonsterSet("EnemyCollection01.json");
+    load_MonsterSet("AbilityTestMonsters.json");
 
     if (array_length(global.monster_DB.enemies) <= 0) {
         monsters_LoadBuiltinFallback();

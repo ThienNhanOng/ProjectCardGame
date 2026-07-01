@@ -1,0 +1,156 @@
+{
+  "collection": "enemyAbilityTest",
+  "enemy": [
+    {
+      "enemyID": 101,
+      "enemyname": "Test Basic Attack",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinSoldier",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 3,
+      "enemyability": []
+    },
+    {
+      "enemyID": 102,
+      "enemyname": "Test Attack All",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinSoldier",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "attack_all", "value": 3 }]
+    },
+    {
+      "enemyID": 103,
+      "enemyname": "Test Self Buff",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinSoldier",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "self_buff", "value": 3, "turns": 2 }]
+    },
+    {
+      "enemyID": 104,
+      "enemyname": "Test Buff Ally",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinCommander",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 0,
+      "enemyability": [{ "type": "buff", "value": 3, "turns": 2 }]
+    },
+    {
+      "enemyID": 105,
+      "enemyname": "Test Destroy",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinCommander",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 0,
+      "enemyability": [{ "type": "destroy", "value": 1 }]
+    },
+    {
+      "enemyID": 106,
+      "enemyname": "Test Heal",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinMage",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 0,
+      "enemyability": [{ "type": "heal", "value": 3 }]
+    },
+    {
+      "enemyID": 107,
+      "enemyname": "Test Heal All",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinMage",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 0,
+      "enemyability": [{ "type": "heal_all", "value": 3 }]
+    },
+    {
+      "enemyID": 108,
+      "enemyname": "Test Shroud",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinMage",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 0,
+      "enemyability": [{ "type": "shroud", "value": 3 }]
+    },
+    {
+      "enemyID": 109,
+      "enemyname": "Test Discard Hand",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinSoldier",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "discard_hand", "delay": 2, "value": 1 }]
+    },
+    {
+      "enemyID": 110,
+      "enemyname": "Test Discard Extra Deck",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinSoldier",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 3,
+      "enemyability": [{ "type": "discard_extra_deck", "delay": 2, "value": 1 }]
+    },
+    {
+      "enemyID": 111,
+      "enemyname": "Test Add Deck",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinMage",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 0,
+      "enemyability": [{ "type": "add_deck", "delay": 2, "card_id": -1, "value": 1 }]
+    },
+    {
+      "enemyID": 112,
+      "enemyname": "Test Summon",
+      "type": "monster",
+      "tag": ["Test", "Ability"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinMage",
+      "level": 1,
+      "enemyhealthvalue": 5,
+      "enemyattackvalue": 0,
+      "enemyability": [
+        {
+          "type": "summon_enemy",
+          "delay": 2,
+          "enemyID": 1,
+          "collection": "enemyCollection01"
+        }
+      ]
+    }
+  ]
+}

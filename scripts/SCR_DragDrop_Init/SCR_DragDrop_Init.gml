@@ -26,6 +26,16 @@ function SCR_DragDrop_Step() {
         }
     }
     
+    if (_deck != noone) {
+        with (_deck) {
+            if (deck_AnyPickerOpen()) return;
+        }
+    }
+
+    if (mouse_check_button_pressed(mb_right)) {
+        if (is_dragging) SCR_DragDrop_Cancel();
+    }
+    
     if (mouse_check_button_pressed(mb_left) && !is_dragging) {
         if (_targeting) return;
 

@@ -77,7 +77,7 @@ function deck_LoadFromBattleSource() {
     var _extra_source = battle_GetExtraDeckSourceCopy();
     if (array_length(_extra_source) > 0) {
         for (var j = 0; j < array_length(_extra_source); j++) {
-            deck_AddExtraCard(_extra_source[j]);
+            deck_AddExtraCardEntry(_extra_source[j]);
         }
         show_debug_message("Loaded " + string(extra_deck_Count) + " cards into extra deck (fresh copy)");
     } else {
@@ -89,7 +89,7 @@ function deck_LoadExtraDeckFromCollection() {
     var _extra_source = battle_GetExtraDeckSourceCopy();
     if (array_length(_extra_source) > 0) {
         for (var i = 0; i < array_length(_extra_source); i++) {
-            deck_AddExtraCard(_extra_source[i]);
+            deck_AddExtraCardEntry(_extra_source[i]);
         }
         show_debug_message("Loaded " + string(extra_deck_Count) + " cards into extra deck (saved source)");
         return;
@@ -135,10 +135,17 @@ function deck_AddCard(card_id) {
     return true;
 }
 
-function deck_AddExtraCard(card_id) {
-    var _data = deck_GetCardData(card_id);
+function deck_AddExtraCard(_card_id) {
+    return deck_AddExtraCardEntry(_card_id);
+}
+
+function deck_AddExtraCardEntry(_entry_or_id) {
+    var _entry = extraDeck_NormalizeEntry(_entry_or_id);
+    if (_entry == undefined) return false;
+
+    var _data = deck_GetCardData(extraDeck_GetCardId(_entry));
     if (_data == undefined) {
-        show_debug_message("Extra deck add failed: card id " + string(card_id) + " not found");
+        show_debug_message("Extra deck add failed: card id " + string(extraDeck_GetCardId(_entry)) + " not found");
         return false;
     }
     if (_data.type != "spirit" && _data.type != "special_monster") {
@@ -146,7 +153,7 @@ function deck_AddExtraCard(card_id) {
         return false;
     }
 
-    extra_deck[extra_deck_Count] = card_id;
+    extra_deck[extra_deck_Count] = _entry;
     extra_deck_Count++;
     return true;
 }
@@ -266,6 +273,7 @@ function card_CreateRuntimeInstance(_template) {
     _card.max_health = _base_hp;
     _card.status_effects = [];
     _card.silenced_turns = 0;
+    _card.shrouded_turns = 0;
     _card.silenced_ability_backup = undefined;
     _card.attack_buff = 0;
 

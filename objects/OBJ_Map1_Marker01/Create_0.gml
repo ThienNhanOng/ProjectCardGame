@@ -1,13 +1,15 @@
 event_inherited();
 
 
+//debug battle
+//eventmarker_apply_config(1, "Trail Start", "ability_test_all", "AbilityTestBattle.json", "ability_test_all");
 
+//first battle
 eventmarker_apply_config(1, "Trail Start", "battle01", "Grasslands_Battleset01_starter.json", "battle01,battle02,battle03");
 
 
 
 //reward amount, randomization
-
 eventmarker_apply_reward(1, true);
 
 

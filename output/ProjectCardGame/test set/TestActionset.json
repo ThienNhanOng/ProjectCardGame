@@ -1,0 +1,317 @@
+{
+  "collection": "ActionEffectTest",
+  "cards": [
+    {
+      "id": 2001,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction01_(DrawCards)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "draw_cards", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2002,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction02_(Attack)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "attack", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2003,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction03_(AttackAll)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "attack_all", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2004,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction04_(Heal)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "heal", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2005,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction05_(HealAll)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "heal_all", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2006,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction06_(SelfBuff)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "self_buff", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2007,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction07_(Buff)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "buff", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2008,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction08_(Destroy)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "destroy", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2009,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction09_(Silence)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "silence", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2010,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction10_(Add)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add", "id": 1001, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2011,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction11_(AddDeck)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_deck", "id": 1001, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2012,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction12_(AddExtraDeck)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_extra_deck", "id": 1016, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2013,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction13_(AddHandTag)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_hand_tag", "tags": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2014,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction14_(AddDeckTag)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_deck_tag", "tags": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2015,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction15_(AddExtraDeckTag)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_extra_deck_tag", "tags": ["Warrior"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2020,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction16_(AddHandIndeckTag)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_hand_tag", "indeckTag": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2022,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction18_(AddDeckIndeckTag)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_deck_tag", "indeckTag": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2023,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction19_(AddExtraDeckIndeckTag)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_extra_deck_tag", "indeckTag": ["Warrior"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2024,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction20_(Cost2)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 2,
+      "actionType": [
+        { "type": "draw_cards", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2025,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction21_(AddCounter)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_counter", "amount": 2, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2026,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction22_(RemoveCounter)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "remove_counter", "amount": 3, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2027,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction23_(AddCost)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_cost", "tag": "Test", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2028,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction24_(AddHandWithCost)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "add_hand_with_cost", "cost": 3, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 2021,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestAction17_(OpenZone)",
+      "type": "action",
+      "tag": ["Test"],
+      "sprite": "SPR_Actionplaceholder",
+      "cost": 1,
+      "actionType": [
+        { "type": "openzone", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    }
+  ]
+}

@@ -58,7 +58,7 @@ function deck_ExtraDeckPicker_Close() {
 function deck_ExtraDeckPicker_GetExtraDeckIds() {
     var _ids = [];
     for (var i = 0; i < extra_deck_Count; i++) {
-        array_push(_ids, extra_deck[i]);
+        array_push(_ids, extraDeck_GetCardId(extra_deck[i]));
     }
     return _ids;
 }
@@ -67,16 +67,21 @@ function deck_ExtraDeckPicker_PickIndexAt(_mx, _my) {
     return deck_ScrollPicker_PickIndexAt(_mx, _my, deck_ExtraDeckPicker_GetExtraDeckIds(), extra_deck_picker_scroll);
 }
 
-function deck_RemoveExtraCardAt(_index) {
-    if (_index < 0 || _index >= extra_deck_Count) return -1;
+function deck_RemoveExtraCardAt(_index, _permanent = true) {
+    if (_index < 0 || _index >= extra_deck_Count) return undefined;
 
-    var _card_id = extra_deck[_index];
+    var _entry = extra_deck[_index];
     for (var i = _index; i < extra_deck_Count - 1; i++) {
         extra_deck[i] = extra_deck[i + 1];
     }
     extra_deck[extra_deck_Count - 1] = 0;
     extra_deck_Count--;
-    return _card_id;
+
+    if (_permanent) {
+        battle_PermanentlyRemoveSpiritEntry(_entry);
+    }
+
+    return _entry;
 }
 
 function deck_ExtraDeckPicker_SelectCard(_index) {
@@ -115,6 +120,7 @@ function deck_DrawExtraDeckZone() {
 
         for (var i = 0; i < _visible; i++) {
             var _card_id = extra_deck[i];
+            _card_id = extraDeck_GetCardId(_card_id);
             var _card_data = deck_GetCardData(_card_id);
             if (_card_data == undefined) continue;
 

@@ -43,6 +43,8 @@ function SCR_Battle_Init() {
 
     battle_PrepareBoardCards();
 
+    battle_EnemyTurn_Init();
+
     battle_StartBattle();
 }
 

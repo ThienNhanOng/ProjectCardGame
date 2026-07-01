@@ -63,6 +63,14 @@ function trait_NormalizeEntry(_raw) {
 
     if (_type == "buff_attack") _type = "self_buff";
 
+    if (_type == "summoner") _type = "summon_enemy";
+    if (_type == "discard_spirit") _type = "discard_extra_deck";
+
+    var _hand_filter = "";
+    if (_type == "discard_monster") { _hand_filter = "monster"; _type = "discard_hand"; }
+    if (_type == "discard_action") { _hand_filter = "action"; _type = "discard_hand"; }
+    if (_type == "discard_weapon") { _hand_filter = "weapon"; _type = "discard_hand"; }
+
     if (_type == "increase_counter") _type = "add_counter";
     if (_type == "decrease_counter") _type = "remove_counter";
     if (_type == "no_board_expire" || _type == "disable_board_expire" || _type == "board_persistent") _type = "no_board_expire";
@@ -86,6 +94,8 @@ function trait_NormalizeEntry(_raw) {
     else if (variable_struct_exists(_raw, "card_id")) _card_id = _raw.card_id;
 
 
+
+    if (_type == "shrouded") _type = "shroud";
 
     if (_type == "silence") {
 
@@ -121,6 +131,55 @@ function trait_NormalizeEntry(_raw) {
     var _tags = trait_ParseTags(_raw);
     var _indeck_tags = trait_ParseIndeckTags(_raw);
     var _apply_cost = trait_ParseApplyCost(_raw);
+    var _delay = 0;
+    var _ability_name = "";
+    var _buff_turns = 0;
+    var _enemy_id = -1;
+    var _card_ids = [];
+    var _collection = "";
+
+    if (variable_struct_exists(_raw, "delay")) {
+        _delay = max(0, floor(_raw.delay));
+    }
+
+    if (variable_struct_exists(_raw, "name")) {
+        _ability_name = string(_raw.name);
+    }
+
+    if (variable_struct_exists(_raw, "card_ids") && is_array(_raw.card_ids)) {
+        for (var c = 0; c < array_length(_raw.card_ids); c++) {
+            array_push(_card_ids, floor(_raw.card_ids[c]));
+        }
+    } else if (variable_struct_exists(_raw, "ids") && is_array(_raw.ids)) {
+        for (var d = 0; d < array_length(_raw.ids); d++) {
+            array_push(_card_ids, floor(_raw.ids[d]));
+        }
+    }
+
+    if (_type == "summon_enemy") {
+        if (variable_struct_exists(_raw, "enemyID")) _enemy_id = floor(_raw.enemyID);
+        else if (variable_struct_exists(_raw, "enemy_id")) _enemy_id = floor(_raw.enemy_id);
+        else if (variable_struct_exists(_raw, "id")) _enemy_id = floor(_raw.id);
+        if (variable_struct_exists(_raw, "collection")) _collection = string(_raw.collection);
+        _card_id = -1;
+        if (_delay <= 0 && variable_struct_exists(_raw, "turns")) {
+            _delay = max(0, floor(_raw.turns));
+        } else if (_delay <= 0 && _amount > 0) {
+            _delay = max(0, floor(_amount));
+        }
+    }
+
+    if (_type == "discard_hand" || _type == "discard_extra_deck" || _type == "add_deck") {
+        if (_delay <= 0 && variable_struct_exists(_raw, "turns")) {
+            _delay = max(0, floor(_raw.turns));
+        }
+    }
+
+    if (_type == "self_buff" || _type == "buff") {
+        if (variable_struct_exists(_raw, "turns")) {
+            _buff_turns = max(1, floor(_raw.turns));
+        }
+    }
 
     if (_type == "conditions" && variable_struct_exists(_raw, "requirements") && is_array(_raw.requirements)) {
 
@@ -144,7 +203,14 @@ function trait_NormalizeEntry(_raw) {
         tags: _tags,
         indeck_tags: _indeck_tags,
         apply_cost: _apply_cost,
-        requirements: _requirements
+        requirements: _requirements,
+        delay: _delay,
+        name: _ability_name,
+        buff_turns: _buff_turns,
+        enemy_id: _enemy_id,
+        card_ids: _card_ids,
+        hand_filter: _hand_filter,
+        collection: _collection
     };
 }
 
@@ -350,6 +416,14 @@ function trait_GetDisplayText(_trait) {
 
         case "destroy": return "Destroy " + string(_trait.amount);
 
+        case "discard_hand":
+            if (_trait.hand_filter != "") return "Discard " + string(max(1, _trait.amount)) + " " + _trait.hand_filter + " card(s)";
+            return "Discard " + string(max(1, _trait.amount)) + " hand card(s)";
+        case "discard_extra_deck": return "Discard " + string(max(1, _trait.amount)) + " extra deck card(s)";
+        case "summon_enemy":
+            if (_trait.enemy_id >= 0) return "Summon enemy ID " + string(_trait.enemy_id);
+            return "Summon ally";
+
         case "add": return "Add to hand id " + string(_trait.card_id);
 
         case "add_deck": return "Add to deck id " + string(_trait.card_id);
@@ -400,7 +474,8 @@ function trait_GetDisplayText(_trait) {
             if (_entry == undefined) return "Add cost";
             return "Add cost: " + card_FormatCostEntry(_entry);
 
-        case "silence": return "Silence 1 target (" + string(max(1, _trait.amount)) + " enemy turn(s))";
+        case "silence": return "Silence 1 enemy (" + string(max(1, _trait.amount)) + " enemy turn(s))";
+        case "shroud": return "Shroud 1 target (" + string(max(1, _trait.amount)) + " enemy turn(s))";
 
         case "discard_action": return "Discard " + string(max(1, _trait.amount)) + " action card(s)";
         case "discard_monster": return "Discard " + string(max(1, _trait.amount)) + " monster card(s)";

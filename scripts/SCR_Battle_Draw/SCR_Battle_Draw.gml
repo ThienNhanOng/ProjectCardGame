@@ -31,13 +31,18 @@ function SCR_Battle_DrawOverlays() {
         with (_deck) deck_ExtraDeckPicker_Draw();
     }
 
-    battle_DrawHoverPreview();
+    battle_EnemyLog_DrawPanel();
     worldmap_DrawBattleVictoryPrompt();
 
     var _bm = instance_find(OBJ_BattleManager, 0);
     if (_bm != noone) {
-        with (_bm) conditions_summon_Draw();
+        with (_bm) {
+            conditions_summon_Draw();
+            monsterAbility_Picker_Draw();
+        }
     }
+
+    battle_DrawHoverPreview();
 
     draw_set_color(c_white);
 }

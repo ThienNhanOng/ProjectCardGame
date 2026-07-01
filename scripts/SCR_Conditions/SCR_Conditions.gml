@@ -4,6 +4,7 @@ function conditions_summon_Reset() {
     conditions_summon_active = false;
     conditions_summon_card_id = -1;
     conditions_summon_card = undefined;
+    conditions_summon_return_entry = undefined;
     conditions_summon_queue = [];
     conditions_summon_mode = "none";
     conditions_summon_current = undefined;
@@ -34,7 +35,7 @@ function conditions_NormalizeEntry(_raw) {
     if (_type == "sacrifice_tag" || _type == "sacrifice_tags") _type = "sacrifice_tag";
     if (_type == "sacrifice_card" || _type == "sacrifice_cards") _type = "sacrifice_id";
     if (_type == "discard_tag" || _type == "discard_tags") _type = "discard_tag";
-    if (_type == "astral") _amount = 1;
+    if (_type == "astral" && _amount <= 0) _amount = 1;
 
     if (variable_struct_exists(_raw, "id")) _id = floor(real(_raw.id));
     else if (variable_struct_exists(_raw, "card_id")) _id = floor(real(_raw.card_id));
@@ -119,7 +120,8 @@ function conditions_GetRequirementText(_cond) {
             var _type_label = conditions_FormatCardTypesLabel(_cond.card_types);
             return "Discard " + string(_cond.amount) + " [" + conditions_JoinTags(_cond.tags) + "] " + _type_label + " card(s)";
         case "astral":
-            return "Astral — removed after battle";
+            if (_cond.amount > 1) return "Astral — " + string(_cond.amount) + " summons";
+            return "Astral — 1 summon";
         default: return string(_cond.type);
     }
 }
@@ -371,29 +373,9 @@ function conditions_GetSummonFailReason(_card) {
     return "";
 }
 
-/// @desc True when this spirit/extra-deck card is battle-only (not saved to extra deck source)
+/// @desc True when this spirit has a limited number of summons (astral condition)
 function card_IsAstral(_card_or_id) {
-    var _def = undefined;
-
-    if (is_struct(_card_or_id)) {
-        if (variable_struct_exists(_card_or_id, "astral") && _card_or_id.astral) return true;
-        if (variable_struct_exists(_card_or_id, "id")) {
-            _def = deck_GetCardData(_card_or_id.id);
-        } else {
-            _def = _card_or_id;
-        }
-    } else {
-        _def = deck_GetCardData(floor(_card_or_id));
-    }
-
-    if (_def == undefined) return false;
-    if (variable_struct_exists(_def, "astral") && _def.astral) return true;
-
-    var _reqs = conditions_GetRequirements(_def);
-    for (var i = 0; i < array_length(_reqs); i++) {
-        if (_reqs[i].type == "astral") return true;
-    }
-    return false;
+    return card_GetAstralSummonLimit(_card_or_id) > 0;
 }
 
 function conditions_CanSummon(_card) {
@@ -411,32 +393,39 @@ function conditions_TryBeginFromExtraDeck(_deck_index) {
     var _deck = instance_find(OBJ_Deck, 0);
     if (_deck == noone) return false;
 
-    var _card_id = -1;
-    with (_deck) _card_id = deck_RemoveExtraCardAt(_deck_index);
+    var _entry = undefined;
+    with (_deck) _entry = deck_RemoveExtraCardAt(_deck_index, false);
+    if (_entry == undefined) return false;
+
+    var _card_id = extraDeck_GetCardId(_entry);
     if (_card_id <= 0) return false;
 
     var _card = deck_CreateRuntimeCard(_card_id);
     if (_card == undefined) {
-        with (_deck) deck_AddExtraCard(_card_id);
+        with (_deck) deck_AddExtraCardEntry(_entry);
         return false;
+    }
+
+    if (extraDeck_GetAstralRemaining(_entry) > 0) {
+        _card.astral_remaining = extraDeck_GetAstralRemaining(_entry);
     }
 
     var _bm = instance_find(OBJ_BattleManager, 0);
     if (_bm == noone) {
-        with (_deck) deck_AddExtraCard(_card_id);
+        with (_deck) deck_AddExtraCardEntry(_entry);
         return false;
     }
 
     var _ok = false;
     with (_bm) {
-        _ok = conditions_BeginSummon(_card_id, _card);
+        _ok = conditions_BeginSummon(_card_id, _card, _entry);
     }
 
     if (_ok) {
         with (_deck) deck_ExtraDeckPicker_Close();
         show_debug_message("Summoning " + _card.name + "...");
     } else {
-        with (_deck) deck_AddExtraCard(_card_id);
+        with (_deck) deck_AddExtraCardEntry(_entry);
         var _reason = "";
         with (_bm) { _reason = conditions_GetSummonFailReason(_card); }
         show_debug_message("Cannot summon " + _card.name
@@ -445,7 +434,7 @@ function conditions_TryBeginFromExtraDeck(_deck_index) {
     return _ok;
 }
 
-function conditions_BeginSummon(_card_id, _runtime_card) {
+function conditions_BeginSummon(_card_id, _runtime_card, _return_entry = undefined) {
     conditions_summon_Reset();
     if (_runtime_card == undefined) return false;
 
@@ -454,6 +443,7 @@ function conditions_BeginSummon(_card_id, _runtime_card) {
     conditions_summon_active = true;
     conditions_summon_card_id = _card_id;
     conditions_summon_card = _runtime_card;
+    conditions_summon_return_entry = _return_entry;
 
     var _conds = conditions_GetRequirements(_runtime_card);
     for (var i = 0; i < array_length(_conds); i++) {
@@ -468,11 +458,10 @@ function conditions_BeginSummon(_card_id, _runtime_card) {
 function conditions_CancelSummon() {
     if (!conditions_summon_active) return;
 
-    if (conditions_summon_card_id > 0) {
-        var _card_id = conditions_summon_card_id;
+    if (conditions_summon_return_entry != undefined) {
         var _deck = instance_find(OBJ_Deck, 0);
         if (_deck != noone) {
-            with (_deck) deck_AddExtraCard(_card_id);
+            with (_deck) deck_AddExtraCardEntry(conditions_summon_return_entry);
         }
         show_debug_message("Summon cancelled — spirit returned to extra deck");
     }
@@ -675,6 +664,14 @@ function conditions_CompleteSummonOnSlot(_slot_index) {
     with (_board) _placed = SCR_Board_PlaceCard(_slot, _summon_card);
 
     if (_placed) {
+        if (variable_struct_exists(_summon_card, "astral_remaining")) {
+            _summon_card.astral_remaining = max(0, floor(_summon_card.astral_remaining) - 1);
+            if (_summon_card.astral_remaining <= 0) {
+                _summon_card.spirit_expired = true;
+                battle_PermanentlyRemoveSpiritById(_summon_card.id);
+                show_debug_message(_summon_card.name + " astral summons exhausted — removed permanently");
+            }
+        }
         show_debug_message(conditions_summon_card.name + " summoned!");
         conditions_summon_Reset();
     }

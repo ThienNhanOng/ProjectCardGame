@@ -1,0 +1,166 @@
+{
+  "collection": "enemyCollection01",
+  "enemy": [
+    {
+      "enemyID": 1,
+      "enemyname": "Goblin Raider",
+      "type": "monster",
+      "tag": ["Goblin", "Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinSoldier",
+      "level": 1,
+      "enemyhealthvalue": 6,
+      "enemyattackvalue": 6,
+      "enemyability": []
+    },
+    {
+      "enemyID": 2,
+      "enemyname": "Goblin Berserker",
+      "type": "monster",
+      "tag": ["Goblin", "Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinSoldier",
+      "level": 1,
+      "enemyhealthvalue": 6,
+      "enemyattackvalue": 6,
+      "enemyability": [{ "type": "attack_all", "value": 3 }]
+    },
+    {
+      "enemyID": 3,
+      "enemyname": "Goblin Shaman",
+      "type": "monster",
+      "tag": ["Goblin", "Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinMage",
+      "level": 1,
+      "enemyhealthvalue": 15,
+      "enemyattackvalue": 0,
+      "enemyability": [{ "type": "heal", "value": 5 }]
+    },
+    {
+      "enemyID": 4,
+      "enemyname": "Goblin Chief",
+      "type": "monster",
+      "tag": ["Goblin", "Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinCommander",
+      "level": 1,
+      "enemyhealthvalue": 20,
+      "enemyattackvalue": 8,
+      "enemyability": [{ "type": "self_buff", "value": 3 }]
+    },
+    {
+      "enemyID": 5,
+      "enemyname": "Goblin Commander",
+      "type": "monster",
+      "tag": ["Goblin", "Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinCommander",
+      "level": 1,
+      "enemyhealthvalue": 15,
+      "enemyattackvalue": 5,
+      "enemyability": [{ "type": "buff", "value": 2 }]
+    },
+    {
+      "enemyID": 6,
+      "enemyname": "Goblin Lord",
+      "type": "monster",
+      "tag": ["Goblin", "Set1"],
+      "sprite": "SPR_Monsterplaceholder",
+      "animation": "GoblinCommander",
+      "level": 1,
+      "enemyhealthvalue": 20,
+      "enemyattackvalue": 20,
+      "enemyability": [{ "type": "destroy", "value": 1 }],
+      "elite": true
+    },
+    {
+      "enemyID": 7,
+      "enemyname": "Bandit Scout",
+      "type": "monster",
+      "tag": ["Bandit", "Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 1,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 5,
+      "enemyability": []
+    },
+    {
+      "enemyID": 8,
+      "enemyname": "Bandit Leader",
+      "type": "monster",
+      "tag": ["Bandit", "Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 1,
+      "enemyhealthvalue": 30,
+      "enemyattackvalue": 10,
+      "enemyability": []
+    },
+    {
+      "enemyID": 9,
+      "enemyname": "Bandit Saboteur",
+      "type": "monster",
+      "tag": ["Bandit", "Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 1,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 5,
+      "enemyability": [{ "type": "discard_monster", "value": 1 }]
+    },
+    {
+      "enemyID": 10,
+      "enemyname": "Bandit Saboteur (Action)",
+      "type": "monster",
+      "tag": ["Bandit", "Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 1,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 5,
+      "enemyability": [{ "type": "discard_action", "value": 1 }]
+    },
+    {
+      "enemyID": 11,
+      "enemyname": "Bandit Saboteur (Weapon)",
+      "type": "monster",
+      "tag": ["Bandit", "Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 1,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 5,
+      "enemyability": [{ "type": "discard_weapon", "value": 1 }]
+    },
+    {
+      "enemyID": 12,
+      "enemyname": "Bandit Saboteur (Spirit)",
+      "type": "monster",
+      "tag": ["Bandit", "Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 1,
+      "enemyhealthvalue": 10,
+      "enemyattackvalue": 5,
+      "enemyability": [{ "type": "discard_spirit", "value": 1 }]
+    },
+    {
+      "enemyID": 13,
+      "enemyname": "Bandit Commander",
+      "type": "monster",
+      "tag": ["Bandit", "Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 1,
+      "enemyhealthvalue": 30,
+      "enemyattackvalue": 1,
+      "enemyability": [{ "type": "buff", "value": 3 }]
+    },
+    {
+      "enemyID": 14,
+      "enemyname": "Bandit Medic",
+      "type": "monster",
+      "tag": ["Bandit", "Set2"],
+      "sprite": "SPR_Monsterplaceholder",
+      "level": 1,
+      "enemyhealthvalue": 30,
+      "enemyattackvalue": 0,
+      "enemyability": [{ "type": "heal_all", "value": 3 }]
+    }
+  ]
+}

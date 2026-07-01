@@ -148,6 +148,12 @@ function trait_Execute(_trait, _ctx) {
 
             return trait_ExecuteSilence(_ctx);
 
+        case "shroud":
+
+            if (_ctx.amount <= 0) _ctx.amount = max(1, _trait.amount);
+
+            return trait_ExecuteShroud(_ctx);
+
 
 
         default:

@@ -1,0 +1,18 @@
+{
+  "collection": "AbilityTestCards",
+  "cards": [
+    {
+      "id": -1,
+      "own": 0,
+      "cardRarity": 0,
+      "name": "testnegative",
+      "type": "monster",
+      "tag": ["Test", "Negative"],
+      "sprite": "SPR_Monsterplaceholder",
+      "health": 1,
+      "attack": 1,
+      "cost": 1,
+      "ability": []
+    }
+  ]
+}

@@ -1,0 +1,340 @@
+{
+  "collection": "WeaponEffectTest",
+  "cards": [
+    {
+      "id": 3001,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon01_(DrawCards)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "draw_cards", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3002,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon02_(Attack)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "attack", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3003,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon03_(AttackAll)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "attack_all", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3004,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon04_(Heal)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "heal", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3005,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon05_(HealAll)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "heal_all", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3006,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon06_(SelfBuff)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "self_buff", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3007,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon07_(Buff)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "buff", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3008,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon08_(Destroy)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "destroy", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3009,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon09_(Silence)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "silence", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3010,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon10_(Add)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add", "id": 1001, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3011,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon11_(AddDeck)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_deck", "id": 1001, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3012,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon12_(AddExtraDeck)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_extra_deck", "id": 1016, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3013,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon13_(AddHandTag)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_hand_tag", "tags": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3014,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon14_(AddDeckTag)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_deck_tag", "tags": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3015,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon15_(AddExtraDeckTag)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_extra_deck_tag", "tags": ["Warrior"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3020,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon16_(AddHandIndeckTag)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_hand_tag", "indeckTag": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3022,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon18_(AddDeckIndeckTag)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_deck_tag", "indeckTag": ["Test"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3023,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon19_(AddExtraDeckIndeckTag)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_extra_deck_tag", "indeckTag": ["Warrior"], "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3024,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon20_(Cost2)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "cost": 2,
+      "ability": []
+    },
+    {
+      "id": 3025,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon21_(AddCounter)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_counter", "amount": 2, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3026,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon22_(RemoveCounter)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "remove_counter", "amount": 3, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3027,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon23_(AddCost)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_cost", "tag": "Test", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3028,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon24_(AddHandWithCost)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "add_hand_with_cost", "cost": 3, "repeat": false, "recursion": 1 }
+      ]
+    },
+    {
+      "id": 3021,
+      "own": 4,
+      "cardRarity": 0,
+      "name": "TestWeapon17_(OpenZone)",
+      "type": "weapon",
+      "tag": ["Test"],
+      "sprite": "SPR_Weaponplaceholder",
+      "equip": true,
+      "attack": 1,
+      "ability": [
+        { "type": "openzone", "amount": 1, "repeat": false, "recursion": 1 }
+      ]
+    }
+  ]
+}

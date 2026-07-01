@@ -67,7 +67,11 @@ function monster_CreateInstance(_wave_entry) {
         status_effects: [],
         silenced_turns: 0,
         silenced_ability_backup: undefined,
-        attack_buff: 0
+        attack_buff: 0,
+        ability_index: 0,
+        pending_delayed: undefined,
+        attack_all_charges: 0,
+        timed_attack_buffs: []
     };
 }
 

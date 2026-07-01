@@ -1,0 +1,22 @@
+{
+  "battles": [
+    {
+      "battle": "ability_test_all",
+      "active_slots": 2,
+      "wave": [
+        { "collection": "enemyAbilityTest", "enemyID": 101 },
+        { "collection": "enemyAbilityTest", "enemyID": 102 },
+        { "collection": "enemyAbilityTest", "enemyID": 103 },
+        { "collection": "enemyAbilityTest", "enemyID": 104 },
+        { "collection": "enemyAbilityTest", "enemyID": 105 },
+        { "collection": "enemyAbilityTest", "enemyID": 106 },
+        { "collection": "enemyAbilityTest", "enemyID": 107 },
+        { "collection": "enemyAbilityTest", "enemyID": 108 },
+        { "collection": "enemyAbilityTest", "enemyID": 109 },
+        { "collection": "enemyAbilityTest", "enemyID": 110 },
+        { "collection": "enemyAbilityTest", "enemyID": 111 },
+        { "collection": "enemyAbilityTest", "enemyID": 112 }
+      ]
+    }
+  ]
+}

@@ -128,7 +128,7 @@ function SCR_Board_DrawPlayerMonsterOverlay(_slot, _card_w, _card_h) {
     card_DrawAttackGainBadge(_slot.x, _slot.y, _card_w, _card_h, _attack_gain);
 
     if (battle_IsSpiritMonster(_slot.card)) {
-        var _strike = battle_GetMonsterStrikeAmount(_slot.card);
+        var _strike = card_GetBoardAttackDisplay(_slot.card, _slot.index);
         if (_strike > 0) {
             draw_set_halign(fa_center);
             draw_set_valign(fa_top);

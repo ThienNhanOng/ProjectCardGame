@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_MonsterAbility_Delayed",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_MonsterAbility_Delayed",
+  "parent":{
+    "name":"monsterAbility",
+    "path":"folders/scripts/cardcollection/Traits/monsterAbility.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

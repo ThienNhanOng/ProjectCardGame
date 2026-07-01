@@ -39,7 +39,7 @@ function deck_GetUniqueBattleDeckCardIds(_destination = "") {
 
     if (_destination == "extra_deck") {
         for (var e = 0; e < extra_deck_Count; e++) {
-            var _extra_id = extra_deck[e];
+            var _extra_id = extraDeck_GetCardId(extra_deck[e]);
             if (_extra_id <= 0) continue;
             var _extra_key = string(_extra_id);
             if (variable_struct_exists(_seen, _extra_key)) continue;

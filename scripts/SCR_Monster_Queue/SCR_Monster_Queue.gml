@@ -50,6 +50,7 @@ function monster_ApplyDamage(_slot_index, _amount) {
 
     if (_slot.card.health <= 0) {
         show_debug_message(_slot.card.name + " defeated in slot " + string(_slot_index) + "!");
+        monsterAbility_OnDeath(_slot.card);
         _slot.occupied = false;
         _slot.card = undefined;
         monster_SpawnIntoSlot(_board, _slot_index);
@@ -78,6 +79,32 @@ function monster_CheckVictory(_board) {
 
 function monster_GetQueueCount() {
     return array_length(monster_queue);
+}
+
+function monster_QueueInsertFront(_entry) {
+    if (_entry == undefined) return false;
+
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_mm == noone) return false;
+
+    var _board = instance_find(OBJ_BoardManager, 0);
+
+    with (_mm) {
+        if (!variable_instance_exists(id, "monster_queue") || !is_array(monster_queue)) {
+            monster_queue = [];
+        }
+
+        array_insert(monster_queue, 0, _entry);
+
+        if (_board != noone) {
+            monster_FillActiveSlots(_board);
+        }
+
+        show_debug_message("Queued " + string(_entry.collection) + " enemy ID "
+            + string(_entry.enemyID) + " at front | waiting: " + string(array_length(monster_queue)));
+    }
+
+    return true;
 }
 
 function monster_CountLivingActive(_board) {

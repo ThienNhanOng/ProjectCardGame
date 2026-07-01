@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"SCR_Trait_AddTag",
   "parent":{
-    "name":"effects",
-    "path":"folders/scripts/cardcollection/Traits/effects.yy",
+    "name":"Playereffects",
+    "path":"folders/scripts/cardcollection/Traits/Playereffects.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
