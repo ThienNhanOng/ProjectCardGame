@@ -1,0 +1,29 @@
+@startuml 09_dialog
+top to bottom direction
+skinparam componentStyle rectangle
+
+[marker dialog script array] as Marker
+[dialog_Start] as Start
+[dialog_ShowCurrentOrAdvance] as Show
+[name/left/right/background/line] as kinds
+[OBJ_DialogController Draw GUI] as DC
+[dialog_DrawGui] as Draw
+[tint layer] as Tint
+[full-screen bg if told] as BG
+[portraits + inactive dim] as Portraits
+[typewriter text box] as Text
+[SCR_Dialog_Builder] as Builder
+[SCR_Dialog_Text] as DialogText
+
+Marker --> Start
+Start --> Show
+Show --> kinds
+DC --> Draw
+Draw --> Tint
+Draw --> BG
+Draw --> Portraits
+Draw --> Text
+Builder --> Marker
+DialogText --> Builder
+
+@enduml

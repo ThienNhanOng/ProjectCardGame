@@ -1,0 +1,23 @@
+@startuml 06_monster
+top to bottom direction
+skinparam componentStyle rectangle
+
+[OBJ_MonsterManager] as MM
+[SCR_Monster_Init] as Init
+[battle_runtime_config or Battle01.json] as cfg
+[SCR_Monster_Queue] as Queue
+[spawn wave enemies] as spawn
+[SCR_Monster_AnimRegistry] as Anim
+[SCR_Battle_EnemyTurn] as EnemyTurn
+[SCR_MonsterAbility_Execute] as MA
+[SCR_MonsterAbility_Picker] as MA_pick
+
+MM --> Init
+Init --> cfg
+cfg --> Queue
+Queue --> spawn
+spawn --> Anim
+EnemyTurn --> MA
+MA --> MA_pick
+
+@enduml

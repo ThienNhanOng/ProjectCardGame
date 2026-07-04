@@ -1,0 +1,31 @@
+@startuml 04_board_manager
+top to bottom direction
+skinparam componentStyle rectangle
+
+[OBJ_BoardManager] as BM
+[SCR_Board_Create] as Create
+[SCR_Board_Dimensions] as Dim
+[SCR_Board_PlayerSlots] as PS
+[SCR_Board_EnemySlots] as ES
+[SCR_Board_ActionSlot] as AS
+[SlotFactory / SCR_Slot_init] as SF
+[SCR_Board_SlotManager] as Step
+[SCR_DragDrop_Init] as DD
+
+package "5 columns" as columns {
+  [monster slots] as MON
+  [weapon slots] as WPN
+  [action slots] as ACT
+  [spirit slots] as SPI
+}
+
+BM --> Create
+Create --> Dim
+Create --> PS
+Create --> ES
+Create --> AS
+Create --> SF
+Step --> DD
+PS --> columns
+
+@enduml

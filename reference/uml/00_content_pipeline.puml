@@ -1,0 +1,27 @@
+@startuml 00_content_pipeline
+left to right direction
+skinparam componentStyle rectangle
+
+[Content author] as author
+folder "content/maps/event_XX" as content
+file "dialog_pre.gml / portraits / bg PNG" as dialog_src
+file "rewards.json / battleset.json" as event_json
+[Import to GameMaker assets] as import
+folder "datafiles/ Included Files" as datafiles
+[SCR_DialogExample_* scripts] as scripts
+[sprites/map art] as sprites
+[OBJ_Map1_Marker Create] as marker
+[World map + battle engine] as engine
+
+author --> content
+content --> dialog_src
+content --> event_json
+dialog_src --> import
+event_json --> datafiles
+import --> scripts
+import --> sprites
+scripts --> marker
+sprites --> marker
+datafiles --> engine
+
+@enduml

@@ -1,0 +1,38 @@
+@startuml 08_worldmap_events
+top to bottom direction
+skinparam componentStyle rectangle
+
+[OBJ_WorldMapController Init] as WMC
+[worldmap_InitRoom] as InitRoom
+[worldmap_SyncMarkersFromRoom] as Sync
+[OBJ_EventMarker instances get event_id] as EM
+
+[OBJ_PlayerMarker Step] as PM
+[worldmap_PlayerMovementStep snap] as Move
+[worldmap_TryPlayerInteract] as E
+[eventmarker_trigger] as Trigger
+[dialog_Start] as Dialog
+[worldmap_LaunchEventBattle] as Battle
+[Room_battle] as RB
+[worldmap_ReturnToMapAfterVictory] as Win
+[worldmap_ApplyPendingPlayerSpawn] as Spawn
+
+WMC --> InitRoom
+InitRoom --> Sync
+Sync --> EM
+
+PM --> Move
+PM --> E
+E --> Trigger
+Trigger --> Dialog : first clear
+Trigger --> Battle : replay
+Dialog --> Battle
+Battle --> RB
+RB --> Win
+Win --> Spawn
+
+note right of Trigger
+  pre dialog once?
+end note
+
+@enduml

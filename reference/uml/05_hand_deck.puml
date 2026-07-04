@@ -1,0 +1,20 @@
+@startuml 05_hand_deck
+left to right direction
+skinparam componentStyle rectangle
+
+database "battle_deck_source IDs" as bds
+[OBJ_Deck Create SCR_Deck_createinit] as DK
+[shuffle deck array] as shuffle
+[OBJ_Hand SCR_Hand_Init] as HD
+[SCR_Hand_DrawFromDeck] as draw
+database "hand card structs" as hand
+[SCR_Hand_Draw / SCR_Hand_DrawCard] as Draw
+
+bds --> DK
+DK --> shuffle
+shuffle --> HD
+HD --> draw
+draw --> hand
+hand --> Draw
+
+@enduml

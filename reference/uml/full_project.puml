@@ -1,0 +1,72 @@
+@startuml full_project
+top to bottom direction
+skinparam componentStyle rectangle
+
+package "CONTENT" {
+  [maps/events/dialog/art] as maps
+  [cards/enemies/battlesets] as json
+}
+
+package "Bootstrap & Data" as BOOT {
+  [OBJ_GameController] as GC
+  [LoadCollection] as LC
+  database "card_DB" as card_DB
+  [LoadMonsters] as LM
+  database "monster_DB" as monster_DB
+  [SCR_PlayerCollection] as PC
+  database "player_collection" as coll
+  GC --> LC --> card_DB
+  GC --> LM --> monster_DB
+  GC --> PC --> coll
+}
+
+package "Collection & Deck Builder" as DECK {
+  [OBJ_DeckBuilder] as DBC
+  [OBJ_CardSlot] as CS
+  database "battle_deck_source" as bds
+  DBC --> CS
+  DBC --> bds : READY
+}
+
+package "World Map & Events" as MAP {
+  [OBJ_WorldMapController] as WMC
+  [OBJ_PlayerMarker] as PM
+  [OBJ_EventMarker] as EM
+  [Map1 Markers 01-05] as M1
+  database "battle_runtime_config" as brc
+  EM --> M1
+  PM --> EM : E
+  EM --> brc : launch
+}
+
+package "Dialog System" as DIALOG {
+  [OBJ_DialogController] as DC
+  [SCR_Dialog_System] as DS
+  EM --> DS
+  DC --> DS
+}
+
+package "Battle Room" as BATTLE {
+  [OBJ_BattleManager] as BM
+  [OBJ_BoardManager] as BRD
+  [OBJ_Hand] as HD
+  [OBJ_Deck] as DK
+  [OBJ_MonsterManager] as MM
+  [SCR_Trait_*] as TR
+  BM --> BRD
+  BM --> HD
+  HD --> DK
+  BM --> MM
+  BM --> TR
+}
+
+json --> BOOT
+maps --> MAP
+maps --> DIALOG
+BOOT --> DECK
+DECK --> MAP
+MAP --> BATTLE
+BATTLE --> MAP : victory
+MAP --> DECK
+
+@enduml

@@ -1,7 +1,0 @@
-flowchart LR
-    bds[(battle_deck_source IDs)] --> DK[OBJ_Deck Create SCR_Deck_createinit]
-    DK --> shuffle[shuffle deck array]
-    shuffle --> HD[OBJ_Hand SCR_Hand_Init]
-    HD --> draw[SCR_Hand_DrawFromDeck]
-    draw --> hand[(hand card structs)]
-    hand --> Draw[SCR_Hand_Draw / SCR_Hand_DrawCard]

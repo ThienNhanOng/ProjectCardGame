@@ -1,0 +1,26 @@
+@startuml 01_bootstrap_data
+top to bottom direction
+skinparam componentStyle rectangle
+
+[Room_collection Create] as RC
+[OBJ_GameController Create] as GC
+[SCR_LoadAllCollections] as SCR_LoadAllCollections
+[Merc_starterdeck01.json] as Merc
+[AbilityTestCards.json] as TestCards
+[battle_EnsureMonsterDatabase] as battle_EnsureMonsterDatabase
+[EnemyCollection01.json] as Enemy
+[collection_EnsurePlayerInitialized] as collection_EnsurePlayerInitialized
+database "card_DB" as card_DB
+database "monster_DB" as monster_DB
+
+RC --> GC
+GC --> SCR_LoadAllCollections
+SCR_LoadAllCollections --> Merc
+SCR_LoadAllCollections --> TestCards
+GC --> battle_EnsureMonsterDatabase
+battle_EnsureMonsterDatabase --> Enemy
+GC --> collection_EnsurePlayerInitialized
+Merc --> card_DB
+Enemy --> monster_DB
+
+@enduml

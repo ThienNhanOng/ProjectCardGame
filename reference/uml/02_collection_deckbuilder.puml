@@ -1,0 +1,25 @@
+@startuml 02_collection_deckbuilder
+top to bottom direction
+skinparam componentStyle rectangle
+
+[OBJ_DeckBuilder] as DBC
+[SCR_DBC_Create] as Create
+[SCR_DBC_InitGrid + OBJ_CardSlot] as Grid
+[SCR_DBC_InitDeck] as Deck
+[Step] as Step
+[SCR_DBS_HandleScrolling] as Scroll
+[SCR_DBS_HandleDeckClick] as Click
+[SCR_DBS_HandleReadyButton] as Ready
+[battle_SaveDeckSources] as Save
+[room_goto return map] as Goto
+
+DBC --> Create
+Create --> Grid
+Create --> Deck
+Step --> Scroll
+Step --> Click
+Step --> Ready
+Ready --> Save
+Save --> Goto
+
+@enduml
