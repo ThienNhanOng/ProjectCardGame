@@ -13,6 +13,7 @@
     {"name":"inst_62B7EA88","path":"rooms/Room_Worldmap1/Room_Worldmap1.yy",},
     {"name":"inst_583CFB2A","path":"rooms/Room_Worldmap1/Room_Worldmap1.yy",},
     {"name":"inst_WMCTRL001","path":"rooms/Room_Worldmap1/Room_Worldmap1.yy",},
+    {"name":"inst_DIALOG001","path":"rooms/Room_Worldmap1/Room_Worldmap1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -25,6 +26,7 @@
             {"$GMRInstance":"v4","%Name":"inst_69323C28","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_69323C28","objectId":{"name":"OBJ_Map1_Marker04","path":"objects/OBJ_Map1_Marker04/OBJ_Map1_Marker04.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":832.0,"y":192.0,},
             {"$GMRInstance":"v4","%Name":"inst_62B7EA88","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_62B7EA88","objectId":{"name":"OBJ_Map1_Marker05","path":"objects/OBJ_Map1_Marker05/OBJ_Map1_Marker05.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1088.0,"y":416.0,},
             {"$GMRInstance":"v4","%Name":"inst_WMCTRL001","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_WMCTRL001","objectId":{"name":"OBJ_WorldMapController","path":"objects/OBJ_WorldMapController/OBJ_WorldMapController.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":0.0,"y":0.0,},
+            {"$GMRInstance":"v4","%Name":"inst_DIALOG001","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_DIALOG001","objectId":{"name":"OBJ_DialogController","path":"objects/OBJ_DialogController/OBJ_DialogController.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":0.0,"y":0.0,},
           ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
       ],"name":"instance","properties":[],"resourceType":"GMRLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRLayer":"","%Name":"Background_Layers","depth":200,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[

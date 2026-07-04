@@ -16,23 +16,7 @@ function SCR_Deck_DrawDebugRow() {
             var _x = _start_x + i * (_card_width + _spacing);
             var _y = _start_y;
             
-            // Get sprite based on card type
-            var _spr = SPR_Monsterplaceholder;
-            switch (_card_data.type) {
-                case "monster":
-                case "special_monster":
-                    _spr = SPR_Monsterplaceholder;
-                    break;
-                case "weapon":
-                    _spr = SPR_Weaponplaceholder;
-                    break;
-                case "action":
-                    _spr = SPR_Actionplaceholder;
-                    break;
-            }
-            
-            // Draw card
-            draw_sprite(_spr, 0, _x, _y);
+            card_DrawFramedInRect(_x, _y, _card_width, _card_height, _card_data, 1);
             
             // Draw card name
             draw_set_color(c_black);

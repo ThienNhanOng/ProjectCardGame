@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Card_Draw",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Card_Draw",
+  "parent":{
+    "name":"cardcollection",
+    "path":"folders/scripts/cardcollection.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

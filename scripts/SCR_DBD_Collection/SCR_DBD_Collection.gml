@@ -600,20 +600,7 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
     var _side_w = max(80, _inner_w - _img_w - 10);
     var _side_start_y = _cy;
 
-    draw_set_color(make_color_rgb(18, 18, 22));
-    draw_rectangle(_cx, _cy, _cx + _img_w, _cy + _img_h, false);
-    draw_set_color(make_color_rgb(90, 90, 95));
-    draw_rectangle(_cx, _cy, _cx + _img_w, _cy + _img_h, true);
-
-    var _spr = SCR_DBD_GetCardPreviewSprite(_card);
-    if (_spr != noone) {
-        var _spr_w = sprite_get_width(_spr);
-        var _spr_h = sprite_get_height(_spr);
-        var _area_w = _img_w - 10;
-        var _area_h = _img_h - 10;
-        var _scale = min(_area_w / _spr_w, _area_h / _spr_h);
-        draw_sprite_ext(_spr, 0, _cx + (_img_w * 0.5), _cy + (_img_h * 0.5), _scale, _scale, 0, c_white, 1);
-    }
+    card_DrawFramedInRect(_cx, _cy, _img_w, _img_h, _card, 1);
 
     var _side_title = _ability_before_summary ? "Ability" : "Summary";
     var _side_lines = _ability_before_summary ? _ability_lines : _summary_lines;

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_DialogExample_map1marker",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_DialogExample_map1marker",
+  "parent":{
+    "name":"DialogSystem",
+    "path":"folders/scripts/WorldMap/DialogSystem.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

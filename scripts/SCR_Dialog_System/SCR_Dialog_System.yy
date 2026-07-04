@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SCR_Dialog_System",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SCR_Dialog_System",
+  "parent":{
+    "name":"DialogSystem",
+    "path":"folders/scripts/WorldMap/DialogSystem.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

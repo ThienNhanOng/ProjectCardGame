@@ -1,6 +1,8 @@
 /// @desc World map config — load JSON, define event flow, battles, replay pools
 
 #macro WORLDMAP_INTERACT_RADIUS 56
+#macro WORLDMAP_SNAP_OFFSET_Y 40
+#macro WORLDMAP_SNAP_BREAK_HOLD 0.25
 
 enum WORLDMAP_EVENT_STATE {
     LOCKED,
@@ -22,8 +24,17 @@ function worldmap_InitGlobals() {
             collection_return_room: noone,
             victory_pending: false,
             last_reward_text: "",
-            rewards_obtained: []
+            rewards_obtained: [],
+            pending_spawn_event_id: -1
         };
+    }
+
+    if (!variable_struct_exists(global.worldmap, "pending_spawn_event_id")) {
+        global.worldmap.pending_spawn_event_id = -1;
+    }
+
+    if (!variable_struct_exists(global.worldmap, "pending_dialog_post")) {
+        global.worldmap.pending_dialog_post = undefined;
     }
 
     if (!variable_global_exists("battleset_cache")) {

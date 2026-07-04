@@ -3,6 +3,7 @@
 /// @desc Launch any battle id directly (future hooks, debug, scripted fights)
 function worldmap_StartBattle(_battle_id, _battleset_file = "") {
     worldmap_InitGlobals();
+    dialog_ForceClose();
 
     if (_battleset_file == "") {
         _battleset_file = global.worldmap.battleset_file;
@@ -24,6 +25,7 @@ function worldmap_StartBattle(_battle_id, _battleset_file = "") {
 
 function worldmap_LaunchEventBattle(_event_id) {
     worldmap_InitGlobals();
+    dialog_ForceClose();
 
     if (!worldmap_CanInteractEvent(_event_id)) {
         show_debug_message("Event " + string(_event_id) + " is locked");
@@ -66,8 +68,10 @@ function worldmap_NotifyBattleVictory() {
 function worldmap_ReturnToMapAfterVictory() {
     worldmap_InitGlobals();
 
-    if (global.worldmap.active_event_id > 0) {
-        worldmap_MarkEventCleared(global.worldmap.active_event_id);
+    var _event_id = global.worldmap.active_event_id;
+    if (_event_id > 0) {
+        worldmap_MarkEventCleared(_event_id);
+        global.worldmap.pending_spawn_event_id = _event_id;
     }
 
     var _return_room = global.worldmap.return_room;
@@ -80,6 +84,105 @@ function worldmap_ReturnToMapAfterVictory() {
     battle_EndSession();
 
     room_goto(_return_room);
+}
+
+function worldmap_GetMarkerSnapPosition(_marker_inst) {
+    if (_marker_inst == noone) return { x: 0, y: 0 };
+
+    return {
+        x: _marker_inst.x,
+        y: _marker_inst.y - WORLDMAP_SNAP_OFFSET_Y
+    };
+}
+
+function worldmap_GetEventMarkerById(_event_id) {
+    if (_event_id <= 0) return noone;
+
+    var _found = noone;
+    with (OBJ_EventMarker) {
+        if (event_id == _event_id) _found = id;
+    }
+    return _found;
+}
+
+function worldmap_ApplyPendingPlayerSpawn() {
+    worldmap_InitGlobals();
+
+    var _event_id = global.worldmap.pending_spawn_event_id;
+    if (_event_id <= 0) return;
+
+    global.worldmap.pending_spawn_event_id = -1;
+
+    var _marker = worldmap_GetEventMarkerById(_event_id);
+    if (_marker == noone) return;
+
+    var _player = instance_find(OBJ_PlayerMarker, 0);
+    if (_player == noone) return;
+
+    var _pos = worldmap_GetMarkerSnapPosition(_marker);
+    _player.x = _pos.x;
+    _player.y = _pos.y;
+    _player.snap_event_id = _event_id;
+    _player.snap_break_free = false;
+    _player.snap_hold_timer = 0;
+}
+
+function worldmap_PlayerMovementStep(_inst) {
+    if (_inst == noone || dialog_IsActive()) return;
+
+    var _move_spd = 4;
+    var _hor = keyboard_check(ord("D")) - keyboard_check(ord("A"));
+    var _ver = keyboard_check(ord("S")) - keyboard_check(ord("W"));
+    var _moving = (_hor != 0 || _ver != 0);
+
+    var _nearest = worldmap_GetNearestInteractableEvent(_inst);
+    var _dt = delta_time / 1000000;
+    if (_dt <= 0) _dt = 1 / max(1, game_get_speed(gamespeed_fps));
+
+    if (_nearest == noone) {
+        _inst.snap_break_free = false;
+        _inst.snap_event_id = -1;
+        _inst.snap_hold_timer = 0;
+        if (_moving) {
+            _inst.x += _hor * _move_spd;
+            _inst.y += _ver * _move_spd;
+        }
+    } else {
+        var _dist = point_distance(_inst.x, _inst.y, _nearest.x, _nearest.y);
+
+        if (_dist > WORLDMAP_INTERACT_RADIUS) {
+            _inst.snap_break_free = false;
+            _inst.snap_event_id = -1;
+            _inst.snap_hold_timer = 0;
+            if (_moving) {
+                _inst.x += _hor * _move_spd;
+                _inst.y += _ver * _move_spd;
+            }
+        } else if (!_inst.snap_break_free) {
+            var _pos = worldmap_GetMarkerSnapPosition(_nearest);
+            _inst.x = _pos.x;
+            _inst.y = _pos.y;
+            _inst.snap_event_id = _nearest.event_id;
+
+            if (_moving) {
+                _inst.snap_hold_timer += _dt;
+                if (_inst.snap_hold_timer >= WORLDMAP_SNAP_BREAK_HOLD) {
+                    _inst.snap_break_free = true;
+                    _inst.snap_hold_timer = 0;
+                    _inst.x += _hor * _move_spd;
+                    _inst.y += _ver * _move_spd;
+                }
+            } else {
+                _inst.snap_hold_timer = 0;
+            }
+        } else if (_moving) {
+            _inst.x += _hor * _move_spd;
+            _inst.y += _ver * _move_spd;
+        }
+    }
+
+    _inst.x = clamp(_inst.x, 120, 1245);
+    _inst.y = clamp(_inst.y, 160, 650);
 }
 
 function worldmap_BattleVictoryStep() {
@@ -167,6 +270,7 @@ function worldmap_DrawCollectionButton() {
 }
 
 function worldmap_HandleCollectionButton() {
+    if (dialog_IsActive()) return;
     if (!mouse_check_button_pressed(mb_left)) return;
 
     var _mx = device_mouse_x_to_gui(0);
@@ -339,6 +443,8 @@ function worldmap_GetNearestInteractableEvent(_player_inst) {
 }
 
 function worldmap_TryPlayerInteract(_player_inst) {
+    if (dialog_IsActive()) return false;
+
     var _marker = worldmap_GetNearestInteractableEvent(_player_inst);
     if (_marker == noone) return false;
 

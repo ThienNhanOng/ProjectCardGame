@@ -28,6 +28,11 @@ function eventmarker_init() {
     marker_reward_randomize = true;
     marker_reward_entries = [];
 
+    marker_dialog_pre = undefined;
+    marker_dialog_post = undefined;
+    marker_dialog_pre_once = true;
+    marker_dialog_post_once = true;
+
     depth = -10;
     sprite_index = Map_Marker_inactive;
     image_blend = c_white;
@@ -73,6 +78,26 @@ function eventmarker_reward_add(_card_id, _chance, _collection = "", _once = fal
         collection: string(_collection),
         once: _once
     });
+}
+
+/// @desc Dialog script to play before battle starts (function returning entry array)
+function eventmarker_set_dialog_pre(_script_func) {
+    marker_dialog_pre = _script_func;
+}
+
+/// @desc Dialog script to play after returning to map from this marker's battle
+function eventmarker_set_dialog_post(_script_func) {
+    marker_dialog_post = _script_func;
+}
+
+/// @desc When true, pre-battle dialog only plays before the event is first cleared
+function eventmarker_set_dialog_pre_once(_once = true) {
+    marker_dialog_pre_once = _once;
+}
+
+/// @desc When true, post-battle dialog only plays after the event is first cleared
+function eventmarker_set_dialog_post_once(_once = true) {
+    marker_dialog_post_once = _once;
 }
 
 function eventmarker_NormalizeRewardEntry(_raw) {
@@ -185,6 +210,7 @@ function eventmarker_is_player_near() {
 }
 
 function eventmarker_check_interact() {
+    if (dialog_IsActive()) return;
     if (!worldmap_CanInteractEvent(event_id)) return;
     if (!eventmarker_is_player_near()) return;
     if (!keyboard_check_pressed(ord("E"))) return;
@@ -206,15 +232,67 @@ function eventmarker_trigger() {
 }
 
 function eventmarker_do_dialog() {
-    show_debug_message("Dialog: " + dialog_text);
+    if (marker_dialog_pre != undefined) {
+        var _skip = marker_dialog_pre_once && worldmap_IsEventCleared(event_id);
+        if (!_skip) {
+            dialog_Start(marker_dialog_pre);
+            return;
+        }
+    }
+    show_debug_message("Dialog marker has no script — use eventmarker_set_dialog_pre()");
 }
 
 function eventmarker_do_battle() {
+    eventmarker_BeginBattleFlow();
+}
+
+function eventmarker_BeginBattleFlow() {
     if (event_id <= 0) {
         show_debug_message("Event marker missing event_id");
         return;
     }
-    worldmap_LaunchEventBattle(event_id);
+
+    dialog_Init();
+    global.dialog.launch_event_id = event_id;
+    global.dialog.launch_dialog_post = marker_dialog_post;
+    global.dialog.launch_dialog_post_once = marker_dialog_post_once;
+
+    var _skip_pre = marker_dialog_pre_once && worldmap_IsEventCleared(event_id);
+    if (marker_dialog_pre != undefined && !_skip_pre) {
+        dialog_Start(marker_dialog_pre, eventmarker_LaunchBattleAfterDialog);
+        return;
+    }
+
+    eventmarker_LaunchBattleAfterDialog();
+}
+
+function eventmarker_LaunchBattleAfterDialog() {
+    dialog_Init();
+
+    var _event_id = global.dialog.launch_event_id;
+    var _dialog_post = global.dialog.launch_dialog_post;
+    var _dialog_post_once = true;
+    if (variable_struct_exists(global.dialog, "launch_dialog_post_once")) {
+        _dialog_post_once = global.dialog.launch_dialog_post_once;
+    }
+
+    dialog_ForceClose();
+
+    if (_dialog_post != undefined) {
+        var _skip_post = _dialog_post_once && worldmap_IsEventCleared(_event_id);
+        if (!_skip_post) {
+            worldmap_InitGlobals();
+            global.worldmap.pending_dialog_post = _dialog_post;
+        }
+    }
+
+    global.dialog.launch_event_id = -1;
+    global.dialog.launch_dialog_post = undefined;
+    global.dialog.launch_dialog_post_once = true;
+
+    if (_event_id > 0) {
+        worldmap_LaunchEventBattle(_event_id);
+    }
 }
 
 function eventmarker_do_transition() {

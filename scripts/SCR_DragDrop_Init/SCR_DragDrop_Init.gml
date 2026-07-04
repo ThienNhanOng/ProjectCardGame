@@ -94,8 +94,7 @@ function SCR_DragDrop_Step() {
 function SCR_DragDrop_Draw() {
     if (!is_dragging || drag_card == undefined) return;
     
-    var _spr = SCR_Hand_GetSprite(drag_card);
-    draw_sprite_ext(_spr, 0, drag_x, drag_y, 1.1, 1.1, 0, c_white, 0.85);
+    card_DrawFramedAtCenter(drag_x, drag_y, 1.1, drag_card, 0.85);
     draw_set_color(c_black);
     draw_set_halign(fa_center);
     draw_text(drag_x, drag_y - 60, drag_card.name);

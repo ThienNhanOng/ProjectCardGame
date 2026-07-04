@@ -1,11 +1,14 @@
 event_inherited();
 
 
-//debug battle
-//eventmarker_apply_config(1, "Trail Start", "ability_test_all", "AbilityTestBattle.json", "ability_test_all");
-
 //first battle
 eventmarker_apply_config(1, "Trail Start", "battle01", "Grasslands_Battleset01_starter.json", "battle01,battle02,battle03");
+
+// Optional dialog before / after battle (pre dialog plays once by default)
+eventmarker_set_dialog_pre(dialog_Map1_Marker01_PreBattle);
+eventmarker_set_dialog_pre_once(true);
+// eventmarker_set_dialog_post(dialog_Map1_Marker01_PostBattle);
+// eventmarker_set_dialog_post_once(true);
 
 
 

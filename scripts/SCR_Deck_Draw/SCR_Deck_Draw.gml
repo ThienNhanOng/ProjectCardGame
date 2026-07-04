@@ -48,20 +48,7 @@ function SCR_Deck_Draw(_debug = false) {
         var _card_data = deck_GetCardData(_card_id);
 
         if (_card_data != undefined) {
-            var _spr = SPR_Monsterplaceholder;
-            switch (_card_data.type) {
-                case "monster":
-                case "special_monster":
-                    _spr = SPR_Monsterplaceholder;
-                    break;
-                case "weapon":
-                    _spr = SPR_Weaponplaceholder;
-                    break;
-                case "action":
-                    _spr = SPR_Actionplaceholder;
-                    break;
-            }
-            draw_sprite(_spr, 0, deck_X + (i * 0.4), deck_Y - (i * 0.4));
+            card_DrawFramedAtCenter(deck_X + (i * 0.4), deck_Y - (i * 0.4), 1, _card_data, 1);
 
             if (_debug) {
                 draw_set_color(c_black);

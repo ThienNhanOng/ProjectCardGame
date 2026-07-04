@@ -11,36 +11,8 @@ function SCR_ExtraDeck_DrawCard(_x, _y, _w, _h, _card_data, _force_hover = undef
     var _scaled_w = _transform.w;
     var _scaled_h = _transform.h;
     
-    // Background
-    draw_set_color(c_white);
-    draw_rectangle(_draw_x, _draw_y, _draw_x + _scaled_w, _draw_y + _scaled_h, false);
-    draw_set_color(c_black);
-    draw_rectangle(_draw_x, _draw_y, _draw_x + _scaled_w, _draw_y + _scaled_h, true);
-    
-    // Picture
-    var _spr = noone;
-    if (_card_data.type == "monster" || _card_data.type == "special_monster") {
-        _spr = SPR_Monsterplaceholder;
-    } else if (_card_data.type == "weapon") {
-        _spr = SPR_Weaponplaceholder;
-    } else if (_card_data.type == "action") {
-        _spr = SPR_Actionplaceholder;
-    } else if (_card_data.type == "spirit") {
-        _spr = SPR_Monsterplaceholder;
-    }
-    
-    if (_spr != noone) {
-        var _spr_w = sprite_get_width(_spr);
-        var _spr_h = sprite_get_height(_spr);
-        var _area_w = _scaled_w - 8;
-        var _area_h = _scaled_h - 52;
-        var _scale = min(_area_w / _spr_w, _area_h / _spr_h);
-        
-        var _draw_x_pos = _draw_x + _scaled_w / 2;
-        var _draw_y_pos = _draw_y + 30 + _area_h / 2;
-        
-        draw_sprite_ext(_spr, 0, _draw_x_pos, _draw_y_pos, _scale, _scale, 0, c_white, 1);
-    }
+    // Metallic frame with inset paper art
+    card_DrawFramedInRect(_draw_x, _draw_y, _scaled_w, _scaled_h, _card_data, 1);
     
     // Name
     var _pad = 4;

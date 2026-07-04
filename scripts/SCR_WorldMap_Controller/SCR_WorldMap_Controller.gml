@@ -8,14 +8,27 @@ function SCR_WorldMapController_Init() {
         _config = global.worldmap_room_config_file;
     }
     worldmap_InitRoom(_config);
+    worldmap_ApplyPendingPlayerSpawn();
+    dialog_Init();
+    dialog_TryRunPendingPost();
 }
 
 function SCR_WorldMapController_Step() {
+    if (!instance_exists(OBJ_DialogController)) {
+        instance_create_depth(0, 0, -10000, OBJ_DialogController);
+    }
+
+    dialog_Step();
+
+    if (dialog_IsActive()) return;
+
     worldmap_RefreshAllMarkers();
     worldmap_HandleCollectionButton();
 }
 
 function SCR_WorldMapController_DrawHUD() {
+    if (dialog_IsActive()) return;
+
     worldmap_InitGlobals();
 
     var _gw = display_get_gui_width();

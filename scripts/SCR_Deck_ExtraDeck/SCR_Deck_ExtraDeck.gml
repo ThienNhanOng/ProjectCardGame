@@ -2,17 +2,16 @@
 
 function deck_GetExtraDeckZoneBounds() {
     var _visible = max(1, min(extra_deck_Count, 6));
-    var _spacing = 10;
-    var _stack_w = max(extra_deck_Width, (_visible - 1) * _spacing + extra_deck_Width * 0.6);
-    var _cx = extra_deck_X;
-    var _cy = extra_deck_Y;
+    var _stack = max(0, _visible - 1) * 0.4;
+    var _cx = extra_deck_X + _stack;
+    var _cy = extra_deck_Y - _stack;
 
     return {
         cx: _cx,
         cy: _cy,
-        left: _cx - _stack_w / 2,
+        left: _cx - extra_deck_Width / 2,
         top: _cy - extra_deck_Height / 2,
-        right: _cx + _stack_w / 2,
+        right: _cx + extra_deck_Width / 2,
         bottom: _cy + extra_deck_Height / 2
     };
 }
@@ -114,9 +113,6 @@ function deck_DrawExtraDeckZone() {
         draw_sprite(SPR_Cardback, 0, extra_deck_X, extra_deck_Y);
     } else {
         var _visible = min(extra_deck_Count, 6);
-        var _spacing = 10;
-        var _total_w = (_visible - 1) * _spacing;
-        var _start_x = extra_deck_X - _total_w / 2;
 
         for (var i = 0; i < _visible; i++) {
             var _card_id = extra_deck[i];
@@ -124,18 +120,15 @@ function deck_DrawExtraDeckZone() {
             var _card_data = deck_GetCardData(_card_id);
             if (_card_data == undefined) continue;
 
-            var _spr = SPR_Monsterplaceholder;
-            if (_card_data.type == "weapon") _spr = SPR_Weaponplaceholder;
-            else if (_card_data.type == "action") _spr = SPR_Actionplaceholder;
-
-            draw_sprite(_spr, 0, _start_x + i * _spacing, extra_deck_Y);
+            card_DrawFramedAtCenter(extra_deck_X + (i * 0.4), extra_deck_Y - (i * 0.4), 1, _card_data, 1);
         }
 
         if (extra_deck_Count > _visible) {
+            var _top = deck_GetExtraDeckZoneBounds();
             draw_set_halign(fa_center);
             draw_set_valign(fa_bottom);
             draw_set_color(c_yellow);
-            draw_text(extra_deck_X, extra_deck_Y + extra_deck_Height / 2 + 4,
+            draw_text(_top.cx, _top.bottom + 4,
                 "+" + string(extra_deck_Count - _visible));
             draw_set_halign(fa_left);
             draw_set_valign(fa_top);

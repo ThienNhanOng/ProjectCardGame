@@ -173,13 +173,12 @@ function SCR_Board_DrawPlacedCards() {
     for (var i = 0; i < array_length(player_monster_slots); i++) {
         var _slot = player_monster_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-        var _spr     = SCR_Hand_GetSprite(_slot.card);
         var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(_slot);
         var _scale   = _hovered ? _hover_scale : 1;
         var _cx      = _slot.x + _card_w / 2;
         var _cy      = _slot.y + _card_h / 2;
 
-        draw_sprite_ext(_spr, 0, _cx, _cy, _scale, _scale, 0, c_white, 1);
+        card_DrawFramedAtCenter(_cx, _cy, _scale, _slot.card, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_left);
         draw_set_valign(fa_top);
@@ -189,11 +188,10 @@ function SCR_Board_DrawPlacedCards() {
     for (var i = 0; i < array_length(player_weapon_slots); i++) {
         var _slot = player_weapon_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-        var _spr     = SCR_Hand_GetSprite(_slot.card);
         var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(_slot);
         var _scale   = _hovered ? _hover_scale : 1;
         
-        draw_sprite_ext(_spr, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
+        card_DrawFramedAtCenter(_slot.x + _card_w / 2, _slot.y + _card_h / 2, _scale, _slot.card, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_left);
         draw_set_valign(fa_top);
@@ -222,11 +220,10 @@ function SCR_Board_DrawPlacedCards() {
     }
     
     if (action_slot.occupied && action_slot.card != undefined) {
-        var _spr     = SCR_Hand_GetSprite(action_slot.card);
         var _hovered = !is_dragging && SCR_Board_IsSlotMouseOver(action_slot);
         var _scale   = _hovered ? _hover_scale : 1;
         
-        draw_sprite_ext(_spr, 0, action_slot.x + _card_w / 2, action_slot.y + _card_h / 2, _scale, _scale, 0, c_white, 1);
+        card_DrawFramedAtCenter(action_slot.x + _card_w / 2, action_slot.y + _card_h / 2, _scale, action_slot.card, 1);
         draw_set_color(c_black);
         draw_set_halign(fa_left);
         draw_set_valign(fa_top);

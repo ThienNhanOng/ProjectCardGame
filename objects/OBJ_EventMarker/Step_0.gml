@@ -1,2 +1,1 @@
-//parent marker do not touch
-eventmarker_check_interact();
+// Interact is handled from OBJ_PlayerMarker (avoids duplicate E triggers)

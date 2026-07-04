@@ -1,0 +1,106 @@
+Dialog System — Quick Guide
+
+
+NAME VARIABLES (namehero)
+=========================
+Define display names once, then use short keys in lines.
+
+Array style:
+  dialog_NameHero("Hero"),          // key = hero
+  dialog_NameGuide("Guide"),          // key = guide
+  dialog_Name("monster", "Orc"),    // custom key
+  dialog_LineKey("hero", "Hello!"), // text box shows "Hero"
+
+Text script style:
+  namehero Hero
+  nameguide Guide
+  hero: The trail starts here.
+  guide: Stay sharp.
+
+
+PORTRAIT SETUP + SPEAKER KEYS
+=============================
+  dialog_Left(SPR_Dialog_Player, "hero", true),
+  dialog_Right(SPR_Dialog_Testcharacter, "guide", true),
+
+The 3rd argument is visible true/false.
+Assign speaker keys on left/right so the active talker stays bright.
+
+
+SHOW / HIDE PORTRAITS
+=====================
+  dialog_Left(sprite, "hero", false),   // hide left
+  dialog_Right(sprite, "guide", true),  // show right
+  dialog_HideLeft(),
+  dialog_ShowLeft(),
+  dialog_HideRight(),
+  dialog_ShowRight(),
+
+Text script:
+  (left hide)
+  (right show)
+  (left visible false)
+  (right visible true)
+
+
+ACTIVE SPEAKER HIGHLIGHT
+========================
+When hero talks, the guide portrait is dimmed.
+When guide talks, the hero portrait is dimmed.
+Assign keys with dialog_Left/Right and use dialog_LineKey("hero", ...).
+
+
+DIALOG BACKGROUND (full screen, dialog only)
+==========================================
+Draw order during dialog:
+  world map -> dialog bg -> tint -> portraits -> text
+
+Put at the top of your script:
+  dialog_Background(SPR_BG_GrassTest, true),
+
+Change mid-dialog (place directly before the line):
+  dialog_Background(SPR_PlaceholderMap, true),
+  dialog_LineKey("hero", "image change"),
+
+TYPEWRITER TEXT
+===============
+Text types out letter by letter.
+Click / Space while typing = skip to full line.
+Click / Space after typing = next line.
+
+
+FULL EXAMPLE (marker Create uses dialog script)
+===============================================
+  eventmarker_set_dialog_pre(dialog_Map1_Marker02_Intro);
+
+  function dialog_Map1_Marker02_Intro() {
+      return [
+          dialog_Background(SPR_BG_GrassTest, true),
+          dialog_NameHero("Hero"),
+          dialog_NameGuide("Stranger"),
+          dialog_Left(SPR_Dialog_Player, "hero", true),
+          dialog_Right(SPR_Dialog_Testcharacter, "guide", true),
+          dialog_LineKey("hero", "Who are you?"),
+          dialog_LineKey("guide", "A colorsentence(red,\"warning\")."),
+          dialog_HideRight(),
+          dialog_LineKey("hero", "Alone then...")
+      ];
+  }
+
+
+TEXT SCRIPT EQUIVALENT
+======================
+  (bg) SPR_BG_GrassTest
+  namehero Hero
+  nameguide Stranger
+  (left) SPR_Dialog_Player hero true
+  (right) SPR_Dialog_Testcharacter guide true
+  hero: Who are you?
+  guide: Watch out.
+  (right hide)
+  hero: Alone then...
+
+
+COLORED TEXT
+============
+  colorsentence(blue,"Advance Strike")
