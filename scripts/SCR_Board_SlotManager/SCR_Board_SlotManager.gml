@@ -90,18 +90,15 @@ function SCR_Board_UpdateWeaponSlotAvailability() {
             _weapon_slot.locked = true;
         }
     }
-    show_debug_message("Weapon slot availability updated");
 }
 
 function SCR_Board_PlaceCard(_slot, _card) {
     if (_slot == undefined) return false;
     if (_slot.occupied) {
-        show_debug_message("Slot already occupied!");
-        return false;
+return false;
     }
     if (_slot.locked) {
-        show_debug_message("Slot is locked!");
-        return false;
+return false;
     }
     var _valid = false;
     switch (_slot.type) {
@@ -124,15 +121,12 @@ function SCR_Board_PlaceCard(_slot, _card) {
             break;
     }
     if (!_valid) {
-        show_debug_message("Invalid card type for slot! Card: " + _card.type + " Slot: " + _slot.type);
-        return false;
+return false;
     }
     _slot.occupied = true;
     _slot.card = _card;
     _slot.hovered = false;
-    show_debug_message("Placed " + _card.name + " in " + _slot.type + " slot " + string(_slot.index));
-    
-    battle_NotifyCardPlaced(_slot, _card);
+battle_NotifyCardPlaced(_slot, _card);
     
     // If this was a monster slot, update weapon slot availability
     if (_slot.type == "monster") {
@@ -150,9 +144,7 @@ function SCR_Board_RemoveCard(_slot) {
     
     _slot.occupied = false;
     _slot.card = undefined;
-    show_debug_message("Removed " + _card.name + " from slot " + string(_slot_index));
-    
-    // If this was a monster slot, update weapon slot availability
+// If this was a monster slot, update weapon slot availability
     if (_slot_type == "monster") {
         SCR_Board_UpdateWeaponSlotAvailability();
     }
@@ -164,8 +156,7 @@ function SCR_Board_UnlockSlot(_index) {
     if (_index >= 3 && _index < 5) {
         player_monster_slots[_index].visible = true;
         player_monster_slots[_index].locked = false;
-        show_debug_message("Unlocked monster slot: " + string(_index));
-        SCR_Board_UpdateWeaponSlotAvailability();
+SCR_Board_UpdateWeaponSlotAvailability();
     }
 }
 
@@ -188,12 +179,10 @@ function SCR_Board_CloseHiddenSlot(_index) {
     _weapon_slot.locked = true;
 
     SCR_Board_UpdateWeaponSlotAvailability();
-    show_debug_message("Hidden slot " + string(_index) + " closed");
 }
 
 function SCR_Board_SetEnemySlots(_count) {
     for (var i = 0; i < array_length(enemy_slots); i++) {
         enemy_slots[i].visible = (i < _count);
     }
-    show_debug_message("Enemy slots active: " + string(_count));
 }

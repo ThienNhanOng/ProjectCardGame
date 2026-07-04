@@ -137,9 +137,7 @@ function battle_BuffEnemyMonster(_slot_index, _amount) {
 
     if (!variable_struct_exists(_slot.card, "attack_buff")) _slot.card.attack_buff = 0;
     card_GainAttack(_slot.card, _amount);
-    show_debug_message("Buffed enemy slot " + string(_slot_index)
-        + " ATK +" + string(_amount) + " -> " + string(_slot.card.attack));
-    return true;
+return true;
 }
 
 function battle_BuffPlayerMonster(_slot_index, _amount) {
@@ -151,7 +149,5 @@ function battle_BuffPlayerMonster(_slot_index, _amount) {
     if (!_slot.visible || !_slot.occupied || _slot.card == undefined) return false;
 
     card_GainAttack(_slot.card, _amount);
-    show_debug_message("Buffed player slot " + string(_slot_index)
-        + " ATK +" + string(_amount) + " -> " + string(_slot.card.attack));
-    return true;
+return true;
 }

@@ -1,0 +1,9 @@
+flowchart TB
+    DBC[OBJ_DeckBuilder] --> Create[SCR_DBC_Create]
+    Create --> Grid[SCR_DBC_InitGrid + OBJ_CardSlot]
+    Create --> Deck[SCR_DBC_InitDeck]
+    Step[Step] --> Scroll[SCR_DBS_HandleScrolling]
+    Step --> Click[SCR_DBS_HandleDeckClick]
+    Step --> Ready[SCR_DBS_HandleReadyButton]
+    Ready --> Save[battle_SaveDeckSources]
+    Save --> Goto[room_goto return map]

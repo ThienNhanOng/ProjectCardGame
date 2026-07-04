@@ -1,0 +1,50 @@
+Traits & Effects — System Summary
+
+
+PURPOSE
+Unified ability pipeline for player cards, weapons, actions, spirits, and enemy abilities.
+
+MAIN SCRIPTS
+- SCR_Trait_Parse (trait_NormalizeEntry)
+- SCR_Trait_Execute
+- SCR_Trait_Attack, Heal, Buff, Draw, AddDeck, OpenZone, Destroy, Silence, …
+- SCR_Trait_Resources (add_counter, add_cost)
+- SCR_Conditions (spirit summon requirements)
+- SCR_MonsterAbility_* (enemy-side dispatch)
+
+FOLDER (IDE)
+- scripts/cardcollection/Traits/
+
+RESPONSIBILITIES
+- Parse JSON ability strings/objects into normalized entries
+- Dispatch to effect script by trait type
+- Shared between SCR_Battle_PlayCard and enemy turn
+
+DEPENDENCIES
+- card_DB / monster_DB ability fields
+- Board slots, hand, deck, battle resources
+
+PUBLIC API
+- trait_NormalizeEntry(raw)
+- trait_Execute(entry, context)
+- Per-effect SCR_Trait_<Name>(...)
+
+INITIALIZATION ORDER
+Stateless — invoked during battle play and enemy turns
+
+RUNTIME FLOW
+JSON ability → normalize → execute → mutate battle/board/hand state
+
+EXAMPLE
+"ability": "attack:3" on weapon → SCR_Trait_Attack
+
+COMMON PITFALLS
+- Typo in trait name → silent no-op or debug message
+- New trait added to JSON but no SCR_Trait_* handler
+
+FUTURE EXPANSION
+- Data-driven trait registry table
+- Conditional chains (if/then in JSON)
+
+PARENT / CHILD
+- No objects — pure script subsystem

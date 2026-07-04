@@ -24,8 +24,7 @@ function load_MonsterSet(_filename) {
 
     var _path = load_MonsterSet_ResolvePath(_filename);
     if (!file_exists(_path)) {
-        show_debug_message("Monster set not found: " + _filename);
-        return;
+return;
     }
 
     var _file = file_text_open_read(_path);
@@ -39,13 +38,11 @@ function load_MonsterSet(_filename) {
     var _set = json_parse(_json_str);
 
     if (!variable_struct_exists(_set, "enemy") || !is_array(_set.enemy)) {
-        show_debug_message("Monster set missing enemy[] array: " + _path);
-        return;
+return;
     }
 
     if (!variable_struct_exists(_set, "collection") || string(_set.collection) == "") {
-        show_debug_message("Monster set missing collection name: " + _path);
-        return;
+return;
     }
 
     var _new_enemies = _set.enemy;
@@ -72,9 +69,6 @@ function load_MonsterSet(_filename) {
         array_push(global.monster_DB.enemies, _entry);
     }
 
-    show_debug_message("Loaded: " + _set.collection
-        + " | Enemies: " + string(array_length(_new_enemies))
-        + " | File: " + _path);
 }
 
 function load_MixedContent(_filename) {
@@ -82,8 +76,7 @@ function load_MixedContent(_filename) {
     monsters_EnsureDatabase();
 
     if (!file_exists(_filename)) {
-        show_debug_message("Mixed content not found: " + _filename);
-        return;
+return;
     }
 
     var _file = file_text_open_read(_filename);
@@ -129,9 +122,6 @@ function load_MixedContent(_filename) {
         }
     }
 
-    show_debug_message("Loaded mix: " + _data.collection
-        + " | Cards: " + string(_card_count)
-        + " | Enemies: " + string(_enemy_count));
 }
 
 function monsters_LoadBuiltinFallback() {
@@ -151,7 +141,6 @@ function monsters_LoadBuiltinFallback() {
         enemyability: []
     });
 
-    show_debug_message("WARNING: Using built-in fallback — EnemyCollection01.json failed to load");
 }
 
 function SCR_LoadAllMonsters() {
@@ -165,7 +154,6 @@ function SCR_LoadAllMonsters() {
         monsters_LoadBuiltinFallback();
     }
 
-    show_debug_message("Total enemies in DB: " + string(array_length(global.monster_DB.enemies)));
 }
 
 function battle_EnsureMonsterDatabase() {
@@ -179,5 +167,4 @@ function battle_EnsureMonsterDatabase() {
         monster_DB = global.monster_DB;
     }
 
-    show_debug_message("Monster DB ready: " + string(array_length(global.monster_DB.enemies)) + " enemies");
 }

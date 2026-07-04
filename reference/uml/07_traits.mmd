@@ -1,0 +1,10 @@
+flowchart LR
+    JSON[card/enemy JSON ability field] --> Parse[SCR_Trait_Parse trait_NormalizeEntry]
+    Parse --> Exec[SCR_Trait_Execute]
+    Exec --> PE[SCR_Trait_Playereffects]
+    Exec --> RES[SCR_Trait_Resources]
+    Exec --> COND[SCR_Conditions]
+    Exec --> MA[SCR_MonsterAbility_*]
+
+    PlayCard[SCR_Battle_PlayCard] --> Exec
+    EnemyTurn[SCR_Battle_EnemyTurn] --> MA

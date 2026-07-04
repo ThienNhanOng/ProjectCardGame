@@ -158,9 +158,7 @@ function trait_Execute(_trait, _ctx) {
 
         default:
 
-            show_debug_message("Trait not implemented yet: " + string(_trait.type));
-
-            return false;
+return false;
 
     }
 

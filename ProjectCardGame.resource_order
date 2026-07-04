@@ -8,6 +8,7 @@
     {"name":"WorldMapSystem","order":5,"path":"folders/objects/WorldMapSystem.yy",},
     {"name":"EventMarkers","order":1,"path":"folders/objects/WorldMapSystem/EventMarkers.yy",},
     {"name":"map1Markers","order":1,"path":"folders/objects/WorldMapSystem/Map1Assets/map1Markers.yy",},
+    {"name":"Reference","order":5,"path":"folders/Reference.yy",},
     {"name":"card set up","order":3,"path":"folders/rooms/card set up.yy",},
     {"name":"maps levels","order":4,"path":"folders/rooms/maps levels.yy",},
     {"name":"scripts","order":3,"path":"folders/scripts.yy",},

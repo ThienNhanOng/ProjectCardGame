@@ -30,15 +30,11 @@ function monster_GetDefinition(_collection, _enemy_id) {
     for (var j = 0; j < array_length(global.monster_DB.enemies); j++) {
         var _fallback = global.monster_DB.enemies[j];
         if (floor(_fallback.enemyID) == _enemy_id) {
-            show_debug_message("Monster fallback by ID " + string(_enemy_id)
-                + " (wanted collection " + _collection + ")");
-            return _fallback;
+return _fallback;
         }
     }
 
-    show_debug_message("Monster not found: " + _collection + " ID " + string(_enemy_id)
-        + " | DB size: " + string(array_length(global.monster_DB.enemies)));
-    return undefined;
+return undefined;
 }
 
 function monster_CreateInstance(_wave_entry) {

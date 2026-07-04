@@ -221,8 +221,7 @@ function deck_TagPicker_Begin(_trait) {
     var _any_tag = (_trait.type == "add_hand_with_cost" && array_length(_tags) <= 0);
 
     if (!_any_tag && array_length(_tags) <= 0) {
-        show_debug_message("Tag picker failed: no tags or indeckTag on trait " + string(_trait.type));
-        return false;
+return false;
     }
 
     var _deck = instance_find(OBJ_Deck, 0);
@@ -240,9 +239,7 @@ function deck_TagPicker_Begin(_trait) {
     }
     if (array_length(_ids) <= 0) {
         var _scope = _use_indeck ? "in-deck " : "";
-        show_debug_message("Tag picker failed: no " + _scope + _destination + " cards for tags ["
-            + trait_GetTagsDisplayText(_tags) + "]");
-        return false;
+return false;
     }
 
     var _dest_label = trait_GetTagDestinationLabel(_destination);
@@ -270,8 +267,7 @@ function deck_TagPicker_Begin(_trait) {
         if (extra_deck_picker_open) deck_ExtraDeckPicker_Close();
     }
 
-    show_debug_message("Tag picker opened: " + string(array_length(_ids)) + " matches -> " + _dest_label);
-    return true;
+return true;
 }
 
 function trait_GetTagsDisplayText(_tags) {
@@ -419,8 +415,7 @@ function trait_ExecuteAddHandTag(_trait) {
 function trait_ExecuteAddHandWithCost(_trait) {
     if (_trait == undefined || _trait.type != "add_hand_with_cost") return false;
     if (_trait.apply_cost <= 0) {
-        show_debug_message("add_hand_with_cost needs cost > 0");
-        return false;
+return false;
     }
     return deck_TagPicker_Begin(_trait);
 }

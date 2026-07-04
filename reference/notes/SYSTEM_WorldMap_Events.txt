@@ -1,0 +1,68 @@
+World Map & Events — System Summary
+
+
+PURPOSE
+Overworld navigation, marker unlock chain, battle launch, first-clear rewards, return after victory.
+
+MAIN SCRIPTS
+- SCR_WorldMap_Controller, SCR_WorldMap_Config, SCR_WorldMap_Progress
+- SCR_EventMaker (eventmarker_* API)
+
+MAIN OBJECTS
+- OBJ_WorldMapController
+- OBJ_PlayerMarker
+- OBJ_EventMarker (parent — do not place in room)
+  └── OBJ_Map1_Marker01..05, OBJ_Map2_Marker01
+
+ROOMS
+- Room_Worldmap1, Room_WorldMapParent (template)
+
+RESPONSIBILITIES
+- Sync markers from room → assign event_id by marker_order
+- Player movement, snap-to-event, E interact
+- Launch battle with battleset JSON → battle_runtime_config
+- Mark cleared, grant rewards, spawn player above beaten event
+- Collection button → Room_collection
+
+DEPENDENCIES
+- Dialog system (pre/post)
+- Battle room (launch/return)
+- Collection (rewards, deck return)
+
+PUBLIC API
+- worldmap_InitRoom(config_file)
+- eventmarker_apply_config(order, label, battle, battleset, replay_pool)
+- eventmarker_apply_reward / eventmarker_reward_add
+- eventmarker_set_dialog_pre / post / _once
+- worldmap_LaunchEventBattle(event_id)
+- worldmap_ReturnToMapAfterVictory()
+- worldmap_PlayerMovementStep(inst)
+
+INITIALIZATION ORDER
+1. Room creation code sets worldmap_room_config_file
+2. OBJ_WorldMapController Create → SCR_WorldMapController_Init
+3. worldmap_SyncMarkersFromRoom assigns event_ids
+4. worldmap_ApplyPendingPlayerSpawn after battle return
+
+RUNTIME FLOW
+Move → snap at marker → E → optional pre-dialog → battle → victory → return above marker → optional post-dialog
+
+EXAMPLE
+OBJ_Map1_Marker01 Create:
+  eventmarker_apply_config(1, "Trail Start", "battle01", "Grasslands_Battleset01_starter.json", "battle01,battle02")
+  eventmarker_set_dialog_pre(dialog_Map1_Marker01_PreBattle)
+  eventmarker_set_dialog_pre_once(true)
+
+COMMON PITFALLS
+- Placing OBJ_EventMarker directly in room (use child markers)
+- marker_order gaps break unlock chain
+- Duplicate E handling (fixed: player-only interact)
+
+FUTURE EXPANSION
+- Room_Worldmap2 with Map2 markers
+- Non-battle EVENT_TYPE.DIALOG / ROOM_TRANSITION markers
+
+PARENT / CHILD
+OBJ_EventMarker
+├── OBJ_Map1_Marker01 … 05
+└── OBJ_Map2_Marker01

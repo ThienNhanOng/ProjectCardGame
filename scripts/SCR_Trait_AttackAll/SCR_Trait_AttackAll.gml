@@ -26,8 +26,7 @@ function trait_AttackAllEnemies(_amount) {
         _hit = true;
     }
 
-    show_debug_message("Attack all enemies for " + string(_amount) + " damage");
-    return _hit;
+return _hit;
 }
 
 function trait_AttackAllPlayerMonsters(_amount) {
@@ -44,8 +43,7 @@ function trait_AttackAllPlayerMonsters(_amount) {
 
     if (!_hit) return battle_DamagePlayer(_amount);
 
-    show_debug_message("Attack all player monsters for " + string(_amount) + " damage each");
-    return true;
+return true;
 }
 
 function trait_CreateAttackAllContext(_amount, _target_side = "enemy") {

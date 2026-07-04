@@ -239,7 +239,6 @@ function eventmarker_do_dialog() {
             return;
         }
     }
-    show_debug_message("Dialog marker has no script — use eventmarker_set_dialog_pre()");
 }
 
 function eventmarker_do_battle() {
@@ -248,8 +247,7 @@ function eventmarker_do_battle() {
 
 function eventmarker_BeginBattleFlow() {
     if (event_id <= 0) {
-        show_debug_message("Event marker missing event_id");
-        return;
+return;
     }
 
     dialog_Init();

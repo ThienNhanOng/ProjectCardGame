@@ -25,5 +25,4 @@ function SCR_Board_EnemySlots() {
         });
     }
 
-    show_debug_message("Enemy slots initialized.");
 }

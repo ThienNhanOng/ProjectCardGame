@@ -50,28 +50,7 @@ function monster_DrawActive(_slot, _monster) {
 }
 
 function SCR_Monster_DrawDebugCounter() {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    var _living = (_board != noone) ? monster_CountLivingActive(_board) : 0;
-
-    draw_set_color(c_yellow);
-    var _db_count = (variable_global_exists("monster_DB") && is_struct(global.monster_DB))
-        ? array_length(global.monster_DB.enemies) : 0;
-
-    draw_text(10, 10, "Queue: " + string(monster_GetQueueCount())
-        + " | Slots: " + string(active_slot_count)
-        + " | Field: " + string(_living)
-        + " | DB: " + string(_db_count));
-
-    if (variable_instance_exists(id, "battle_name")) {
-        draw_text(10, 26, "Battle: " + battle_name);
-    }
-
-    if (battle_won) {
-        draw_set_color(c_lime);
-        draw_text(10, 42, "Victory!");
-    }
-
-    draw_set_color(c_white);
+    debug_DrawBattleStatus(id);
 }
 
 function monster_DrawEmptySlot(_slot) {
@@ -95,5 +74,5 @@ function SCR_Monster_Draw() {
     }
 
     SCR_Monster_DrawDebugCounter();
-    SCR_Monster_DrawHoverDebug();
+    debug_DrawEnemyHoverOverlay(id);
 }

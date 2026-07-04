@@ -1,0 +1,15 @@
+stateDiagram-v2
+    [*] --> PlayerTurn
+    PlayerTurn --> Targeting: play card / attack
+    Targeting --> PlayerTurn: resolve
+    PlayerTurn --> EnemyTurn: end turn
+    EnemyTurn --> PlayerTurn: enemy abilities done
+    PlayerTurn --> Victory: all enemies dead
+    Victory --> ReturnMap: worldmap_ReturnToMapAfterVictory
+
+    note right of PlayerTurn
+        OBJ_BattleManager
+        SCR_Battle_Step
+        SCR_Battle_Turn
+        SCR_Battle_PlayCard
+    end note

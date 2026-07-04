@@ -12,22 +12,19 @@ function trait_ExecuteAddHand(_ctx) {
         _card = deck_CreateRuntimeCard(_ctx.card_id);
     }
     if (_card == undefined) {
-        show_debug_message("Add to hand failed: card id " + string(_ctx.card_id) + " not found");
-        return false;
+return false;
     }
 
     var _added = false;
     with (_hand) {
         if (hand_IsFull()) {
-            show_debug_message("Hand full — cannot add card id " + string(_ctx.card_id));
-            return false;
+return false;
         }
         _added = hand_AddCard(_card);
     }
 
     if (_added) {
-        show_debug_message("Added " + _card.name + " (id " + string(_ctx.card_id) + ") to hand");
-        var _bm = instance_find(OBJ_BattleManager, 0);
+var _bm = instance_find(OBJ_BattleManager, 0);
         if (_bm != noone) {
             with (_bm) trait_ChainRegisterAddedCard(_card);
         }

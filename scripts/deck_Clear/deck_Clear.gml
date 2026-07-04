@@ -4,5 +4,4 @@ function deck_Clear() {
     }
     deck_Count = 0;
     deck_Head = 0;
-    show_debug_message("Deck cleared.");
 }

@@ -47,8 +47,7 @@ function battle_MonsterOnPlayContinue(_slot_index, _completed_trait_index) {
     battle_BeginMonsterOnPlayTargeting(_slot_index, _completed_trait_index + 1);
     if (!battle_IsTargeting()) {
         trait_ChainFinish();
-        show_debug_message("Monster on-play abilities finished");
-    }
+}
 }
 
 function battle_ExecuteMonsterOnPlayEnemyTrait(_player_slot, _trait_index, _enemy_slot) {
@@ -115,7 +114,6 @@ function battle_OnWeaponPlayed(_slot_index, _card) {
     }
 
     battle_BeginWeaponOnPlayTargeting(_slot_index);
-    show_debug_message("Weapon equipped in column " + string(_slot_index) + " — click column to attack");
 }
 
 function battle_GetWeaponSlotCard(_column) {
@@ -184,8 +182,7 @@ function battle_WeaponOnPlayContinue(_slot_index, _completed_trait_index) {
     battle_BeginWeaponOnPlayTargeting(_slot_index, _completed_trait_index + 1);
     if (!battle_IsTargeting()) {
         trait_ChainFinish();
-        show_debug_message("Weapon on-play abilities finished");
-    }
+}
 }
 
 function battle_ExecuteWeaponOnPlayEnemyTrait(_weapon_column, _trait_index, _enemy_slot) {
@@ -402,8 +399,7 @@ function battle_CanPlayActionCard(_card) {
     if (!battle_ActionCardRequiresMonster(_card)) return true;
     if (battle_HasPlayerMonsterOnBoard()) return true;
 
-    show_debug_message("Need a player monster on the board for this action");
-    return false;
+return false;
 }
 
 function battle_IsActionCardFinished() {
@@ -434,8 +430,7 @@ function battle_AbortActionCardPlay() {
 
     action_trait_uses = [];
     trait_ChainFinish();
-    show_debug_message("Action card play cancelled: " + _removed.name);
-    return true;
+return true;
 }
 
 function battle_CancelCurrentAction() {
@@ -511,13 +506,11 @@ function battle_TargetingContinueAfterAction(_last_trait_index) {
         var _type = _traits[i].type;
         if ((_type == "attack" || _type == "attack_all" || _type == "heal" || _type == "self_buff")
             && !battle_HasPlayerMonsterOnBoard()) {
-            show_debug_message("Need a player monster on the board for this action");
-            continue;
+continue;
         }
 
         if (_type == "buff" && !battle_HasAnyBuffTarget()) {
-            show_debug_message("Need a monster on the board to buff");
-            continue;
+continue;
         }
 
         battle_BeginActionTargeting(i, _type);

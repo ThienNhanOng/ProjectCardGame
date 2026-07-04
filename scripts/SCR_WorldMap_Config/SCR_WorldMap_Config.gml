@@ -112,8 +112,7 @@ function worldmap_LoadMapConfig(_filename) {
     worldmap_InitGlobals();
 
     if (!file_exists(_filename)) {
-        show_debug_message("World map config not found: " + _filename);
-        return false;
+return false;
     }
 
     var _file = file_text_open_read(_filename);
@@ -199,10 +198,7 @@ function worldmap_LoadMapConfig(_filename) {
         }
     }
 
-    show_debug_message("World map loaded: " + global.worldmap.map_id
-        + " | Events: " + string(array_length(global.worldmap.event_flow))
-        + " | Battleset: " + global.worldmap.battleset_file);
-    return true;
+return true;
 }
 
 function worldmap_BuildRewardFromLegacySource(_src) {
@@ -292,7 +288,6 @@ function worldmap_MarkEventCleared(_event_id) {
     if (worldmap_IsEventCleared(_id)) return;
 
     array_push(global.worldmap.cleared, _id);
-    show_debug_message("World map event cleared: " + string(_id));
 }
 
 function worldmap_ResolveBattleIdForEvent(_event_id) {
@@ -437,6 +432,4 @@ function worldmap_SyncMarkersFromRoom() {
         }
     }
 
-    show_debug_message("World map synced " + string(array_length(_markers))
-        + " markers from room (use marker_order to set unlock sequence)");
 }

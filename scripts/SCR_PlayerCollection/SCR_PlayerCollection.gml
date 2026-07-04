@@ -197,13 +197,9 @@ function collection_GrantFromDatabase() {
         AddCardToCollection(_def.id, _amount, _collection);
 
         _granted++;
-
     }
 
-
-
-    show_debug_message("Granted " + string(_granted) + " starting card types from card pool (JSON own)");
-
+    return _granted;
 }
 
 
@@ -397,31 +393,9 @@ function collection_SyncDefinitionsFromDatabase() {
 
 
 function SetupPlayerCollection() {
-
     SCR_LoadAllCollections();
-
     collection_EnsurePlayerInitialized();
-
     collection_SyncDefinitionsFromDatabase();
-
-
-
-    show_debug_message("=== Player Collection Ready ===");
-
-    show_debug_message("Total card types: " + string(array_length(global.player_collection)));
-
-
-
-    for (var i = 0; i < array_length(global.player_collection); i++) {
-
-        show_debug_message("  " + global.player_collection[i].name
-
-            + " | ID:" + string(global.player_collection[i].id)
-
-            + " | Owned:" + string(global.player_collection[i].owned));
-
-    }
-
 }
 
 
@@ -443,11 +417,9 @@ function AddAllFromSet(_collection_name, _amount) {
         AddCardToCollection(_def.id, _amount, _collection_name);
 
         _added++;
-
     }
 
-    show_debug_message("Granted " + string(_added) + " card types from " + _collection_name + " x" + string(_amount));
-
+    return _added;
 }
 
 
@@ -468,11 +440,6 @@ function collection_RemoveOwnedCopy(_card_id, _amount = 1, _collection = "") {
         var _before = variable_struct_exists(global.player_collection[c], "owned")
             ? global.player_collection[c].owned : 0;
         global.player_collection[c].owned = max(0, _before - _amount);
-
-        show_debug_message("Lost " + string(min(_amount, _before)) + " copy of "
-            + global.player_collection[c].name
-            + " (now own " + string(global.player_collection[c].owned) + ")");
-
         return true;
     }
 
@@ -502,67 +469,27 @@ function AddCardToCollection(_card_id, _amount, _collection = "") {
         var _add = collection_GetAllowedAddAmount(global.player_collection[c], _amount);
 
         if (_add <= 0) {
-
-            show_debug_message("Collection full for " + global.player_collection[c].name
-
-                + " (max " + string(collection_GetMaxOwnedCopies(global.player_collection[c])) + ")");
-
             return false;
-
         }
 
-
-
         global.player_collection[c].owned += _add;
-
-        show_debug_message("Added " + string(_add) + " more to existing: " + global.player_collection[c].name);
-
         return true;
-
     }
-
-
 
     var _template = collection_FindDefinition(_card_id, _collection);
-
     if (_template == undefined) {
-
-        show_debug_message("ERROR: Card ID " + string(_card_id)
-
-            + (_collection != "" ? " in " + _collection : "")
-
-            + " not found in database!");
-
         return false;
-
     }
-
-
 
     var _new_card = collection_CopyDefinition(_template);
-
     var _add_new = collection_GetAllowedAddAmount(_new_card, _amount);
-
     if (_add_new <= 0) {
-
-        show_debug_message("Collection full for " + _new_card.name
-
-            + " (max " + string(collection_GetMaxOwnedCopies(_new_card)) + ")");
-
         return false;
-
     }
 
-
-
     _new_card.owned = _add_new;
-
     array_push(global.player_collection, _new_card);
-
-    show_debug_message("Added NEW: " + _new_card.name + " x" + string(_add_new));
-
     return true;
-
 }
 
 
@@ -617,29 +544,11 @@ function ClearCollection() {
 
     global.player_collection_initialized = false;
 
-    show_debug_message("Collection cleared!");
-
 }
 
 
 
 function DebugPrintCollection() {
-
-    show_debug_message("=== CURRENT COLLECTION ===");
-
-    for (var i = 0; i < array_length(global.player_collection); i++) {
-
-        show_debug_message(string(i) + ". " + global.player_collection[i].name
-
-            + " (ID:" + string(global.player_collection[i].id)
-
-            + ") Owned: " + string(global.player_collection[i].owned)
-
-            + " Available: " + string(GetCardAvailable(global.player_collection[i].id)));
-
-    }
-
-    show_debug_message("Total card types: " + string(array_length(global.player_collection)));
-
+    // Debug output removed — see reference/DEBUG_ARCHIVE.gml
 }
 

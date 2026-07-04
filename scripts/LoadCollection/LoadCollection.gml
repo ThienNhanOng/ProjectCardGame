@@ -24,8 +24,7 @@ function load_Collection(_filename) {
 
     var _path = load_Collection_ResolvePath(_filename);
     if (!file_exists(_path)) {
-        show_debug_message("Collection not found: " + _filename);
-        return;
+return;
     }
 
     var _file = file_text_open_read(_path);
@@ -44,8 +43,6 @@ function load_Collection(_filename) {
         array_push(card_DB.cards, _card);
     }
 
-    show_debug_message("Loaded: " + _collection.collection
-        + " | Cards: " + string(array_length(_new_cards)));
 }
 
 function SCR_LoadAllCollections() {
@@ -55,5 +52,4 @@ function SCR_LoadAllCollections() {
     load_Collection("Merc_starterdeck01.json");
     load_Collection("AbilityTestCards.json");
 
-    show_debug_message("Total cards in DB: " + string(array_length(card_DB.cards)));
 }

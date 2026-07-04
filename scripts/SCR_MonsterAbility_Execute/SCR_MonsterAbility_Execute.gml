@@ -29,8 +29,7 @@ function monsterAbility_ActivateTrait(_slot_index, _monster, _trait) {
                 monsterAbility_LogActivated(_monster, _trait);
                 return true;
             }
-            show_debug_message(_monster.name + " ability pending: " + string(_trait.type));
-            return false;
+return false;
     }
 }
 
@@ -63,8 +62,7 @@ function monsterAbility_ApplyDelayedEffect(_slot_index, _monster, _trait) {
             monsterAbility_SummonEnemy_Activate(_slot_index, _monster, _trait);
             break;
         default:
-            show_debug_message(_monster.name + " delayed effect: " + string(_trait.type));
-            break;
+break;
     }
 }
 

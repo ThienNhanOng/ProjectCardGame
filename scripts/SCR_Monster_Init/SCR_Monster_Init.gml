@@ -22,8 +22,7 @@ function SCR_Monster_Init() {
     }
 
     if (_config == undefined) {
-        show_debug_message("MonsterManager: battle config failed to load!");
-        return;
+return;
     }
 
     battle_name = _config.battle;
@@ -37,19 +36,13 @@ function SCR_Monster_Init() {
 
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) {
-        show_debug_message("MonsterManager: BoardManager not found!");
-        return;
+return;
     }
 
     monster_ApplyActiveSlotLayout(_board);
     monster_FillActiveSlots(_board);
 
     var _living = monster_CountLivingActive(_board);
-    show_debug_message("MonsterManager ready | Battle: " + battle_name
-        + " | Active slots: " + string(active_slot_count)
-        + " | Queue waiting: " + string(array_length(monster_queue))
-        + " | On field: " + string(_living)
-        + " | DB: " + string(array_length(global.monster_DB.enemies)));
 }
 
 function monster_ApplyActiveSlotLayout(_board) {

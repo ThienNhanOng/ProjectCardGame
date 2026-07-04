@@ -130,8 +130,7 @@ function battle_EnemyLog_PushAction(_line) {
 }
 
 function battle_EnemyLog_Write(_line) {
-    show_debug_message("[EnemyLog] " + _line);
-    battle_EnemyLog_EnsureGlobals();
+battle_EnemyLog_EnsureGlobals();
 
     var _file = file_text_open_append(global.enemy_log_path);
     file_text_write_string(_file, _line + "\r\n");

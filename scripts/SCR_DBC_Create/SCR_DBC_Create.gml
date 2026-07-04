@@ -11,5 +11,4 @@ function SCR_DBC_Create() {
     SCR_ExtraDeck_Init();
     SCR_DBC_LoadPage();
 
-    show_debug_message("DeckBuilder Created");
 }

@@ -1,0 +1,55 @@
+Collection & Deck Builder — System Summary
+
+
+PURPOSE
+Let the player browse owned cards, build main deck (min 8) and auto-fill spirit extra deck, save for battle.
+
+MAIN SCRIPTS
+- SCR_DBC_Create, SCR_DBC_InitGrid, SCR_DBC_InitDeck, SCR_DBC_LoadPage
+- SCR_DBD_Draw*, SCR_DBS_HandleReadyButton, SCR_DBS_HandleDeckClick
+- SCR_CardSlot_* (draw, click, add to deck)
+- SCR_Deck_ExtraDeck, SCR_ExtraDeck_*
+
+MAIN OBJECTS
+- OBJ_DeckBuilder (orchestrator)
+- OBJ_CardSlot (grid cells, spawned dynamically)
+- OBJ_GameController (loads data first)
+
+ROOM
+- Room_collection (first room in project order)
+
+RESPONSIBILITIES
+- Paginated collection grid from player_collection
+- Deck list UI, READY validation, save deck IDs to globals
+- Return to world map or prior room on READY
+
+DEPENDENCIES
+- Bootstrap data (card_DB, player_collection)
+- worldmap_GetCollectionReturnRoom() for exit destination
+
+PUBLIC API
+- SCR_DBC_Create() — deckbuilder init
+- SCR_DBS_HandleReadyButton() — save + leave
+- battle_SaveDeckSources() — writes battle_deck_source
+- collection_Open / grant functions from SCR_PlayerCollection
+
+INITIALIZATION ORDER
+1. OBJ_GameController loads DBs
+2. OBJ_DeckBuilder Create → SCR_DBC_Create → spawn CardSlots
+
+RUNTIME FLOW
+Grid browse → click add/remove → READY → save globals → room_goto map
+
+EXAMPLE
+Player clicks READY → deck IDs saved → returns to Room_Worldmap1
+
+COMMON PITFALLS
+- READY with fewer than 8 cards
+- Spirits must go to extra deck automatically — don't hand-pick in main deck
+
+FUTURE EXPANSION
+- Multiple saved deck presets
+- Filter/sort collection by type
+
+PARENT / CHILD
+- OBJ_DeckBuilder, OBJ_CardSlot, OBJ_GameController: no inheritance parent

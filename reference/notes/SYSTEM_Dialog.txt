@@ -1,0 +1,56 @@
+Dialog System — System Summary
+
+
+PURPOSE
+Visual-novel style overlays on world map: portraits, typewriter text, colored text, optional full-screen backgrounds.
+
+MAIN SCRIPTS
+- SCR_Dialog_System (runtime, draw, step)
+- SCR_Dialog_Builder (dialog_Left, dialog_LineKey, dialog_Background, …)
+- SCR_Dialog_Text (parse colored text, text script format)
+- SCR_DialogExample_map1marker (content example)
+
+MAIN OBJECTS
+- OBJ_DialogController (Draw GUI → dialog_DrawGui)
+- OBJ_DialogBackdrop (legacy/unused in room)
+
+RESPONSIBILITIES
+- Script array entries: name, left/right portrait, lines, background swaps
+- Typewriter text, inactive speaker dim, portrait show/hide
+- Pre/post hooks via eventmarker_set_dialog_*
+- Block map input while active
+
+DEPENDENCIES
+- SCR_WorldMap_Controller calls dialog_Step
+- Event markers stash pending_dialog_post before battle
+
+PUBLIC API
+- dialog_Start(script_func, on_complete)
+- dialog_LineKey(key, text), dialog_NameHero(name)
+- dialog_Left(sprite, key, visible), dialog_HideRight()
+- dialog_Background(sprite, visible), dialog_ClearBackground()
+- eventmarker_set_dialog_pre_once(true) — no replay after clear
+
+INITIALIZATION ORDER
+1. dialog_Init() on map load
+2. OBJ_DialogController in room or spawned by WorldMapController Step
+3. dialog_Start from marker interact or TryRunPendingPost
+
+RUNTIME FLOW
+Build entry array → advance entries → draw GUI layers → on_complete callback → battle
+
+EXAMPLE
+dialog_Background(SPR_BG_GrassTest, true) before a line → full-screen grass pops in
+
+COMMON PITFALLS
+- Using SPR_Field (battle board) instead of map grass art for dialog bg
+- dialog_Background at array start shows image immediately — place before target line only
+- Forgetting dialog_DrawGui is on Draw GUI event (eventType 8, eventNum 64)
+
+FUTURE EXPANSION
+- Load dialog from content/ text files
+- Choices branching (dialog_Choice entry kind)
+
+PARENT / CHILD
+- OBJ_DialogController: no parent
+- Content scripts are plain functions returning arrays — not child objects

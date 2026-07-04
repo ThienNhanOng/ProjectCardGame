@@ -97,7 +97,6 @@ function SCR_Board_InitSlots() {
         sprite   : SPR_ActionSlot
     };
     
-    show_debug_message("Board slots initialized diagonally from (19,350) to (84,442)");
 }
 
 function SCR_Board_IsSlotMouseOver(_slot) {

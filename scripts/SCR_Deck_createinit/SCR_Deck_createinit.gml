@@ -65,10 +65,8 @@ function deck_LoadFromBattleSource() {
             deck_Count++;
         }
         deck_Shuffle();
-        show_debug_message("Loaded " + string(deck_Count) + " cards into battle deck (fresh copy, shuffled)");
-    } else {
-        show_debug_message("No battle deck source found! Using default cards.");
-        deck_AddCard(1);
+} else {
+deck_AddCard(1);
         deck_AddCard(2);
         deck_AddCard(3);
         deck_Shuffle();
@@ -79,8 +77,7 @@ function deck_LoadFromBattleSource() {
         for (var j = 0; j < array_length(_extra_source); j++) {
             deck_AddExtraCardEntry(_extra_source[j]);
         }
-        show_debug_message("Loaded " + string(extra_deck_Count) + " cards into extra deck (fresh copy)");
-    } else {
+} else {
         deck_LoadExtraDeckFromCollection();
     }
 }
@@ -91,13 +88,11 @@ function deck_LoadExtraDeckFromCollection() {
         for (var i = 0; i < array_length(_extra_source); i++) {
             deck_AddExtraCardEntry(_extra_source[i]);
         }
-        show_debug_message("Loaded " + string(extra_deck_Count) + " cards into extra deck (saved source)");
-        return;
+return;
     }
 
     if (!variable_global_exists("player_collection") || !is_array(global.player_collection)) {
-        show_debug_message("Extra deck: no player collection found");
-        return;
+return;
     }
 
     for (var i = 0; i < array_length(global.player_collection); i++) {
@@ -112,21 +107,18 @@ function deck_LoadExtraDeckFromCollection() {
         }
     }
 
-    show_debug_message("Loaded " + string(extra_deck_Count) + " spirit cards into extra deck");
 }
 
 // ===== DECK FUNCTIONS =====
 function deck_AddCard(card_id) {
     if (deck_Count >= deck_Max) {
-        show_debug_message("Deck full! Cannot add card " + string(card_id));
-        return false;
+return false;
     }
 
     var _data = deck_GetCardData(card_id);
     if (_data != undefined
         && (_data.type == "spirit" || _data.type == "special_monster")) {
-        show_debug_message("Spirit cards must be added to the extra deck");
-        return false;
+return false;
     }
 
     deck[deck_Count] = card_id;
@@ -145,12 +137,10 @@ function deck_AddExtraCardEntry(_entry_or_id) {
 
     var _data = deck_GetCardData(extraDeck_GetCardId(_entry));
     if (_data == undefined) {
-        show_debug_message("Extra deck add failed: card id " + string(extraDeck_GetCardId(_entry)) + " not found");
-        return false;
+return false;
     }
     if (_data.type != "spirit" && _data.type != "special_monster") {
-        show_debug_message("Extra deck only accepts spirit/special_monster cards");
-        return false;
+return false;
     }
 
     extra_deck[extra_deck_Count] = _entry;
@@ -160,8 +150,7 @@ function deck_AddExtraCardEntry(_entry_or_id) {
 
 function deck_DrawCard() {
     if (deck_Count <= 0) {
-        show_debug_message("Deck is empty!");
-        return -1;
+return -1;
     }
     var _card_id = deck[deck_Head];
     deck_Head++;
@@ -178,8 +167,7 @@ function deck_Shuffle(_quiet = false) {
     }
     deck_Head = 0;
     if (!_quiet) {
-        show_debug_message("Deck shuffled. Cards: " + string(deck_Count));
-    }
+}
 }
 
 function deck_GetCardData(card_id) {
@@ -188,8 +176,7 @@ function deck_GetCardData(card_id) {
             return card_DB.cards[i];
         }
     }
-    show_debug_message("Card ID not found: " + string(card_id));
-    return undefined;
+return undefined;
 }
 
 /// @desc Store immutable base HP from JSON so runtime damage cannot corrupt the DB template
@@ -311,11 +298,8 @@ function deck_IsValid() {
 
 // Debug: Print all cards in deck
 function deck_DebugPrint() {
-    show_debug_message("=== DECK CONTENTS ===");
-    for (var i = 0; i < deck_Count; i++) {
+for (var i = 0; i < deck_Count; i++) {
         var _card_id = deck[i];
         var _card_name = deck_GetCardName(_card_id);
-        show_debug_message("Slot " + string(i) + ": ID " + string(_card_id) + " - " + _card_name);
-    }
-    show_debug_message("Total cards: " + string(deck_Count));
+}
 }

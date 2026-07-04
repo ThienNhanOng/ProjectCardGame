@@ -1,0 +1,50 @@
+flowchart TB
+    subgraph CONTENT["content/"]
+        maps[maps/events/dialog/art]
+        json[cards/enemies/battlesets]
+    end
+
+    subgraph BOOT["Bootstrap & Data"]
+        GC[OBJ_GameController] --> LC[LoadCollection] --> card_DB[(card_DB)]
+        GC --> LM[LoadMonsters] --> monster_DB[(monster_DB)]
+        GC --> PC[SCR_PlayerCollection] --> coll[(player_collection)]
+    end
+
+    subgraph DECK["Collection & Deck Builder"]
+        DBC[OBJ_DeckBuilder] --> CS[OBJ_CardSlot]
+        DBC -->|READY| bds[(battle_deck_source)]
+    end
+
+    subgraph MAP["World Map & Events"]
+        WMC[OBJ_WorldMapController]
+        PM[OBJ_PlayerMarker]
+        EM[OBJ_EventMarker]
+        M1[Map1 Markers 01-05]
+        EM --> M1
+        PM -->|E| EM
+        EM -->|launch| brc[(battle_runtime_config)]
+    end
+
+    subgraph DIALOG["Dialog System"]
+        DC[OBJ_DialogController]
+        DS[SCR_Dialog_System]
+        EM --> DS
+        DC --> DS
+    end
+
+    subgraph BATTLE["Battle Room"]
+        BM[OBJ_BattleManager]
+        BRD[OBJ_BoardManager]
+        HD[OBJ_Hand] --> DK[OBJ_Deck]
+        MM[OBJ_MonsterManager]
+        TR[SCR_Trait_*]
+        BM --> BRD & HD & MM & TR
+    end
+
+    json --> BOOT
+    maps --> MAP & DIALOG
+    BOOT --> DECK
+    DECK --> MAP
+    MAP --> BATTLE
+    BATTLE -->|victory| MAP
+    MAP --> DECK

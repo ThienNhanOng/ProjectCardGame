@@ -34,8 +34,7 @@ function battle_NormalizeWaveConfig(_data) {
 
 function battle_LoadConfig(_filename) {
     if (!file_exists(_filename)) {
-        show_debug_message("Battle config not found: " + _filename);
-        return undefined;
+return undefined;
     }
 
     var _file     = file_text_open_read(_filename);
@@ -49,11 +48,7 @@ function battle_LoadConfig(_filename) {
     var _data = json_parse(_json_str);
     var _config = battle_NormalizeWaveConfig(_data);
 
-    show_debug_message("Loaded battle: " + string(_config.battle)
-        + " | Active slots: " + string(_config.active_slots)
-        + " | Wave size: " + string(array_length(_config.wave)));
-
-    return _config;
+return _config;
 }
 
 function battle_LoadBattleset(_filename) {
@@ -66,8 +61,7 @@ function battle_LoadBattleset(_filename) {
     }
 
     if (!file_exists(_filename)) {
-        show_debug_message("Battleset not found: " + _filename);
-        return undefined;
+return undefined;
     }
 
     var _file = file_text_open_read(_filename);
@@ -91,9 +85,7 @@ function battle_LoadBattleset(_filename) {
     var _set = { file: _filename, battles: _battles };
     global.battleset_cache[$ _filename] = _set;
 
-    show_debug_message("Loaded battleset " + _filename
-        + " | Battles: " + string(variable_struct_names_count(_battles)));
-    return _set;
+return _set;
 }
 
 function battle_GetBattlesetBattle(_battleset_file, _battle_id) {
@@ -102,8 +94,7 @@ function battle_GetBattlesetBattle(_battleset_file, _battle_id) {
 
     var _key = string(_battle_id);
     if (!variable_struct_exists(_set.battles, _key)) {
-        show_debug_message("Battle not found in battleset: " + _key);
-        return undefined;
+return undefined;
     }
 
     return _set.battles[$ _key];

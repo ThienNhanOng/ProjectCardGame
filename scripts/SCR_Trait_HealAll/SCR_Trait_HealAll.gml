@@ -21,8 +21,7 @@ function trait_HealAllPlayerMonsters(_amount) {
         if (battle_HealPlayerMonster(i, _amount)) _healed = true;
     }
 
-    show_debug_message("Heal all player monsters for " + string(_amount));
-    return _healed;
+return _healed;
 }
 
 function trait_HealAllEnemies(_amount) {
@@ -37,8 +36,7 @@ function trait_HealAllEnemies(_amount) {
         if (battle_HealEnemyMonster(i, _amount)) _healed = true;
     }
 
-    show_debug_message("Heal all enemies for " + string(_amount));
-    return _healed;
+return _healed;
 }
 
 function trait_CreateHealAllContext(_amount, _target_side = "player") {

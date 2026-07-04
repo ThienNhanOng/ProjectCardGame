@@ -1,0 +1,10 @@
+flowchart TB
+    RC[Room_collection Create] --> GC[OBJ_GameController Create]
+    GC --> SCR_LoadAllCollections
+    SCR_LoadAllCollections --> Merc[Merc_starterdeck01.json]
+    SCR_LoadAllCollections --> TestCards[AbilityTestCards.json]
+    GC --> battle_EnsureMonsterDatabase
+    battle_EnsureMonsterDatabase --> Enemy[EnemyCollection01.json]
+    GC --> collection_EnsurePlayerInitialized
+    Merc --> card_DB[(card_DB)]
+    Enemy --> monster_DB[(monster_DB)]

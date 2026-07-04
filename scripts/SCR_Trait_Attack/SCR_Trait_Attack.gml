@@ -9,8 +9,7 @@ function trait_ExecuteAttack(_ctx) {
         with (_mm) {
             monster_ApplyDamage(_ctx.target_enemy_slot, _ctx.amount);
         }
-        show_debug_message("Trait attack " + string(_ctx.amount) + " -> enemy slot " + string(_ctx.target_enemy_slot));
-        return true;
+return true;
     }
 
     if (_ctx.target_side == "player") {

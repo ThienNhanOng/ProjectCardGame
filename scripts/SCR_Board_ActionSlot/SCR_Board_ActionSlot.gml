@@ -17,5 +17,4 @@ function SCR_Board_ActionSlot() {
         hovered  : false
     };
     
-    show_debug_message("Action slot initialized.");
 }

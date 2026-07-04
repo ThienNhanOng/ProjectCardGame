@@ -51,8 +51,7 @@ function SCR_DragDrop_Step() {
             drag_x          = _mx;
             drag_y          = _my;
             is_dragging     = true;
-            show_debug_message("Dragging: " + drag_card.name);
-        }
+}
     }
     
     if (is_dragging) {
@@ -74,8 +73,7 @@ function SCR_DragDrop_Step() {
                 }
                 if (!_slot.occupied && !_slot.locked) {
                     if (!card_CanAffordAllCosts(drag_card, drag_hand_index)) {
-                        show_debug_message("Cannot afford cost for " + drag_card.name);
-                    } else if (SCR_Board_PlaceCard(_slot, drag_card)) {
+} else if (SCR_Board_PlaceCard(_slot, drag_card)) {
                         card_PayAllCosts(drag_card, drag_hand_index);
                         var _hand = instance_find(OBJ_Hand, 0);
                         if (_hand != noone) {

@@ -129,15 +129,13 @@ function dialog_Start(_script_func, _on_complete = undefined) {
     dialog_ForceClose();
 
     if (_script_func == undefined) {
-        show_debug_message("dialog_Start: expected a script function");
-        if (_on_complete != undefined) _on_complete();
+if (_on_complete != undefined) _on_complete();
         return false;
     }
 
     var _entries = _script_func();
     if (!is_array(_entries)) {
-        show_debug_message("dialog_Start: script must return an array");
-        if (_on_complete != undefined) _on_complete();
+if (_on_complete != undefined) _on_complete();
         return false;
     }
 
@@ -384,8 +382,7 @@ function dialog_ApplyBackgroundEntry(_entry) {
     global.dialog.bg_visible = dialog_GetEntryBool(_entry, "visible", true);
 
     if (!sprite_exists(global.dialog.bg_sprite)) {
-        show_debug_message("dialog: could not load background sprite (" + string(_ref) + ")");
-    }
+}
 }
 
 function dialog_HasBackgroundShowing() {

@@ -1,0 +1,8 @@
+flowchart TB
+    MM[OBJ_MonsterManager] --> Init[SCR_Monster_Init]
+    Init --> cfg[battle_runtime_config or Battle01.json]
+    cfg --> Queue[SCR_Monster_Queue]
+    Queue --> spawn[spawn wave enemies]
+    spawn --> Anim[SCR_Monster_AnimRegistry]
+    EnemyTurn[SCR_Battle_EnemyTurn] --> MA[SCR_MonsterAbility_Execute]
+    MA --> MA_pick[SCR_MonsterAbility_Picker]

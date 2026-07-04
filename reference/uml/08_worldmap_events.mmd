@@ -1,0 +1,18 @@
+flowchart TB
+    WMC[OBJ_WorldMapController Init] --> InitRoom[worldmap_InitRoom]
+    InitRoom --> Sync[worldmap_SyncMarkersFromRoom]
+    Sync --> EM[OBJ_EventMarker instances get event_id]
+
+    PM[OBJ_PlayerMarker Step] --> Move[worldmap_PlayerMovementStep snap]
+    PM --> E[worldmap_TryPlayerInteract]
+    E --> Trigger[eventmarker_trigger]
+    Trigger --> Pre{pre dialog once?}
+    Pre -->|first clear| Dialog[dialog_Start]
+    Pre -->|replay| Battle[worldmap_LaunchEventBattle]
+    Dialog --> Battle
+    Battle --> RB[Room_battle]
+    RB --> Win[worldmap_ReturnToMapAfterVictory]
+    Win --> Spawn[worldmap_ApplyPendingPlayerSpawn]
+
+    classDef parent fill:#333,color:#fff
+    class EM parent

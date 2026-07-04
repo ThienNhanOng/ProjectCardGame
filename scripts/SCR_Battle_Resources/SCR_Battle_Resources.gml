@@ -55,9 +55,7 @@ function battle_SpendResources(_amount) {
 
     with (_bm) {
         player_resources = max(0, player_resources - _amount);
-        show_debug_message("Spent " + string(_amount) + " resources"
-            + " | Resources: " + string(player_resources) + "/" + string(player_resources_max));
-    }
+}
     return true;
 }
 
@@ -77,9 +75,7 @@ function battle_AddResourcesTemporary(_amount, _player_slot = -1) {
             resource_add_buff_orphan += _amount;
         }
 
-        show_debug_message("Resources +" + string(_amount) + " this turn"
-            + " | Resources: " + string(player_resources) + "/" + string(player_resources_max));
-    }
+}
     return true;
 }
 
@@ -99,9 +95,7 @@ function battle_RemoveResourcesMaxFromSlot(_amount, _player_slot = -1) {
 
         battle_RecalculateResourceMax();
 
-        show_debug_message("Resources max -" + string(_amount)
-            + " | Resources: " + string(player_resources) + "/" + string(player_resources_max));
-    }
+}
     return true;
 }
 
@@ -130,9 +124,7 @@ function battle_ClearResourceEffectsFromSlot(_player_slot) {
             battle_RecalculateResourceMax();
         }
 
-        show_debug_message("Resource effects removed from slot " + string(_player_slot)
-            + " | Resources: " + string(player_resources) + "/" + string(player_resources_max));
-    }
+}
 }
 
 /// @desc Strip temporary add_counter buffs at end of player turn
@@ -150,9 +142,7 @@ function battle_ClearTurnResourceAddBuffs() {
             resource_add_buff_by_slot[i] = 0;
         }
 
-        show_debug_message("Turn resource buffs cleared (-" + string(_buff_total) + ")"
-            + " | Resources: " + string(player_resources) + "/" + string(player_resources_max));
-    }
+}
 }
 
 /// @desc Refill current resources to max at the start of each player turn
@@ -166,8 +156,7 @@ function battle_RefreshResourcesForTurn() {
             resource_add_buff_by_slot[i] = 0;
         }
         player_resources = player_resources_max;
-        show_debug_message("Resources refreshed: " + string(player_resources) + "/" + string(player_resources_max));
-    }
+}
 }
 
 function battle_GetResourcesDisplayRect() {

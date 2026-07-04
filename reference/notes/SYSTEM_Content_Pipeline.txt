@@ -1,0 +1,48 @@
+Content Pipeline — System Summary
+
+
+PURPOSE
+Separate game content (levels, events, dialog, art) from engine tools.
+Authors work in content/; the engine loads and runs that content.
+
+MAIN SCRIPTS / ASSETS
+- content/maps/.../events/event_XX/  (target layout)
+- datafiles/*.json  (current bundled content)
+- sprites/Map/, sprites/characters/  (imported art)
+- Per-marker Create events  (wiring today)
+
+RESPONSIBILITIES
+- Store per-level battlesets, rewards, dialog sources, portraits, backgrounds
+- Keep engine code generic — no hardcoded story in SCR_Battle_* etc.
+
+DEPENDENCIES
+- World map, dialog, data bootstrap systems consume content
+
+PUBLIC API (authoring)
+- JSON: battleset, map config, card/enemy collections
+- GML dialog functions returned as arrays
+- PNG sprites imported to GameMaker
+
+INITIALIZATION ORDER
+1. Author creates content folder entry for event
+2. Import/register JSON + sprites in GameMaker
+3. Wire marker Create → eventmarker_* + dialog_* calls
+
+RUNTIME FLOW
+content JSON/sprites → Included Files → engine globals → map/battle/dialog
+
+EXAMPLE
+content/maps/grasslands/events/event_01_trail_start/dialog_pre.gml
+  → script asset dialog_Map1_Marker01_PreBattle
+  → OBJ_Map1_Marker01 Create: eventmarker_set_dialog_pre(...)
+
+COMMON PITFALLS
+- Editing only datafiles/ without mirroring content/ plan
+- Forgetting Included Files registration in .yyp
+
+FUTURE EXPANSION
+- Scaffold events from content/ templates
+- Load dialog text from content/ without duplicate script assets
+
+PARENT / CHILD
+- Content folders are organizational only — no object inheritance

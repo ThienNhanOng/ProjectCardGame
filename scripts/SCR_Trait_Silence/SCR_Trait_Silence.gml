@@ -53,9 +53,7 @@ function battle_SilenceEnemyMonster(_slot_index, _turns) {
     if (!status_SilenceUnit(_slot.card, _turns)) return false;
 
     battle_StatusLog_Silence("enemy", _slot_index, _slot.card.name, _slot.card.silenced_turns);
-    show_debug_message("Silenced " + _slot.card.name + " for " + string(_slot.card.silenced_turns)
-        + " enemy turn(s) | ability set to none");
-    return true;
+return true;
 }
 
 function battle_ShroudPlayerMonster(_slot_index, _turns) {
@@ -69,9 +67,7 @@ function battle_ShroudPlayerMonster(_slot_index, _turns) {
     if (!status_ShroudUnit(_slot.card, _turns)) return false;
 
     battle_StatusLog_Shroud(_slot_index, _slot.card.name, _slot.card.shrouded_turns);
-    show_debug_message("Shrouded " + _slot.card.name + " for " + string(_slot.card.shrouded_turns)
-        + " enemy turn(s) | cannot attack");
-    return true;
+return true;
 }
 
 function battle_SilencePlayerMonster(_slot_index, _turns) {

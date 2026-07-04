@@ -8,8 +8,7 @@ if (mouse_x <= room_width - 150 || mouse_x >= room_width - 20
 }
 
 if (array_length(selected_deck) < 8) {
-    show_debug_message("Need at least 8 cards to start! Current: " + string(array_length(selected_deck)));
-    return;
+return;
 }
 
 var _main_ids = player_deck_SaveSelectedDeckIds();

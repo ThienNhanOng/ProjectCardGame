@@ -137,8 +137,7 @@ function monsterAbility_ActivateTrait(_slot_index, _monster, _trait) {
                 battle_EnemyLog_Action(_monster.name + " activated " + _name + ".");
                 return true;
             }
-            show_debug_message(_monster.name + " ability pending: " + string(_trait.type));
-            return false;
+return false;
     }
 }
 
@@ -157,8 +156,7 @@ function monsterAbility_ApplyDelayedEffect(_slot_index, _monster, _trait) {
             monsterAbility_destroy(_slot_index, _monster, max(1, _trait.amount));
             break;
         default:
-            show_debug_message(_monster.name + " delayed effect: " + string(_trait.type));
-            break;
+break;
     }
 }
 

@@ -14,8 +14,7 @@ function trait_ExecuteDraw(_ctx) {
         else break;
     }
 
-    show_debug_message("Drew " + string(_drawn) + " card(s) from deck");
-    return _drawn > 0;
+return _drawn > 0;
 }
 
 function trait_CreateDrawContext(_amount) {

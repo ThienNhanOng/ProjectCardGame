@@ -24,4 +24,3 @@ view_set_xport(0, 0);
 view_set_yport(0, 0);
 view_set_camera(0, _cam);
 
-show_debug_message("Camera X: " + string(camera_get_view_x(_cam)));

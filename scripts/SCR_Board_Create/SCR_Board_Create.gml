@@ -11,5 +11,4 @@ function SCR_Board_Create() {
     
     SCR_Board_EnemySlots();
     
-    show_debug_message("Board initialized with factory slots");
 }

@@ -22,6 +22,5 @@ if (mouse_x > room_width - 150 && mouse_x < room_width - 20 &&
         room_goto(rm_Game);
     } else {
         // Not enough cards selected
-        show_debug_message("Need at least 8 cards to start!");
-    }
+}
 }

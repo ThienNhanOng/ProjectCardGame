@@ -1,6 +1,4 @@
-/// @desc Debug hover + hitbox overlay for enemy monsters
-
-#macro DEBUG_ENEMY_HITBOXES false
+/// @desc Debug hover + hitbox overlay for enemy monsters (gated by DEBUG_DRAW_ENEMY_HITBOXES in SCR_Debug)
 
 function monster_GetHitbox(_slot) {
     var _layout = monster_GetSlotLayout(_slot);
@@ -40,7 +38,7 @@ function SCR_Monster_UpdateHoverDebug() {
 }
 
 function SCR_Monster_DrawHoverDebug() {
-    if (!DEBUG_ENEMY_HITBOXES) return;
+    if (!DEBUG_DRAW_ENEMY_HITBOXES) return;
     if (active_slot_count <= 0) return;
 
     var _board = instance_find(OBJ_BoardManager, 0);

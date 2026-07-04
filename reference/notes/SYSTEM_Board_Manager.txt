@@ -1,0 +1,52 @@
+Board Manager — System Summary
+
+
+PURPOSE
+Manage the 5-column battle board: monster, weapon, action, spirit slots; drag-drop card play.
+
+MAIN SCRIPTS
+- SCR_Board_Create, SCR_Board_Dimensions
+- SCR_Board_PlayerSlots, SCR_Board_EnemySlots, SCR_Board_ActionSlot
+- SlotFactory, SCR_Slot_init
+- SCR_Board_SlotManager, SCR_DragDrop_Init, SCR_Board_Draw
+
+MAIN OBJECTS
+- OBJ_BoardManager
+
+RESPONSIBILITIES
+- Create slot instances per column
+- Track equipped weapons/actions/spirits/monsters
+- Drag-drop from hand to valid slots
+- openzone visibility per column
+
+DEPENDENCIES
+- OBJ_Hand (card source for drag)
+- SCR_Battle_PlayCard (play validation)
+- SCR_Trait_OpenZone
+
+PUBLIC API
+- SCR_Board_Create() — build all slots
+- SCR_DragDrop_Init() — input handling
+- SCR_Board_SlotManager() — per-step slot logic
+- Slot instance vars: occupied, card_data, zone_open
+
+INITIALIZATION ORDER
+After OBJ_Hand Create, before OBJ_BattleManager Create
+
+RUNTIME FLOW
+Drag card → validate slot → SCR_Battle_PlayCard → traits execute on slot
+
+EXAMPLE
+Weapon card dragged to weapon column → equip → attack traits available
+
+COMMON PITFALLS
+- Playing to closed zone without openzone trait
+- Slot dimensions mismatch with card draw size
+
+FUTURE EXPANSION
+- Enemy board columns mirroring player
+- Animated slot highlights for valid targets
+
+PARENT / CHILD
+- OBJ_BoardManager: no parent object
+- Slot objects created via SlotFactory (not child objects of BoardManager type)

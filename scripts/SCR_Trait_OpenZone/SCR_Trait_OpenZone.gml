@@ -29,9 +29,7 @@ function battle_OpenZonesFromMonster(_player_slot, _amount) {
 
         board_zone_owner[h] = _player_slot;
         _opened++;
-        show_debug_message("Opened hidden zone slot " + string(_zone_slot)
-            + " (owner player slot " + string(_player_slot) + ")");
-    }
+}
 
     return _opened;
 }
@@ -49,9 +47,7 @@ function battle_CloseZonesOwnedByMonster(_player_slot) {
             SCR_Board_CloseHiddenSlot(_zone_slot);
         }
         board_zone_owner[h] = -1;
-        show_debug_message("Closed hidden zone slot " + string(_zone_slot)
-            + " (owner player slot " + string(_player_slot) + " left)");
-    }
+}
 }
 
 function trait_ExecuteOpenZone(_trait, _player_slot) {

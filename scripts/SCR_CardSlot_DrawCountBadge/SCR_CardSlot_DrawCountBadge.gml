@@ -10,6 +10,5 @@ function SCR_CardSlot_DrawCountBadge() {
         draw_set_valign(fa_middle);
         draw_text(x + card_w - 12, y + 12, string(count));
     } else {
-        show_debug_message("No badge drawn - count = " + string(count));
-    }
+}
 }

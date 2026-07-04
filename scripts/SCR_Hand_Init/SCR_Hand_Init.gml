@@ -5,5 +5,4 @@ function SCR_Hand_Init() {
         SCR_Hand_DrawFromDeck();
     }
 
-    show_debug_message("Opening hand: " + string(hand_Count) + " cards");
 }

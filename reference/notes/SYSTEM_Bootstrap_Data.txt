@@ -1,0 +1,51 @@
+Bootstrap & Data Layer — System Summary
+
+
+PURPOSE
+Load all card and enemy definitions at startup. Split card pool (card_DB) from player ownership (player_collection).
+
+MAIN SCRIPTS
+- LoadCollection.gml / SCR_LoadAllCollections
+- LoadMonsters.gml / battle_EnsureMonsterDatabase
+- SCR_PlayerCollection.gml
+- SCR_Card_Draw.gml, deck_Clear.gml
+
+MAIN OBJECTS
+- OBJ_GameController (Create only)
+
+RESPONSIBILITIES
+- Parse JSON into card_DB and monster_DB
+- Initialize global.player_collection
+- Cache battleset JSON (global.battleset_cache)
+
+DEPENDENCIES
+- datafiles/*.json as Included Files
+- Used by: deck builder, battle, world map rewards
+
+PUBLIC API
+- SCR_LoadAllCollections()
+- battle_EnsureMonsterDatabase()
+- collection_EnsurePlayerInitialized()
+- collection_GrantBattleReward(id, count, collection)
+- card_DB lookup via loaded structs
+
+INITIALIZATION ORDER
+1. Room_collection or Room_battle creates OBJ_GameController
+2. Load collections → load monsters → init player collection
+
+RUNTIME FLOW
+JSON files → parse → globals → all other systems read structs
+
+EXAMPLE
+OBJ_GameController Create runs SCR_LoadAllCollections() and battle_EnsureMonsterDatabase()
+
+COMMON PITFALLS
+- JSON not in Included Files → file_exists fails at runtime
+- Confusing card_DB (all definitions) with player_collection (owned copies)
+
+FUTURE EXPANSION
+- Load from content/cards/ and content/enemies/ paths
+- Hot reload in debug builds
+
+PARENT / CHILD
+- OBJ_GameController: standalone, no parent object

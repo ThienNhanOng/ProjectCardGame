@@ -27,7 +27,6 @@ function battle_StartBattle() {
     battle_phase = "player";
     battle_ResetTurnUses();
     battle_RefreshResourcesForTurn();
-    show_debug_message("=== Player turn 1 ===");
 }
 
 function battle_BeginNextPlayerTurn() {
@@ -42,7 +41,6 @@ function battle_BeginNextPlayerTurn() {
     }
 
     SCR_Hand_DrawFromDeck();
-    show_debug_message("=== Player turn " + string(turn_number) + " | Drew 1 card ===");
 }
 
 function battle_EndTurn() {
@@ -57,8 +55,7 @@ function battle_EndTurn() {
     battle_ClearTurnResourceAddBuffs();
     battle_TickBoardMonsterLifespan();
     battle_phase = "enemy";
-    show_debug_message("=== Enemy turn ===");
-    battle_RunEnemyTurn();
+battle_RunEnemyTurn();
 }
 
 function battle_ResetTurnUses() {
@@ -173,8 +170,7 @@ function trait_ExecuteNoBoardExpire(_trait, _player_slot) {
     if (_card == undefined) return false;
 
     battle_SetBoardMonsterExpire(_card, false);
-    show_debug_message(_card.name + " will no longer leave the board after turn limit");
-    return true;
+return true;
 }
 
 function trait_ExecuteAddBoardTurns(_trait, _player_slot) {
@@ -184,9 +180,7 @@ function trait_ExecuteAddBoardTurns(_trait, _player_slot) {
     var _add = max(1, _trait.amount);
     if (!battle_AddBoardMonsterTurns(_card, _add)) return false;
 
-    show_debug_message(_card.name + " stays on board +" + string(_add)
-        + " turn(s) (now " + string(_card.board_turns_left) + " left)");
-    return true;
+return true;
 }
 
 function battle_TickBoardMonsterLifespan() {
@@ -206,8 +200,7 @@ function battle_TickBoardMonsterLifespan() {
 
         _slot.card.board_turns_left--;
         if (_slot.card.board_turns_left <= 0) {
-            show_debug_message(_slot.card.name + " left the board (turn limit reached)");
-            battle_DestroyPlayerMonster(i);
+battle_DestroyPlayerMonster(i);
         }
     }
 }

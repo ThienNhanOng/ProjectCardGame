@@ -1,0 +1,50 @@
+Hand & Deck (Battle) — System Summary
+
+
+PURPOSE
+In-battle card flow: deck holds card IDs, hand holds full card structs, draw and render fan layout.
+
+MAIN SCRIPTS
+- SCR_Deck_createinit, SCR_Deck_Draw, deck_Clear
+- SCR_Hand_Init, SCR_Hand_Create, SCR_Hand_DrawFromDeck
+- SCR_Hand_Draw, SCR_Hand_DrawCard, SCR_Hand_Layout, SCR_Hand_GetSpacing
+
+MAIN OBJECTS
+- OBJ_Deck (draw pile)
+- OBJ_Hand (hand array + draw)
+
+RESPONSIBILITIES
+- Shuffle deck from global.battle_deck_source
+- Draw N cards at battle start / on draw traits
+- Hover, layout, sprite selection per card type
+- Hand stores structs; deck stores IDs only
+
+DEPENDENCIES
+- card_DB for ID → struct resolution
+- global.battle_deck_source from deck builder
+- SCR_Card_Draw for rendering
+
+PUBLIC API
+- SCR_Hand_Init() / SCR_Hand_Create()
+- SCR_Hand_DrawFromDeck(count)
+- deck shuffle in SCR_Deck_createinit
+
+INITIALIZATION ORDER
+OBJ_Deck Create → OBJ_Hand Create (Hand reads Deck instance)
+
+RUNTIME FLOW
+deck IDs → shuffle → draw → hand[] structs → render → play removes from hand
+
+EXAMPLE
+SCR_Hand_DrawFromDeck(5) at battle start after SCR_Battle_Init
+
+COMMON PITFALLS
+- Hand created before Deck → broken reference
+- Notes mention SCR_Hand_Functions — functions live in SCR_Hand_Create.gml
+
+FUTURE EXPANSION
+- Hand size limit enforcement
+- Discard pile zone object
+
+PARENT / CHILD
+- OBJ_Deck, OBJ_Hand: no inheritance parent

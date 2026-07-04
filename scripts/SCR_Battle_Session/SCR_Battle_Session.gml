@@ -11,11 +11,6 @@ function battle_SaveDeckSources(_main_ids, _extra_ids) {
         array_push(global.battle_extra_deck_source, _extra_ids[i]);
     }
 
-    show_debug_message("Battle deck source saved: "
-        + string(array_length(global.battle_deck_source))
-        + " main, "
-        + string(array_length(global.battle_extra_deck_source))
-        + " extra");
 }
 
 function battle_MigrateLegacyDeckSources() {
@@ -171,7 +166,6 @@ function battle_BeginSession() {
     }
     global.battle_session_count++;
 
-    show_debug_message("Battle session #" + string(global.battle_session_count) + " starting");
 }
 
 function battle_PermanentlyRemoveSpiritById(_card_id) {
@@ -180,8 +174,7 @@ function battle_PermanentlyRemoveSpiritById(_card_id) {
 
     collection_RemoveOwnedCopy(_card_id, 1);
     battle_SyncExtraDeckFromBattleState();
-    show_debug_message("Spirit id " + string(_card_id) + " removed permanently");
-    return true;
+return true;
 }
 
 function battle_PermanentlyRemoveSpiritEntry(_entry) {
@@ -197,13 +190,11 @@ function battle_PermanentlyLoseSpirit(_card) {
     if (_card_id <= 0) return false;
 
     if (variable_struct_exists(_card, "spirit_expired") && _card.spirit_expired) {
-        show_debug_message(_card.name + " expired spirit leaves the board");
-        return true;
+return true;
     }
 
     battle_PermanentlyRemoveSpiritById(_card_id);
-    show_debug_message(_card.name + " spirit lost permanently");
-    return true;
+return true;
 }
 
 /// @desc After a fight, extra deck source = cards still in extra deck + spirits still alive on board.
@@ -240,12 +231,9 @@ function battle_SyncExtraDeckFromBattleState() {
     }
 
     battle_SaveDeckSources(battle_GetDeckSourceCopy(), _extra_entries);
-    show_debug_message("Extra deck synced: " + string(array_length(_extra_entries))
-        + " spirit copy/copies for next fight");
 }
 
 /// @desc Called when leaving Room_battle back to the map
 function battle_EndSession() {
     global.battle_runtime_config = undefined;
-    show_debug_message("Battle session ended — deck sources preserved for next fight");
 }

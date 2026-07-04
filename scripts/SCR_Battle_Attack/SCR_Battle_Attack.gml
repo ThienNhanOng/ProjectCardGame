@@ -281,8 +281,7 @@ function battle_BeginWeaponAttack(_monster_slot_index) {
 function battle_BeginWeaponAttackStrike(_monster_slot_index) {
     if (battle_IsTargeting()) return false;
     if (!battle_CanColumnAttack(_monster_slot_index)) {
-        show_debug_message("Attack not available for column " + string(_monster_slot_index));
-        return false;
+return false;
     }
 
     var _parts = battle_GetColumnStrikeParts(_monster_slot_index);
@@ -359,16 +358,13 @@ function battle_ColumnExecuteAttackAll(_monster_slot_index, _amount, _source_lab
     var _ok = trait_AttackAllEnemies(_amount);
     if (_ok) {
         battle_ConsumeColumnAttack(_monster_slot_index);
-        show_debug_message(string(_source_label) + " attack all " + string(_amount) + " from column "
-            + string(_monster_slot_index));
-    }
+}
     return _ok;
 }
 
 function battle_WeaponAttack(_monster_slot_index, _enemy_slot_index) {
     if (!battle_CanColumnAttack(_monster_slot_index)) {
-        show_debug_message("Cannot attack from slot " + string(_monster_slot_index));
-        return false;
+return false;
     }
 
     var _parts = battle_GetColumnStrikeParts(_monster_slot_index);
@@ -379,9 +375,7 @@ function battle_WeaponAttack(_monster_slot_index, _enemy_slot_index) {
     var _ok = trait_ExecuteAttack(_ctx);
     if (_ok) {
         battle_ConsumeColumnAttack(_monster_slot_index);
-        show_debug_message("Column attack " + string(_parts.monster_strike) + "+" + string(_parts.weapon_strike)
-            + "+" + string(_parts.buff) + "=" + string(_amount) + " -> enemy slot " + string(_enemy_slot_index));
-    }
+}
     return _ok;
 }
 
@@ -399,8 +393,7 @@ function battle_MonsterAttackAll(_monster_slot_index) {
 
 function battle_ExecuteActionAttackAll(_trait_index, _player_slot_index) {
     if (!battle_CanUseActionTrait(_trait_index)) {
-        show_debug_message("Action attack all unavailable (trait " + string(_trait_index) + ")");
-        return false;
+return false;
     }
 
     var _board = instance_find(OBJ_BoardManager, 0);
@@ -408,12 +401,10 @@ function battle_ExecuteActionAttackAll(_trait_index, _player_slot_index) {
 
     var _player_slot = _board.player_monster_slots[_player_slot_index];
     if (!_player_slot.visible || !_player_slot.occupied || _player_slot.card == undefined) {
-        show_debug_message("Invalid attacking monster slot");
-        return false;
+return false;
     }
     if (status_IsShrouded(_player_slot.card)) {
-        show_debug_message("Cannot attack — " + _player_slot.card.name + " is shrouded");
-        return false;
+return false;
     }
 
     var _traits = battle_GetActionTraits();
@@ -427,9 +418,7 @@ function battle_ExecuteActionAttackAll(_trait_index, _player_slot_index) {
     if (!trait_AttackAllEnemies(_total_atk)) return false;
 
     battle_ConsumeActionTrait(_trait_index);
-    show_debug_message(_player_slot.card.name + " used action attack all for "
-        + string(_base_atk) + "+" + string(_buff_atk) + "=" + string(_total_atk));
-    return true;
+return true;
 }
 
 function battle_ActionAttack(_trait_index, _enemy_slot_index) {
@@ -438,8 +427,7 @@ function battle_ActionAttack(_trait_index, _enemy_slot_index) {
 
 function battle_ExecuteActionAttack(_trait_index, _player_slot_index, _enemy_slot_index) {
     if (!battle_CanUseActionTrait(_trait_index)) {
-        show_debug_message("Action attack unavailable (trait " + string(_trait_index) + ")");
-        return false;
+return false;
     }
 
     var _board = instance_find(OBJ_BoardManager, 0);
@@ -447,12 +435,10 @@ function battle_ExecuteActionAttack(_trait_index, _player_slot_index, _enemy_slo
 
     var _player_slot = _board.player_monster_slots[_player_slot_index];
     if (!_player_slot.visible || !_player_slot.occupied || _player_slot.card == undefined) {
-        show_debug_message("Invalid attacking monster slot");
-        return false;
+return false;
     }
     if (status_IsShrouded(_player_slot.card)) {
-        show_debug_message("Cannot attack — " + _player_slot.card.name + " is shrouded");
-        return false;
+return false;
     }
 
     var _traits = battle_GetActionTraits();
@@ -467,10 +453,7 @@ function battle_ExecuteActionAttack(_trait_index, _player_slot_index, _enemy_slo
     if (!trait_Execute(_traits[_trait_index], _ctx)) return false;
 
     battle_ConsumeActionTrait(_trait_index);
-    show_debug_message(_player_slot.card.name + " used action attack on enemy slot "
-        + string(_enemy_slot_index) + " for " + string(_base_atk) + "+" + string(_buff_atk)
-        + "=" + string(_total_atk) + " damage");
-    return true;
+return true;
 }
 
 function battle_ActionHeal(_trait_index, _player_slot_index) {
@@ -479,8 +462,7 @@ function battle_ActionHeal(_trait_index, _player_slot_index) {
 
 function battle_ExecuteActionHeal(_trait_index, _player_slot_index) {
     if (!battle_CanUseActionTrait(_trait_index)) {
-        show_debug_message("Action heal unavailable (trait " + string(_trait_index) + ")");
-        return false;
+return false;
     }
 
     var _traits = battle_GetActionTraits();
@@ -496,8 +478,7 @@ function battle_ExecuteActionHeal(_trait_index, _player_slot_index) {
 
 function battle_ExecuteActionDestroy(_trait_index, _enemy_slot_index) {
     if (!battle_CanUseActionTrait(_trait_index)) {
-        show_debug_message("Action destroy unavailable (trait " + string(_trait_index) + ")");
-        return false;
+return false;
     }
 
     var _traits = battle_GetActionTraits();
@@ -508,8 +489,7 @@ function battle_ExecuteActionDestroy(_trait_index, _enemy_slot_index) {
     if (!trait_Execute(_traits[_trait_index], _ctx)) return false;
 
     battle_ConsumeActionTrait(_trait_index);
-    show_debug_message("Destroyed enemy in slot " + string(_enemy_slot_index));
-    return true;
+return true;
 }
 
 function battle_ExecuteActionSilence(_trait_index, _enemy_slot_index) {

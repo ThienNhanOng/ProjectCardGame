@@ -1,0 +1,54 @@
+Battle Manager — System Summary
+
+
+PURPOSE
+Run combat turns: play cards, targeting, attacks, resources, enemy turns, victory detection.
+
+MAIN SCRIPTS
+- SCR_Battle_Init, SCR_Battle_Load, SCR_Battle_Session
+- SCR_Battle_Step, SCR_Battle_Turn, SCR_Battle_PlayCard
+- SCR_Battle_Attack, SCR_Battle_Targeting, SCR_Battle_EnemyTurn
+- SCR_Battle_Draw, SCR_Battle_UI, SCR_Battle_Resources
+
+MAIN OBJECTS
+- OBJ_BattleManager
+
+ROOM
+- Room_battle (creation code: battle_BeginSession)
+
+RESPONSIBILITIES
+- Player/enemy turn state machine
+- Card play validation and trait dispatch
+- HP, counters, cost resources
+- Victory → worldmap_NotifyBattleVictory
+
+DEPENDENCIES
+- OBJ_BoardManager, OBJ_Hand, OBJ_Deck, OBJ_MonsterManager
+- SCR_Trait_* for card effects
+- global.battle_runtime_config from world map OR Battle01.json fallback
+
+PUBLIC API
+- SCR_Battle_Init() — battle room setup
+- battle_BeginSession() — room entry
+- battle_StartBattle(), battle_EndSession()
+- SCR_Battle_Step() — per-frame battle logic
+
+INITIALIZATION ORDER (Room_battle)
+GameController → Deck → Hand → BoardManager → BattleManager → MonsterManager
+
+RUNTIME FLOW
+Init → deal hand → player turn loop → enemy turn → victory prompt → return map
+
+EXAMPLE
+worldmap sets global.battle_runtime_config → room_goto Room_battle → SCR_Battle_Init
+
+COMMON PITFALLS
+- Wrong instance creation order breaks hand/deck refs
+- Playing cards without open zone (trait openzone)
+
+FUTURE EXPANSION
+- Status effect stack UI
+- Multi-wave battles without room reload
+
+PARENT / CHILD
+- OBJ_BattleManager: no parent object

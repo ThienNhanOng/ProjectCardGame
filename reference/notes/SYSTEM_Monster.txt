@@ -1,0 +1,51 @@
+Monster System — System Summary
+
+
+PURPOSE
+Spawn enemy waves, run enemy animations, execute enemy abilities on enemy turn.
+
+MAIN SCRIPTS
+- SCR_Monster_Init, SCR_Monster_Data, SCR_Monster_Queue, SCR_Monster_Draw
+- SCR_Monster_AnimRegistry + per-enemy SCR_MonsterAnim_*
+- SCR_MonsterAbility_Core, SCR_MonsterAbility_Execute, SCR_MonsterAbility_Picker
+- SCR_MonsterAbility_* (Attack, Buff, Summon, Discard, etc.)
+- LoadMonsters.gml
+
+MAIN OBJECTS
+- OBJ_MonsterManager
+
+RESPONSIBILITIES
+- Read wave from battle_runtime_config or Battle01.json
+- Queue spawns, HP, death, victory check
+- Register and play attack animations per enemy type
+- Dispatch enemyability JSON on enemy turn
+
+DEPENDENCIES
+- monster_DB / EnemyCollection01.json
+- SCR_Battle_EnemyTurn calls ability execute
+- SCR_Trait relay for some cross-system effects
+
+PUBLIC API
+- SCR_Monster_Init()
+- monster_CheckVictory() — triggers worldmap notify
+- SCR_MonsterAbility_Execute(enemy, ability_entry)
+
+INITIALIZATION ORDER
+Last in Room_battle creation order (after BattleManager)
+
+RUNTIME FLOW
+Init wave → spawn enemies → enemy turn → pick ability → animate → damage/buff
+
+EXAMPLE
+battle01 in battleset JSON lists enemy ids → Monster_Init spawns queue
+
+COMMON PITFALLS
+- Enemy id in battleset not in monster_DB
+- Missing animation registry entry → static sprite
+
+FUTURE EXPANSION
+- Boss phases as sub-queues
+- On-death enemy traits
+
+PARENT / CHILD
+- OBJ_MonsterManager: no parent object

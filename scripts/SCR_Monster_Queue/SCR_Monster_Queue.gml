@@ -10,9 +10,7 @@ function monster_SpawnIntoSlot(_board, _slot_index) {
     var _monster = monster_CreateInstance(_entry);
     if (_monster == undefined) {
         array_insert(monster_queue, 0, _entry);
-        show_debug_message("Spawn failed: " + string(_entry.collection)
-            + " ID " + string(_entry.enemyID));
-        return false;
+return false;
     }
 
     var _slot = _board.enemy_slots[_slot_index];
@@ -20,10 +18,7 @@ function monster_SpawnIntoSlot(_board, _slot_index) {
     _slot.visible = true;
     _slot.card = _monster;
 
-    show_debug_message("Spawned " + _monster.name + " into slot " + string(_slot_index)
-        + " | Queue waiting: " + string(array_length(monster_queue)));
-
-    return true;
+return true;
 }
 
 function monster_FillActiveSlots(_board) {
@@ -45,12 +40,8 @@ function monster_ApplyDamage(_slot_index, _amount) {
     if (!_slot.occupied || _slot.card == undefined || !_slot.card.alive) return;
 
     _slot.card.health = max(0, _slot.card.health - _amount);
-    show_debug_message(_slot.card.name + " (slot " + string(_slot_index) + ") took " + string(_amount)
-        + " damage | HP: " + string(_slot.card.health) + "/" + string(_slot.card.max_health));
-
-    if (_slot.card.health <= 0) {
-        show_debug_message(_slot.card.name + " defeated in slot " + string(_slot_index) + "!");
-        monsterAbility_OnDeath(_slot.card);
+if (_slot.card.health <= 0) {
+monsterAbility_OnDeath(_slot.card);
         _slot.occupied = false;
         _slot.card = undefined;
         monster_SpawnIntoSlot(_board, _slot_index);
@@ -73,8 +64,7 @@ function monster_CheckVictory(_board) {
     }
 
     battle_won = true;
-    show_debug_message("All enemies defeated!");
-    worldmap_NotifyBattleVictory();
+worldmap_NotifyBattleVictory();
 }
 
 function monster_GetQueueCount() {
@@ -100,9 +90,7 @@ function monster_QueueInsertFront(_entry) {
             monster_FillActiveSlots(_board);
         }
 
-        show_debug_message("Queued " + string(_entry.collection) + " enemy ID "
-            + string(_entry.enemyID) + " at front | waiting: " + string(array_length(monster_queue)));
-    }
+}
 
     return true;
 }

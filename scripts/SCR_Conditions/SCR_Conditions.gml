@@ -423,13 +423,8 @@ function conditions_TryBeginFromExtraDeck(_deck_index) {
 
     if (_ok) {
         with (_deck) deck_ExtraDeckPicker_Close();
-        show_debug_message("Summoning " + _card.name + "...");
     } else {
         with (_deck) deck_AddExtraCardEntry(_entry);
-        var _reason = "";
-        with (_bm) { _reason = conditions_GetSummonFailReason(_card); }
-        show_debug_message("Cannot summon " + _card.name
-            + (_reason != "" ? " — " + _reason : " — conditions not met"));
     }
     return _ok;
 }
@@ -463,8 +458,7 @@ function conditions_CancelSummon() {
         if (_deck != noone) {
             with (_deck) deck_AddExtraCardEntry(conditions_summon_return_entry);
         }
-        show_debug_message("Summon cancelled — spirit returned to extra deck");
-    }
+}
     conditions_summon_Reset();
 }
 
@@ -669,11 +663,9 @@ function conditions_CompleteSummonOnSlot(_slot_index) {
             if (_summon_card.astral_remaining <= 0) {
                 _summon_card.spirit_expired = true;
                 battle_PermanentlyRemoveSpiritById(_summon_card.id);
-                show_debug_message(_summon_card.name + " astral summons exhausted — removed permanently");
-            }
+}
         }
-        show_debug_message(conditions_summon_card.name + " summoned!");
-        conditions_summon_Reset();
+conditions_summon_Reset();
     }
     return _placed;
 }
@@ -772,8 +764,7 @@ function conditions_summon_Step() {
             if (conditions_CompleteSummonOnSlot(_slot)) {
                 battle_SkipFollowUpInputThisFrame();
             } else {
-                show_debug_message("Cannot summon there");
-            }
+}
         }
         return;
     }

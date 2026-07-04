@@ -248,8 +248,7 @@ function card_AppendCostEntry(_card, _entry) {
 
     card_NormalizeCostsOnCard(_card);
     array_push(_card.costs, _entry);
-    show_debug_message("Added cost to " + _card.name + ": " + card_FormatCostEntry(_entry));
-    return true;
+return true;
 }
 
 function card_BuildCostEntryFromTrait(_trait) {

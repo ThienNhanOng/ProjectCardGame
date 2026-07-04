@@ -9,8 +9,7 @@ function worldmap_StartBattle(_battle_id, _battleset_file = "") {
         _battleset_file = global.worldmap.battleset_file;
     }
     if (_battleset_file == "") {
-        show_debug_message("worldmap_StartBattle: no battleset file set");
-        return false;
+return false;
     }
 
     var _config = battle_GetBattlesetBattle(_battleset_file, _battle_id);
@@ -28,14 +27,12 @@ function worldmap_LaunchEventBattle(_event_id) {
     dialog_ForceClose();
 
     if (!worldmap_CanInteractEvent(_event_id)) {
-        show_debug_message("Event " + string(_event_id) + " is locked");
-        return false;
+return false;
     }
 
     var _battle_id = worldmap_ResolveBattleIdForEvent(_event_id);
     if (_battle_id == "") {
-        show_debug_message("Event " + string(_event_id) + " has no battle configured");
-        return false;
+return false;
     }
 
     var _config = battle_GetBattlesetBattle(worldmap_GetEventBattleset(_event_id), _battle_id);
@@ -49,8 +46,7 @@ function worldmap_LaunchEventBattle(_event_id) {
     global.worldmap.victory_pending = false;
     global.worldmap.return_room = room;
 
-    show_debug_message("Launching " + _label + " -> " + _battle_id);
-    room_goto(Room_battle);
+room_goto(Room_battle);
     return true;
 }
 
@@ -325,8 +321,6 @@ function worldmap_MarkRewardObtained(_entry) {
     if (worldmap_IsRewardObtained(_norm)) return;
 
     array_push(global.worldmap.rewards_obtained, _key);
-    show_debug_message("One-time reward obtained: card id " + string(_norm.id)
-        + (_norm.collection != "" ? " (" + _norm.collection + ")" : ""));
 }
 
 /// @desc Drop one-time entries already obtained; keep repeatable entries

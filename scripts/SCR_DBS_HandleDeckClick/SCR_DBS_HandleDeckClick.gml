@@ -104,8 +104,7 @@ function SCR_DBS_HandleCollectionRightClick() {
         for (var i = 0; i < array_length(_builder.selected_deck); i++) {
             if (_builder.selected_deck[i].id == card_id) {
                 array_delete(_builder.selected_deck, i, 1);
-                show_debug_message("Returned " + card_data.name + " to collection");
-                player_deck_PersistSelectedDeck(_builder);
+player_deck_PersistSelectedDeck(_builder);
                 SCR_DBD_RebuildGrid();
                 break;
             }
@@ -133,8 +132,7 @@ function SCR_DBS_HandleDeckClick() {
 
             for (var d = 0; d < array_length(selected_deck); d++) {
                 if (selected_deck[d].id == _removed_id) {
-                    show_debug_message("Returned " + selected_deck[d].name + " to collection");
-                    array_delete(selected_deck, d, 1);
+array_delete(selected_deck, d, 1);
                     player_deck_PersistSelectedDeck();
                     break;
                 }

@@ -600,9 +600,7 @@ function trait_ExecuteOnPlay(_trait, _player_slot) {
 
         default:
 
-            show_debug_message("On-play trait pending: " + _trait.type);
-
-            return false;
+return false;
 
     }
 

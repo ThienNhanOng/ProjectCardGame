@@ -70,8 +70,7 @@ function trait_ExecuteAddCostToChain(_trait) {
         _applied = true;
     }
 
-    show_debug_message((_applied ? "Add cost applied: " : "Add cost queued: ") + card_FormatCostEntry(_entry));
-    return true;
+return true;
 }
 
 function trait_ExecuteAddCounter(_trait, _player_slot = -1) {

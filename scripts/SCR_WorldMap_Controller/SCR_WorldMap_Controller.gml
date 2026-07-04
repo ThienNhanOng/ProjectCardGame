@@ -34,14 +34,6 @@ function SCR_WorldMapController_DrawHUD() {
     var _gw = display_get_gui_width();
     var _gh = display_get_gui_height();
 
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-    draw_set_color(c_white);
-    draw_text(12, _gh - 72, "Map: " + global.worldmap.map_id);
-    draw_text(12, _gh - 56, "Progress: " + string(array_length(global.worldmap.cleared))
-        + " / " + string(array_length(global.worldmap.event_flow)));
-    draw_text(12, _gh - 40, "WASD move | E interact at active markers");
-    draw_set_color(c_white);
-
+    debug_DrawWorldMapInfo(_gw, _gh);
     worldmap_DrawCollectionButton();
 }

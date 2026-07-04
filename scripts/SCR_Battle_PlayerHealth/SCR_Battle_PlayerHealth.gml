@@ -37,10 +37,7 @@ function battle_DamagePlayer(_amount) {
 
     with (_bm) {
         player_health = max(0, player_health - _amount);
-        show_debug_message("Player took " + string(_amount) + " damage"
-            + " | HP: " + string(player_health) + "/" + string(player_max_health));
-
-        if (player_health <= 0) {
+if (player_health <= 0) {
             battle_PlayerDefeat();
         }
     }
@@ -56,9 +53,7 @@ function battle_HealPlayer(_amount) {
 
     with (_bm) {
         player_health = min(player_max_health, player_health + _amount);
-        show_debug_message("Player healed " + string(_amount)
-            + " | HP: " + string(player_health) + "/" + string(player_max_health));
-    }
+}
     return true;
 }
 
@@ -79,14 +74,11 @@ function battle_IncreasePlayerMaxHealth(_amount) {
         }
     }
 
-    show_debug_message("Player max health permanently increased by " + string(_amount)
-        + " -> " + string(global.player_max_health));
-    return true;
+return true;
 }
 
 function battle_PlayerDefeat() {
     battle_lost = true;
-    show_debug_message("Player defeated!");
 }
 
 function battle_GetPlayerHealthBarRect() {

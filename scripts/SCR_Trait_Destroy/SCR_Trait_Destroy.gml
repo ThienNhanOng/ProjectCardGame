@@ -19,8 +19,7 @@ function battle_DestroyEnemyMonster(_slot_index) {
     var _slot = _board.enemy_slots[_slot_index];
     if (!_slot.occupied || _slot.card == undefined || !_slot.card.alive) return false;
 
-    show_debug_message(_slot.card.name + " destroyed in enemy slot " + string(_slot_index));
-    _slot.occupied = false;
+_slot.occupied = false;
     _slot.card = undefined;
 
     with (_mm) {

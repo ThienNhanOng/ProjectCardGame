@@ -243,8 +243,7 @@ function SCR_Battle_Targeting_Step() {
         if (_player_slot < 0) return;
 
         if (battle_IsPlayerMonsterSlotShrouded(_player_slot)) {
-            show_debug_message("Cannot attack — that monster is shrouded");
-            return;
+return;
         }
 
         pending_player_slot = _player_slot;

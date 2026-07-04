@@ -76,13 +76,8 @@ function SCR_DBD_DrawCollectionToolbar() {
 
 function SCR_DBD_DrawDeckInfo() {
     var _deck_size = array_length(selected_deck);
-
-    draw_set_color(c_white);
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-    draw_text(container_x, container_y + container_h + 10, "Deck: " + string(_deck_size) + "/" + string(collection_GetDeckMaxSize()));
-
-    draw_text(container_x + 90, container_y + container_h + 10, "|");
+    var _info_y = container_y + container_h + 10;
+    var _label_gap = 16;
 
     var _spirit_owned = 0;
     for (var i = 0; i < array_length(global.player_collection); i++) {
@@ -91,7 +86,19 @@ function SCR_DBD_DrawDeckInfo() {
             _spirit_owned += _card.owned;
         }
     }
-    draw_text(container_x + 105, container_y + container_h + 10, "Spirit: " + string(_spirit_owned));
+
+    draw_set_color(c_white);
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+
+    var _deck_text = "Deck: " + string(_deck_size) + " / " + string(collection_GetDeckMaxSize());
+    draw_text(container_x, _info_y, _deck_text);
+
+    var _sep_x = container_x + string_width(_deck_text) + _label_gap;
+    draw_text(_sep_x, _info_y, "|");
+
+    var _spirit_x = _sep_x + string_width("|") + _label_gap;
+    draw_text(_spirit_x, _info_y, "Spirit: " + string(_spirit_owned));
 
     if (_deck_size >= 8) {
         draw_set_color(c_green);

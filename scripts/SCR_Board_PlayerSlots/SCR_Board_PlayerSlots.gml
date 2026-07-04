@@ -42,5 +42,4 @@ function SCR_Board_PlayerSlots() {
         });
     }
     
-    show_debug_message("Player slots initialized.");
 }
