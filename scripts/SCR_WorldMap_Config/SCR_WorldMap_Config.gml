@@ -3,6 +3,17 @@
 #macro WORLDMAP_INTERACT_RADIUS 56
 #macro WORLDMAP_SNAP_OFFSET_Y 40
 #macro WORLDMAP_SNAP_BREAK_HOLD 0.25
+#macro WORLDMAP_BG_OFFSET_Y -64
+#macro WORLDMAP_SPRITE_TOP_BAR 120
+#macro WORLDMAP_SPRITE_BOTTOM_BAR 120
+#macro WORLDMAP_MOVE_X_MIN 16
+#macro WORLDMAP_MOVE_X_MAX 1200
+#macro WORLDMAP_MOVE_Y_MIN 50
+#macro WORLDMAP_MOVE_Y_MAX 536
+#macro WORLDMAP_COLLECTION_BTN_X 1128
+#macro WORLDMAP_COLLECTION_BTN_Y 606
+#macro WORLDMAP_COLLECTION_BTN_W 130
+#macro WORLDMAP_COLLECTION_BTN_H 36
 
 enum WORLDMAP_EVENT_STATE {
     LOCKED,
@@ -53,6 +64,33 @@ function worldmap_InitGlobals() {
         || !is_array(global.worldmap.rewards_obtained)) {
         global.worldmap.rewards_obtained = [];
     }
+}
+
+function worldmap_GetMapContentTopY() {
+    return WORLDMAP_BG_OFFSET_Y + WORLDMAP_SPRITE_TOP_BAR;
+}
+
+function worldmap_GetMapContentBottomY() {
+    return WORLDMAP_BG_OFFSET_Y + sprite_get_height(SPR_PlaceholderMap) - WORLDMAP_SPRITE_BOTTOM_BAR;
+}
+
+function worldmap_RoomXToGui(_room_x) {
+    if (room_width <= 0) return _room_x;
+    return _room_x * (display_get_gui_width() / room_width);
+}
+
+function worldmap_RoomYToGui(_room_y) {
+    if (room_height <= 0) return _room_y;
+    return _room_y * (display_get_gui_height() / room_height);
+}
+
+function worldmap_GetMovementBounds() {
+    return {
+        x1: WORLDMAP_MOVE_X_MIN,
+        y1: WORLDMAP_MOVE_Y_MIN,
+        x2: WORLDMAP_MOVE_X_MAX,
+        y2: WORLDMAP_MOVE_Y_MAX
+    };
 }
 
 function worldmap_GetEventKey(_event_id) {

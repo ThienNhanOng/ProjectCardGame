@@ -5,6 +5,7 @@
 #macro DEBUG_DRAW_WORLDMAP_INFO false
 #macro DEBUG_DRAW_BATTLE_STATUS false
 #macro DEBUG_DRAW_MOUSE_XY false
+#macro DEBUG_DRAW_WORLDMAP_XY false
 #macro DEBUG_DRAW_HAND_COUNT false
 #macro DEBUG_DRAW_ENEMY_HITBOXES false
 
@@ -24,6 +25,21 @@ function debug_DrawWorldMapInfo(_gw, _gh) {
     draw_text(12, _gh - 56, "Progress: " + string(array_length(global.worldmap.cleared))
         + " / " + string(array_length(global.worldmap.event_flow)));
     draw_text(12, _gh - 40, "WASD move | E interact at active markers");
+}
+
+function debug_DrawWorldMapCoordinates() {
+    if (!DEBUG_DRAW_WORLDMAP_XY) return;
+
+    var _player = instance_find(OBJ_PlayerMarker, 0);
+    var _px = (_player != noone) ? floor(_player.x) : -1;
+    var _py = (_player != noone) ? floor(_player.y) : -1;
+
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_color(c_yellow);
+    draw_text(12, 8, "Player: " + string(_px) + ", " + string(_py));
+    draw_text(12, 24, "Mouse: " + string(floor(mouse_x)) + ", " + string(floor(mouse_y)));
+    draw_set_color(c_white);
 }
 
 /// Field = living enemies on board. DB = monster database entry count.

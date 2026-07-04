@@ -177,8 +177,9 @@ function worldmap_PlayerMovementStep(_inst) {
         }
     }
 
-    _inst.x = clamp(_inst.x, 120, 1245);
-    _inst.y = clamp(_inst.y, 160, 650);
+    var _bounds = worldmap_GetMovementBounds();
+    _inst.x = clamp(_inst.x, _bounds.x1, _bounds.x2);
+    _inst.y = clamp(_inst.y, _bounds.y1, _bounds.y2);
 }
 
 function worldmap_BattleVictoryStep() {
@@ -238,13 +239,14 @@ function worldmap_GetRoomConfigFile(_room = room) {
 }
 
 function worldmap_GetCollectionButtonBounds() {
-    var _w = display_get_gui_width();
-    var _h = display_get_gui_height();
+    var _half_w = WORLDMAP_COLLECTION_BTN_W * 0.5;
+    var _half_h = WORLDMAP_COLLECTION_BTN_H * 0.5;
+
     return {
-        x1: _w - 150,
-        y1: _h - 48,
-        x2: _w - 20,
-        y2: _h - 12
+        x1: worldmap_RoomXToGui(WORLDMAP_COLLECTION_BTN_X - _half_w),
+        y1: worldmap_RoomYToGui(WORLDMAP_COLLECTION_BTN_Y - _half_h),
+        x2: worldmap_RoomXToGui(WORLDMAP_COLLECTION_BTN_X + _half_w),
+        y2: worldmap_RoomYToGui(WORLDMAP_COLLECTION_BTN_Y + _half_h)
     };
 }
 
