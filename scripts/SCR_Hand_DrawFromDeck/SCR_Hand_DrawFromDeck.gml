@@ -21,7 +21,8 @@ return false;
     }
 
     if (_card_id == -1) {
-return false;
+        battle_SpiritShuffle_OnDeckEmpty();
+        return false;
     }
 
     var _card_data = undefined;

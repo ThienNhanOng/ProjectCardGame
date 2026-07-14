@@ -60,6 +60,37 @@ function dialog_NameGuide(_display_name) {
     return dialog_Name("guide", _display_name);
 }
 
+/// @desc Set the left speaker display name (and key). Use with dialog_LeftLine().
+/// @param _key Optional speaker key; defaults to lowercased display name
+function dialog_LeftName(_display_name, _key = "") {
+    var _k = (_key != "") ? string_lower(string(_key)) : string_lower(string_replace(_display_name, " ", "_"));
+    return { kind: "left_name", key: _k, display: string(_display_name) };
+}
+
+/// @desc Set the right speaker display name (and key). Use with dialog_RightLine().
+function dialog_RightName(_display_name, _key = "") {
+    var _k = (_key != "") ? string_lower(string(_key)) : string_lower(string_replace(_display_name, " ", "_"));
+    return { kind: "right_name", key: _k, display: string(_display_name) };
+}
+
+function dialog_ChangeLeftName(_display_name, _key = "") {
+    return dialog_LeftName(_display_name, _key);
+}
+
+function dialog_ChangeRightName(_display_name, _key = "") {
+    return dialog_RightName(_display_name, _key);
+}
+
+/// @desc Dialog line for whoever is currently set as the left speaker
+function dialog_LeftLine(_text) {
+    return { kind: "left_line", text: string(_text) };
+}
+
+/// @desc Dialog line for whoever is currently set as the right speaker
+function dialog_RightLine(_text) {
+    return { kind: "right_line", text: string(_text) };
+}
+
 function dialog_ClearChars() {
     return { kind: "clear" };
 }

@@ -85,7 +85,11 @@ function battle_DestroyPlayerMonster(_slot_index) {
     var _name = _card.name;
 
     if (battle_IsSpiritMonster(_card)) {
-        battle_PermanentlyLoseSpirit(_card);
+        if (card_IsAstral(_card)) {
+            battle_PermanentlyLoseSpirit(_card);
+        } else {
+            _card.spirit_temp_consumed = true;
+        }
     }
 
     var _bm = instance_find(OBJ_BattleManager, 0);

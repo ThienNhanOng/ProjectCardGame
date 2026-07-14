@@ -155,6 +155,6 @@ function monsterAbility_Picker_Draw() {
         with (_deck) _ids = deck_ExtraDeckPicker_GetExtraDeckIds();
 
         deck_ScrollPicker_DrawPanel("Choose card to discard", _ids, monsterAbility_picker_extra_scroll,
-            monsterAbility_picker_extra_focus, "No cards in extra deck", "Click card to discard");
+            monsterAbility_picker_extra_focus, "No cards in extra deck", "Click card to discard", true);
     }
 }

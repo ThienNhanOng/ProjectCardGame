@@ -23,6 +23,61 @@ function dialog_ParseNameLine(_line) {
     return dialog_Name(_key, _display);
 }
 
+function dialog_ParseSideNameLine(_line) {
+    var _lower = string_lower(string_trim(_line));
+    var _is_left = false;
+    var _body = "";
+
+    if (string_pos("leftname:", _lower) == 1) {
+        _is_left = true;
+        _body = string_trim(string_copy(_line, 10, string_length(_line)));
+    } else if (string_pos("leftname ", _lower) == 1) {
+        _is_left = true;
+        _body = string_trim(string_copy(_line, 9, string_length(_line)));
+    } else if (string_pos("rightname:", _lower) == 1) {
+        _is_left = false;
+        _body = string_trim(string_copy(_line, 11, string_length(_line)));
+    } else if (string_pos("rightname ", _lower) == 1) {
+        _is_left = false;
+        _body = string_trim(string_copy(_line, 10, string_length(_line)));
+    } else if (string_pos("change leftname to ", _lower) == 1) {
+        _is_left = true;
+        _body = string_trim(string_copy(_line, 19, string_length(_line)));
+    } else if (string_pos("change rightname to ", _lower) == 1) {
+        _is_left = false;
+        _body = string_trim(string_copy(_line, 20, string_length(_line)));
+    } else {
+        return undefined;
+    }
+
+    if (_body == "") return undefined;
+    return _is_left ? dialog_LeftName(_body) : dialog_RightName(_body);
+}
+
+function dialog_ParseSideDialogLine(_line) {
+    var _lower = string_lower(string_trim(_line));
+    var _is_left = false;
+    var _text = "";
+
+    if (string_pos("left dialog:", _lower) == 1) {
+        _is_left = true;
+        _text = string_trim(string_copy(_line, 13, string_length(_line)));
+    } else if (string_pos("left dialog ", _lower) == 1) {
+        _is_left = true;
+        _text = string_trim(string_copy(_line, 12, string_length(_line)));
+    } else if (string_pos("right dialog:", _lower) == 1) {
+        _is_left = false;
+        _text = string_trim(string_copy(_line, 14, string_length(_line)));
+    } else if (string_pos("right dialog ", _lower) == 1) {
+        _is_left = false;
+        _text = string_trim(string_copy(_line, 13, string_length(_line)));
+    } else {
+        return undefined;
+    }
+
+    return _is_left ? dialog_LeftLine(_text) : dialog_RightLine(_text);
+}
+
 function dialog_ParseSideVisibleCommand(_cmd, _raw_cmd) {
     var _side = "";
     if (string_pos("left", _cmd) == 1) _side = "left";
@@ -96,6 +151,18 @@ function dialog_ParseTextScript(_text) {
         var _name_entry = dialog_ParseNameLine(_line);
         if (_name_entry != undefined) {
             array_push(_entries, _name_entry);
+            continue;
+        }
+
+        var _side_name_entry = dialog_ParseSideNameLine(_line);
+        if (_side_name_entry != undefined) {
+            array_push(_entries, _side_name_entry);
+            continue;
+        }
+
+        var _side_dialog_entry = dialog_ParseSideDialogLine(_line);
+        if (_side_dialog_entry != undefined) {
+            array_push(_entries, _side_dialog_entry);
             continue;
         }
 

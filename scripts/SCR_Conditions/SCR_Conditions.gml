@@ -120,8 +120,7 @@ function conditions_GetRequirementText(_cond) {
             var _type_label = conditions_FormatCardTypesLabel(_cond.card_types);
             return "Discard " + string(_cond.amount) + " [" + conditions_JoinTags(_cond.tags) + "] " + _type_label + " card(s)";
         case "astral":
-            if (_cond.amount > 1) return "Astral — " + string(_cond.amount) + " summons";
-            return "Astral — 1 summon";
+            return "Astral — persists in extra deck";
         default: return string(_cond.type);
     }
 }
@@ -373,9 +372,9 @@ function conditions_GetSummonFailReason(_card) {
     return "";
 }
 
-/// @desc True when this spirit has a limited number of summons (astral condition)
+/// @desc True when this spirit persists in the extra deck unless it dies on board
 function card_IsAstral(_card_or_id) {
-    return card_GetAstralSummonLimit(_card_or_id) > 0;
+    return card_HasAstralCondition(_card_or_id);
 }
 
 function conditions_CanSummon(_card) {
@@ -404,10 +403,6 @@ function conditions_TryBeginFromExtraDeck(_deck_index) {
     if (_card == undefined) {
         with (_deck) deck_AddExtraCardEntry(_entry);
         return false;
-    }
-
-    if (extraDeck_GetAstralRemaining(_entry) > 0) {
-        _card.astral_remaining = extraDeck_GetAstralRemaining(_entry);
     }
 
     var _bm = instance_find(OBJ_BattleManager, 0);
@@ -658,14 +653,7 @@ function conditions_CompleteSummonOnSlot(_slot_index) {
     with (_board) _placed = SCR_Board_PlaceCard(_slot, _summon_card);
 
     if (_placed) {
-        if (variable_struct_exists(_summon_card, "astral_remaining")) {
-            _summon_card.astral_remaining = max(0, floor(_summon_card.astral_remaining) - 1);
-            if (_summon_card.astral_remaining <= 0) {
-                _summon_card.spirit_expired = true;
-                battle_PermanentlyRemoveSpiritById(_summon_card.id);
-}
-        }
-conditions_summon_Reset();
+        conditions_summon_Reset();
     }
     return _placed;
 }

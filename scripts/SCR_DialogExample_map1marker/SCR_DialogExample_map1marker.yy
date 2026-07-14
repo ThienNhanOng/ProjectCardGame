@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"SCR_DialogExample_map1marker",
   "parent":{
-    "name":"DialogSystem",
-    "path":"folders/scripts/WorldMap/DialogSystem.yy",
+    "name":"map1Dialog",
+    "path":"folders/scripts/WorldMap/DialogSystem/MapDialogs/map1Dialog.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

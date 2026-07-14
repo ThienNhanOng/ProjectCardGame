@@ -268,7 +268,7 @@ function deck_ScrollPicker_ApplyScrollInput(_card_ids, _scroll, _focus) {
 
 
 
-function deck_ScrollPicker_DrawPanel(_title, _card_ids, _scroll, _focus, _empty_text, _footer_hint) {
+function deck_ScrollPicker_DrawPanel(_title, _card_ids, _scroll, _focus, _empty_text, _footer_hint, _keep_cards_in_box = false) {
 
     var _layout = deck_ScrollPicker_GetLayout();
 
@@ -349,10 +349,8 @@ function deck_ScrollPicker_DrawPanel(_title, _card_ids, _scroll, _focus, _empty_
 
 
     var _prev_scissor = gpu_get_scissor();
-
-    gpu_set_scissor(floor(_clip_left - 10), floor(_clip_top - 12),
-
-        floor(_clip_right - _clip_left + 20), floor(_clip_bottom - _clip_top + 24));
+    gpu_set_scissor(floor(_clip_left), floor(_clip_top),
+        floor(_clip_right - _clip_left), floor(_clip_bottom - _clip_top));
 
 
 
@@ -370,7 +368,7 @@ function deck_ScrollPicker_DrawPanel(_title, _card_ids, _scroll, _focus, _empty_
 
 
 
-        SCR_ExtraDeck_DrawCard(_box.left, _box.top, _layout.card_w, _layout.card_h, _card_data, i == _focus);
+        SCR_ExtraDeck_DrawCard(_box.left, _box.top, _layout.card_w, _layout.card_h, _card_data, i == _focus, _keep_cards_in_box);
 
     }
 

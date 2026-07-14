@@ -30,6 +30,8 @@ function SCR_Battle_Init() {
 
     battle_InitResources();
 
+    battle_SpiritShuffle_Init();
+
     conditions_summon_Reset();
 
     battle_skip_followup_input = false;

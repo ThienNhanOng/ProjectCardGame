@@ -4,7 +4,7 @@
 #macro DEBUG_LOG_ENABLED false
 #macro DEBUG_DRAW_WORLDMAP_INFO false
 #macro DEBUG_DRAW_BATTLE_STATUS false
-#macro DEBUG_DRAW_MOUSE_XY false
+#macro DEBUG_DRAW_MOUSE_XY true
 #macro DEBUG_DRAW_WORLDMAP_XY false
 #macro DEBUG_DRAW_HAND_COUNT false
 #macro DEBUG_DRAW_ENEMY_HITBOXES false
@@ -74,8 +74,14 @@ function debug_DrawBattleStatus(_monster_manager_id) {
 function debug_DrawMouseCoordinates() {
     if (!DEBUG_DRAW_MOUSE_XY) return;
 
-    draw_set_color(c_purple);
-    draw_text(23, 21, string(mouse_x) + " " + string(mouse_y));
+    var _text = "X: " + string(floor(mouse_x)) + "  Y: " + string(floor(mouse_y));
+
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_color(c_black);
+    draw_text(9, 9, _text);
+    draw_set_color(c_yellow);
+    draw_text(8, 8, _text);
     draw_set_color(c_white);
 }
 

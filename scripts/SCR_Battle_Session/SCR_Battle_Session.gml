@@ -52,6 +52,20 @@ function battle_GetDeckSourceCopy() {
     return _copy;
 }
 
+/// @desc Clone of the main deck at battle start (spirit shuffle refill source)
+function battle_GetInitialMainDeckCopy() {
+    var _copy = [];
+    if (variable_global_exists("battle_initial_main_deck")
+        && is_array(global.battle_initial_main_deck)) {
+        for (var i = 0; i < array_length(global.battle_initial_main_deck); i++) {
+            array_push(_copy, global.battle_initial_main_deck[i]);
+        }
+    }
+
+    if (array_length(_copy) > 0) return _copy;
+    return battle_GetDeckSourceCopy();
+}
+
 function battle_GetExtraDeckSourceCopy() {
     battle_MigrateLegacyDeckSources();
 
@@ -75,28 +89,10 @@ function extraDeck_GetCardId(_entry) {
     return floor(real(_entry));
 }
 
-function extraDeck_GetAstralRemaining(_entry) {
-    if (_entry == undefined) return 0;
-    if (is_struct(_entry) && variable_struct_exists(_entry, "astral_remaining")) {
-        return max(0, floor(_entry.astral_remaining));
-    }
-    return card_GetAstralSummonLimit(extraDeck_GetCardId(_entry));
-}
-
-function extraDeck_CreateEntry(_card_id, _astral_remaining = undefined) {
+function extraDeck_CreateEntry(_card_id) {
     _card_id = floor(real(_card_id));
     if (_card_id <= 0) return undefined;
-
-    if (_astral_remaining == undefined) {
-        _astral_remaining = card_GetAstralSummonLimit(_card_id);
-    } else {
-        _astral_remaining = max(0, floor(_astral_remaining));
-    }
-
-    return {
-        id: _card_id,
-        astral_remaining: _astral_remaining
-    };
+    return { id: _card_id };
 }
 
 function extraDeck_NormalizeEntry(_raw) {
@@ -105,12 +101,7 @@ function extraDeck_NormalizeEntry(_raw) {
     if (is_struct(_raw)) {
         var _id = extraDeck_GetCardId(_raw);
         if (_id <= 0) return undefined;
-
-        var _remaining = extraDeck_GetAstralRemaining(_raw);
-        if (!variable_struct_exists(_raw, "astral_remaining")) {
-            _remaining = card_GetAstralSummonLimit(_id);
-        }
-        return extraDeck_CreateEntry(_id, _remaining);
+        return extraDeck_CreateEntry(_id);
     }
 
     return extraDeck_CreateEntry(_raw);
@@ -118,16 +109,12 @@ function extraDeck_NormalizeEntry(_raw) {
 
 function extraDeck_EntryFromRuntimeCard(_card) {
     if (_card == undefined || !variable_struct_exists(_card, "id")) return undefined;
-
-    var _id = floor(real(_card.id));
-    var _remaining = 0;
-    if (variable_struct_exists(_card, "astral_remaining")) {
-        _remaining = max(0, floor(_card.astral_remaining));
-    }
-    return extraDeck_CreateEntry(_id, _remaining);
+    if (!card_IsAstral(_card)) return undefined;
+    return extraDeck_CreateEntry(_card.id);
 }
 
-function card_GetAstralSummonLimit(_card_or_id) {
+/// @desc True when a spirit card has the astral condition (persists in extra deck unless it dies)
+function card_HasAstralCondition(_card_or_id) {
     var _def = undefined;
 
     if (is_struct(_card_or_id)) {
@@ -140,24 +127,25 @@ function card_GetAstralSummonLimit(_card_or_id) {
         _def = deck_GetCardData(floor(_card_or_id));
     }
 
-    if (_def == undefined) return 0;
+    if (_def == undefined) return false;
 
     if (variable_struct_exists(_def, "astral")) {
-        if (is_bool(_def.astral) && _def.astral) return 1;
-        if (is_real(_def.astral) && _def.astral > 0) return floor(_def.astral);
+        if (is_bool(_def.astral) && _def.astral) return true;
+        if (is_real(_def.astral) && _def.astral > 0) return true;
     }
 
     var _reqs = conditions_GetRequirements(_def);
     for (var i = 0; i < array_length(_reqs); i++) {
-        if (_reqs[i].type == "astral") return max(1, _reqs[i].amount);
+        if (_reqs[i].type == "astral") return true;
     }
-    return 0;
+    return false;
 }
 
 /// @desc Called from Room_battle creation code before instances spawn
 function battle_BeginSession() {
     battle_MigrateLegacyDeckSources();
     global.battleset_cache = {};
+    global.battle_initial_main_deck = battle_GetDeckSourceCopy();
 
     battle_EnsureMonsterDatabase();
 
@@ -193,6 +181,10 @@ function battle_PermanentlyLoseSpirit(_card) {
 return true;
     }
 
+    if (variable_struct_exists(_card, "spirit_temp_consumed") && _card.spirit_temp_consumed) {
+        return true;
+    }
+
     battle_PermanentlyRemoveSpiritById(_card_id);
 return true;
 }
@@ -207,7 +199,6 @@ function battle_SyncExtraDeckFromBattleState() {
             for (var i = 0; i < extra_deck_Count; i++) {
                 var _entry = extraDeck_NormalizeEntry(extra_deck[i]);
                 if (_entry == undefined) continue;
-                if (extraDeck_GetAstralRemaining(_entry) == 0 && card_GetAstralSummonLimit(_entry) > 0) continue;
                 array_push(_extra_entries, _entry);
             }
         }
@@ -220,10 +211,8 @@ function battle_SyncExtraDeckFromBattleState() {
             if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
             if (!battle_IsSpiritMonster(_slot.card)) continue;
             if (variable_struct_exists(_slot.card, "spirit_expired") && _slot.card.spirit_expired) continue;
-            if (variable_struct_exists(_slot.card, "astral_remaining") && _slot.card.astral_remaining <= 0
-                && card_GetAstralSummonLimit(_slot.card) > 0) {
-                continue;
-            }
+            if (variable_struct_exists(_slot.card, "spirit_temp_consumed") && _slot.card.spirit_temp_consumed) continue;
+            if (!card_IsAstral(_slot.card)) continue;
 
             var _entry = extraDeck_EntryFromRuntimeCard(_slot.card);
             if (_entry != undefined) array_push(_extra_entries, _entry);

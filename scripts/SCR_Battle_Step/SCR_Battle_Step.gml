@@ -38,6 +38,11 @@ function SCR_Battle_Step() {
         }
     }
 
+    if (battle_SpiritShuffle_IsActive()) {
+        battle_SpiritShuffle_Step();
+        return;
+    }
+
     worldmap_BattleVictoryStep();
 
     if (battle_IsPlayerPhase()) {

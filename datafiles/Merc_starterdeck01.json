@@ -3,7 +3,7 @@
   "cards": [
     {
       "id": 1,
-      "own": 2,
+      "own": 3,
       "cardRarity": 0,
       "name": "Mercenary Warrior I",
       "type": "monster",
@@ -14,18 +14,6 @@
         {
           "type": "add",
           "id": 7,
-          "repeat": false,
-          "recursion": 1
-        },
-        {
-          "type": "add_deck",
-          "id": 7,
-          "repeat": false,
-          "recursion": 1
-        },
-        {
-          "type": "add_extra_deck",
-          "id": 13,
           "repeat": false,
           "recursion": 1
         }
@@ -49,7 +37,7 @@
         },
         {
           "type": "add_deck",
-          "id": 8,
+          "id": 7,
           "repeat": false,
           "recursion": 1
         }
@@ -57,7 +45,7 @@
     },
     {
       "id": 3,
-      "own": 2,
+      "own": 1,
       "cardRarity": 0,
       "name": "Mercenary Recruiter I",
       "type": "monster",
@@ -75,7 +63,6 @@
     },
     {
       "id": 4,
-      "own": 1,
       "cardRarity": 1,
       "name": "Mercenary Recruiter II",
       "type": "monster",
@@ -116,7 +103,6 @@
     },
     {
       "id": 6,
-      "own": 3,
       "cardRarity": 0,
       "name": "Mercenary Footman",
       "type": "monster",
@@ -128,7 +114,7 @@
     },
     {
       "id": 7,
-      "own": 3,
+      "own": 2,
       "cardRarity": 0,
       "name": "Basic Strike",
       "type": "action",
@@ -146,7 +132,7 @@
     },
     {
       "id": 8,
-      "own": 2,
+      "own": 1,
       "cardRarity": 1,
       "name": "Advance Strike",
       "type": "action",
@@ -181,7 +167,6 @@
     },
     {
       "id": 10,
-      "own": 1,
       "cardRarity": 1,
       "name": "Double Payment",
       "type": "action",

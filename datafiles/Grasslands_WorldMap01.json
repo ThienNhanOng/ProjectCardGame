@@ -1,5 +1,6 @@
 {
   "map_id": "grasslands_01",
+  "map_name": "Map 1",
   "battleset": "Grasslands_Battleset01_starter.json",
   "event_flow": [1, 2, 3, 4, 5],
   "events": [

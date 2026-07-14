@@ -32,7 +32,13 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
-  "spriteMaskId":null,
+  "spriteId":{
+    "name":"Map_Marker_inactive",
+    "path":"sprites/Map_Marker_inactive/Map_Marker_inactive.yy",
+  },
+  "spriteMaskId":{
+    "name":"Map_Marker_inactive",
+    "path":"sprites/Map_Marker_inactive/Map_Marker_inactive.yy",
+  },
   "visible":true,
 }

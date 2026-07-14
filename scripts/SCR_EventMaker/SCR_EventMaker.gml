@@ -15,6 +15,8 @@ function eventmarker_init() {
     target_room = noone;
     target_x    = 0;
     target_y    = 0;
+    target_spawn_event_id = -1;
+    marker_goto_immediate = false;
     interact_hint = "Press E";
 
     // Room Editor instance variables (clone marker, then edit in Instance Variables)
@@ -98,6 +100,22 @@ function eventmarker_set_dialog_pre_once(_once = true) {
 /// @desc When true, post-battle dialog only plays after the event is first cleared
 function eventmarker_set_dialog_post_once(_once = true) {
     marker_dialog_post_once = _once;
+}
+
+/// @desc After winning this marker's battle, send the player to another room (first clear only)
+/// @param _room Room asset or name string, e.g. "Room_Worldmap2"
+/// @param _spawn_event_id Optional event id on the destination map (-1 = default room spawn)
+/// @param _immediate true = skip battle and transition on interact (pre-dialog still plays if set)
+function eventmarker_set_room_goto(_room, _spawn_event_id = -1, _immediate = false) {
+    target_room = room_Goto_ResolveRoom(_room);
+    target_spawn_event_id = floor(_spawn_event_id);
+    marker_goto_immediate = _immediate;
+
+    if (_immediate || marker_battle == "") {
+        marker_event_type = EVENT_TYPE.ROOM_TRANSITION;
+    } else {
+        marker_event_type = EVENT_TYPE.BATTLE;
+    }
 }
 
 function eventmarker_NormalizeRewardEntry(_raw) {
@@ -294,8 +312,31 @@ function eventmarker_LaunchBattleAfterDialog() {
 }
 
 function eventmarker_do_transition() {
-    global.spawn_x = target_x;
-    global.spawn_y = target_y;
+    if (target_room == -1 || !room_exists(target_room)) return;
+
+    var _skip_pre = marker_dialog_pre_once && worldmap_IsEventCleared(event_id);
+    if (marker_dialog_pre != undefined && !_skip_pre) {
+        dialog_Start(marker_dialog_pre, eventmarker_DoTransitionAfterDialog);
+        return;
+    }
+
+    eventmarker_DoTransitionAfterDialog();
+}
+
+function eventmarker_DoTransitionAfterDialog() {
+    dialog_ForceClose();
+
+    if (target_room == -1 || !room_exists(target_room)) return;
+
+    worldmap_InitGlobals();
+
+    if (target_spawn_event_id > 0) {
+        global.worldmap.pending_spawn_event_id = target_spawn_event_id;
+    } else if (target_x != 0 || target_y != 0) {
+        global.spawn_x = target_x;
+        global.spawn_y = target_y;
+    }
+
     room_goto(target_room);
 }
 

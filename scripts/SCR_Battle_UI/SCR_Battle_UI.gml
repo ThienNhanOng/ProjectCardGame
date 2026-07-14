@@ -250,10 +250,12 @@ function battle_GetPreviewSummaryLines(_card) {
     var _player_status = status_GetDisplayText(_card);
     if (_player_status != "") array_push(_lines, _player_status);
 
-    if (variable_struct_exists(_card, "astral_remaining")) {
-        array_push(_lines, "Astral summons left: " + string(max(0, floor(_card.astral_remaining))));
-    } else if (card_GetAstralSummonLimit(_card) > 0) {
-        array_push(_lines, "Astral summons: " + string(card_GetAstralSummonLimit(_card)));
+    if (card_IsAstral(_card)) {
+        array_push(_lines, "Astral — persists in extra deck");
+    } else if (battle_IsSpiritMonster(_card)
+        && variable_struct_exists(_card, "board_turns_left")
+        && _card.board_turns_left >= 0) {
+        array_push(_lines, "Turns left: " + string(_card.board_turns_left));
     }
 
     return _lines;
@@ -310,6 +312,18 @@ function battle_FindHoveredPreviewCard() {
             with (_deck) _ids = deck_ExtraDeckPicker_GetExtraDeckIds();
             _preview = deck_ScrollPicker_GetPreviewCard(_ids, _bm.monsterAbility_picker_extra_scroll,
                 _bm.monsterAbility_picker_extra_focus);
+            if (_preview != undefined) return _preview;
+        }
+    }
+
+    if (_bm != noone && _bm.spirit_shuffle_active && _bm.spirit_shuffle_phase == "pick_discard") {
+        if (_deck != noone) {
+            var _ids = [];
+            var _preview = undefined;
+            with (_deck) _ids = deck_ExtraDeckPicker_GetExtraDeckIds();
+            with (_bm) {
+                _preview = deck_ScrollPicker_GetPreviewCard(_ids, spirit_shuffle_extra_scroll, spirit_shuffle_extra_focus);
+            }
             if (_preview != undefined) return _preview;
         }
     }

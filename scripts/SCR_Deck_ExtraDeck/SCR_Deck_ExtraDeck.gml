@@ -24,6 +24,7 @@ function deck_IsMouseOverExtraDeck() {
 }
 
 function deck_ExtraDeck_CanInteract() {
+    if (battle_SpiritShuffle_IsActive()) return false;
     if (battle_IsPlayerDefeated()) return false;
 
     var _bm = instance_find(OBJ_BattleManager, 0);

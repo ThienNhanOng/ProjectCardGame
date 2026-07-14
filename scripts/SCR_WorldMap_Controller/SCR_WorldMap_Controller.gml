@@ -35,5 +35,6 @@ function SCR_WorldMapController_DrawHUD() {
     var _gh = display_get_gui_height();
 
     debug_DrawWorldMapInfo(_gw, _gh);
+    worldmap_DrawMapDebugInfo(_gh);
     worldmap_DrawCollectionButton();
 }

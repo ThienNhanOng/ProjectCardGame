@@ -39,10 +39,13 @@ function SCR_Battle_DrawOverlays() {
         with (_bm) {
             conditions_summon_Draw();
             monsterAbility_Picker_Draw();
+            battle_SpiritShuffle_Draw();
         }
     }
 
     battle_DrawHoverPreview();
+
+    debug_DrawMouseCoordinates();
 
     draw_set_color(c_white);
 }

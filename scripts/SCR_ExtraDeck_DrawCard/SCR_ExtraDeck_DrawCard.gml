@@ -1,9 +1,24 @@
 /// @description Draw a single extra deck card - matches collection card style exactly
-function SCR_ExtraDeck_DrawCard(_x, _y, _w, _h, _card_data, _force_hover = undefined) {
+function SCR_ExtraDeck_DrawCard(_x, _y, _w, _h, _card_data, _force_hover = undefined, _keep_in_box = false) {
     var _transform = SCR_DeckHover_GetTransform(_x, _y, _w, _h, _force_hover);
+
+    if (_keep_in_box) {
+        _transform.draw_x = _x;
+        _transform.draw_y = _y;
+        _transform.draw_scale = 1;
+        _transform.w = _w;
+        _transform.h = _h;
+    }
     
-    // Draw glow effect
-    SCR_DeckHover_DrawGlow(_transform.draw_x, _transform.draw_y, _transform.w, _transform.h, _transform.is_hovered);
+    if (!_keep_in_box) {
+        SCR_DeckHover_DrawGlow(_transform.draw_x, _transform.draw_y, _transform.w, _transform.h, _transform.is_hovered);
+    } else if (_transform.is_hovered) {
+        draw_set_color(c_yellow);
+        draw_set_alpha(0.85);
+        draw_rectangle(_x + 1, _y + 1, _x + _w - 1, _y + _h - 1, true);
+        draw_set_alpha(1);
+        draw_set_color(c_white);
+    }
     
     var _draw_x = _transform.draw_x;
     var _draw_y = _transform.draw_y;

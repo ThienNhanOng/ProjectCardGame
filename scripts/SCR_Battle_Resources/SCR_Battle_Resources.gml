@@ -1,4 +1,8 @@
-/// @desc Battle resource pool (displayed as "Resources" on the HUD)
+/// @desc Battle resource pool (displayed as marker icons on the HUD)
+
+#macro BATTLE_RESOURCE_MARKER_SCALE 0.6
+#macro BATTLE_RESOURCE_X 341
+#macro BATTLE_RESOURCE_Y 272
 
 function battle_InitResourceSlotTracking() {
     player_resources_base_max = 10;
@@ -171,16 +175,30 @@ function battle_GetResourcesDisplayRect() {
 
 function battle_DrawResourcesCounter() {
     var _rect = battle_GetResourcesDisplayRect();
+    var _max = max(1, player_resources_max);
+    var _spent = clamp(player_resources_max - player_resources, 0, player_resources_max);
+    var _slot_count = player_resources_base_max;
+    var _scale = BATTLE_RESOURCE_MARKER_SCALE;
+    var _icon = sprite_get_width(Map_marker_Active) * _scale;
+    if (_icon <= 0) _icon = 18;
+    var _gap = 3;
+    var _start_x = BATTLE_RESOURCE_X;
+    var _y = BATTLE_RESOURCE_Y;
 
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-    draw_set_color(c_red);
-    draw_text(_rect.left, _rect.top, "Resources");
+    for (var i = 0; i < _slot_count; i++) {
+        var _x = _start_x + i * (_icon + _gap);
+        var _slots_from_right = _slot_count - i;
+        var _is_spent = _slots_from_right <= _spent;
+        var _spr = _is_spent ? Map_Marker_orange : Map_marker_Active;
 
-    draw_set_halign(fa_right);
-    draw_set_valign(fa_middle);
-    draw_text(_rect.right, (_rect.top + _rect.bottom) / 2,
-        string(player_resources) + "/" + string(player_resources_max));
+        if (i >= _max) {
+            draw_set_alpha(0.25);
+            draw_sprite_ext(_spr, 0, _x, _y, _scale, _scale, 0, c_white, 1);
+            draw_set_alpha(1);
+        } else {
+            draw_sprite_ext(_spr, 0, _x, _y, _scale, _scale, 0, c_white, 1);
+        }
+    }
 
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);

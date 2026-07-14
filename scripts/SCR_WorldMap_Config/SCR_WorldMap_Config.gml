@@ -25,6 +25,7 @@ function worldmap_InitGlobals() {
     if (!variable_global_exists("worldmap") || !is_struct(global.worldmap)) {
         global.worldmap = {
             map_id: "",
+            map_name: "",
             config_file: "",
             battleset_file: "",
             event_flow: [],
@@ -36,8 +37,18 @@ function worldmap_InitGlobals() {
             victory_pending: false,
             last_reward_text: "",
             rewards_obtained: [],
-            pending_spawn_event_id: -1
+            pending_spawn_event_id: -1,
+            pending_goto_room: noone,
+            pending_goto_spawn_event: -1
         };
+    }
+
+    if (!variable_struct_exists(global.worldmap, "pending_goto_room")) {
+        global.worldmap.pending_goto_room = noone;
+    }
+
+    if (!variable_struct_exists(global.worldmap, "pending_goto_spawn_event")) {
+        global.worldmap.pending_goto_spawn_event = -1;
     }
 
     if (!variable_struct_exists(global.worldmap, "pending_spawn_event_id")) {
@@ -64,6 +75,18 @@ function worldmap_InitGlobals() {
         || !is_array(global.worldmap.rewards_obtained)) {
         global.worldmap.rewards_obtained = [];
     }
+
+    if (!variable_struct_exists(global.worldmap, "map_name")) {
+        global.worldmap.map_name = "";
+    }
+}
+
+function worldmap_GetMapDisplayName() {
+    worldmap_InitGlobals();
+    if (is_string(global.worldmap.map_name) && global.worldmap.map_name != "") {
+        return global.worldmap.map_name;
+    }
+    return global.worldmap.map_id;
 }
 
 function worldmap_GetMapContentTopY() {
@@ -164,6 +187,7 @@ return false;
     var _data = json_parse(_json_str);
     global.worldmap.config_file = _filename;
     global.worldmap.map_id = variable_struct_exists(_data, "map_id") ? string(_data.map_id) : "map";
+    global.worldmap.map_name = variable_struct_exists(_data, "map_name") ? string(_data.map_name) : "";
     global.worldmap.battleset_file = variable_struct_exists(_data, "battleset") ? string(_data.battleset) : "";
     global.worldmap.events = {};
     global.worldmap.event_flow = [];

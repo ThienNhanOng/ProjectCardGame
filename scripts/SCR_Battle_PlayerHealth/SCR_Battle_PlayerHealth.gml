@@ -1,11 +1,7 @@
 /// @desc Player health pool — enemy attacks reduce this; 0 HP = defeat
 
 function battle_InitPlayerHealth() {
-    if (!variable_global_exists("player_max_health")) {
-        global.player_max_health = 100;
-    }
-
-    player_max_health = global.player_max_health;
+    player_max_health = 30;
     player_health = player_max_health;
     battle_lost = false;
 }

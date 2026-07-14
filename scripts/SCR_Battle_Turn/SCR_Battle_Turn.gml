@@ -2,6 +2,8 @@
 
 /// Non-spirit board monsters are removed after this many player turns on board
 #macro BOARD_MONSTER_TURN_LIMIT 3
+/// Default extra-deck spirit summons (non-astral) last this many player turns on board
+#macro SPIRIT_SUMMON_TURN_LIMIT 1
 
 function battle_IsPlayerPhase() {
     var _bm = instance_find(OBJ_BattleManager, 0);
@@ -118,8 +120,13 @@ function battle_PlayerMonsterCount() {
 function battle_InitBoardMonsterLifespan(_card) {
     if (_card == undefined) return;
     if (battle_IsSpiritMonster(_card)) {
-        _card.board_expire = false;
-        _card.board_turns_left = -1;
+        if (card_IsAstral(_card)) {
+            _card.board_expire = false;
+            _card.board_turns_left = -1;
+        } else {
+            _card.board_expire = true;
+            _card.board_turns_left = SPIRIT_SUMMON_TURN_LIMIT;
+        }
         return;
     }
     _card.board_expire = true;
@@ -128,7 +135,7 @@ function battle_InitBoardMonsterLifespan(_card) {
 
 function battle_SetBoardMonsterExpire(_card, _expires) {
     if (_card == undefined) return false;
-    if (battle_IsSpiritMonster(_card)) return true;
+    if (battle_IsSpiritMonster(_card) && card_IsAstral(_card)) return true;
 
     _card.board_expire = _expires;
     if (!_expires) {
@@ -144,7 +151,7 @@ function battle_SetBoardMonsterExpire(_card, _expires) {
 
 function battle_AddBoardMonsterTurns(_card, _amount) {
     if (_card == undefined) return false;
-    if (battle_IsSpiritMonster(_card)) return true;
+    if (battle_IsSpiritMonster(_card) && card_IsAstral(_card)) return true;
     if (_amount <= 0) return false;
 
     if (!variable_struct_exists(_card, "board_expire") || !_card.board_expire) return true;
@@ -190,11 +197,12 @@ function battle_TickBoardMonsterLifespan() {
     for (var i = array_length(_board.player_monster_slots) - 1; i >= 0; i--) {
         var _slot = _board.player_monster_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-        if (battle_IsSpiritMonster(_slot.card)) continue;
         if (variable_struct_exists(_slot.card, "board_expire") && !_slot.card.board_expire) continue;
 
         if (!variable_struct_exists(_slot.card, "board_turns_left")) {
-            _slot.card.board_turns_left = BOARD_MONSTER_TURN_LIMIT;
+            _slot.card.board_turns_left = battle_IsSpiritMonster(_slot.card)
+                ? SPIRIT_SUMMON_TURN_LIMIT
+                : BOARD_MONSTER_TURN_LIMIT;
         }
         if (_slot.card.board_turns_left < 0) continue;
 

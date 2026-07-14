@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"SCR_Dialog_Text",
   "parent":{
-    "name":"DialogSystem",
-    "path":"folders/scripts/WorldMap/DialogSystem.yy",
+    "name":"system",
+    "path":"folders/scripts/WorldMap/DialogSystem/system.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

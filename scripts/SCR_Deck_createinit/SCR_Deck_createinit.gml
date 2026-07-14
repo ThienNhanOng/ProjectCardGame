@@ -47,6 +47,7 @@ function SCR_Deck_createinit() {
     tag_picker_apply_cost = 0;
     
     deck_LoadFromBattleSource();
+    deck_SnapshotInitialMainDeck();
 }
 
 function deck_LoadFromBattleSource() {
@@ -146,6 +147,38 @@ return false;
     extra_deck[extra_deck_Count] = _entry;
     extra_deck_Count++;
     return true;
+}
+
+function deck_SnapshotInitialMainDeck() {
+    var _snap = [];
+    for (var i = 0; i < deck_Count; i++) {
+        array_push(_snap, deck[deck_Head + i]);
+    }
+
+    if (array_length(_snap) > 0) {
+        global.battle_initial_main_deck = _snap;
+    } else if (!variable_global_exists("battle_initial_main_deck")
+        || !is_array(global.battle_initial_main_deck)
+        || array_length(global.battle_initial_main_deck) <= 0) {
+        global.battle_initial_main_deck = battle_GetDeckSourceCopy();
+    }
+}
+
+/// @desc Restore draw pile from the main-deck clone saved at battle start
+function deck_RebuildMainDeckFromInitial() {
+    var _source = battle_GetInitialMainDeckCopy();
+    if (array_length(_source) <= 0) return false;
+
+    deck_Clear();
+    for (var i = 0; i < array_length(_source); i++) {
+        if (deck_Count >= deck_Max) break;
+        deck[deck_Count] = _source[i];
+        deck_Count++;
+    }
+
+    deck_Head = 0;
+    deck_Shuffle(true);
+    return deck_Count > 0;
 }
 
 function deck_DrawCard() {

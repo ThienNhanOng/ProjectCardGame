@@ -181,6 +181,37 @@ function dialog_RegisterName(_key, _display) {
     global.dialog.names[$ _k] = string(_display);
 }
 
+function dialog_ApplySideNameEntry(_entry, _is_left) {
+    var _key = dialog_GetEntryString(_entry, "key", "");
+    var _display = dialog_GetEntryString(_entry, "display", "");
+    if (_key == "" && _display != "") {
+        _key = string_lower(string_replace(_display, " ", "_"));
+    }
+    if (_key == "") return;
+
+    dialog_RegisterName(_key, (_display != "") ? _display : _key);
+    if (_is_left) {
+        global.dialog.left_key = _key;
+    } else {
+        global.dialog.right_key = _key;
+    }
+}
+
+function dialog_ShowSideLine(_is_left, _text) {
+    global.dialog.left_sprite = dialog_ValidatePortraitSprite(global.dialog.left_sprite, true);
+    global.dialog.right_sprite = dialog_ValidatePortraitSprite(global.dialog.right_sprite, false);
+
+    var _key = _is_left ? global.dialog.left_key : global.dialog.right_key;
+    global.dialog.active_speaker_key = _key;
+    global.dialog.speaker = dialog_GetDisplayNameForKey(_key);
+    if (global.dialog.speaker == "" && _key != "") {
+        global.dialog.speaker = _key;
+    }
+    global.dialog.text = _text;
+    global.dialog.text_segments = dialog_ParseColoredText(global.dialog.text);
+    dialog_TypewriterReset();
+}
+
 function dialog_ResolveSpeakerKey(_entry) {
     var _key = dialog_GetEntryString(_entry, "speaker_key", "");
     if (_key != "") return string_lower(_key);
@@ -233,10 +264,23 @@ function dialog_ShowCurrentOrAdvance() {
                 global.dialog.index++;
                 break;
 
+            case "left_name":
+                dialog_ApplySideNameEntry(_entry, true);
+                global.dialog.index++;
+                break;
+
+            case "right_name":
+                dialog_ApplySideNameEntry(_entry, false);
+                global.dialog.index++;
+                break;
+
             case "left":
                 global.dialog.left_sprite = dialog_ValidatePortraitSprite(
                     dialog_GetEntrySprite(_entry), true);
-                global.dialog.left_key = dialog_GetEntryString(_entry, "speaker_key", global.dialog.left_key);
+                var _left_key = dialog_GetEntryString(_entry, "speaker_key", "");
+                if (_left_key != "") {
+                    global.dialog.left_key = string_lower(_left_key);
+                }
                 global.dialog.left_visible = dialog_GetEntryBool(_entry, "visible", true);
                 global.dialog.index++;
                 break;
@@ -244,7 +288,10 @@ function dialog_ShowCurrentOrAdvance() {
             case "right":
                 global.dialog.right_sprite = dialog_ValidatePortraitSprite(
                     dialog_GetEntrySprite(_entry), false);
-                global.dialog.right_key = dialog_GetEntryString(_entry, "speaker_key", global.dialog.right_key);
+                var _right_key = dialog_GetEntryString(_entry, "speaker_key", "");
+                if (_right_key != "") {
+                    global.dialog.right_key = string_lower(_right_key);
+                }
                 global.dialog.right_visible = dialog_GetEntryBool(_entry, "visible", true);
                 global.dialog.index++;
                 break;
@@ -296,6 +343,14 @@ function dialog_ShowCurrentOrAdvance() {
                 global.dialog.text = dialog_GetEntryString(_entry, "text", "");
                 global.dialog.text_segments = dialog_ParseColoredText(global.dialog.text);
                 dialog_TypewriterReset();
+                return;
+
+            case "left_line":
+                dialog_ShowSideLine(true, dialog_GetEntryString(_entry, "text", ""));
+                return;
+
+            case "right_line":
+                dialog_ShowSideLine(false, dialog_GetEntryString(_entry, "text", ""));
                 return;
 
             default:
@@ -520,7 +575,7 @@ function dialog_DrawTextLayerGui(_gw, _gh, _box_y, _box_h, _sx, _sy) {
     draw_set_halign(fa_center);
     draw_set_valign(fa_bottom);
     draw_set_color(c_ltgray);
-    var _hint = global.dialog.typewriter_done
+    var _hint = global.dialog.typewriter_done ? "Click / Space — next" : "Click / Space — skip typing";
     draw_text_transformed(_gw / 2, _gh - (8 * _sy), _hint, _sx, _sy, 0);
 
     draw_set_halign(fa_left);

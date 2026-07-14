@@ -45,6 +45,18 @@ return false;
     global.worldmap.active_event_id = floor(_event_id);
     global.worldmap.victory_pending = false;
     global.worldmap.return_room = room;
+    global.worldmap.pending_goto_room = noone;
+    global.worldmap.pending_goto_spawn_event = -1;
+
+    var _marker = worldmap_GetEventMarkerById(_event_id);
+    if (_marker != noone) {
+        with (_marker) {
+            if (target_room != -1 && room_exists(target_room) && !marker_goto_immediate) {
+                global.worldmap.pending_goto_room = target_room;
+                global.worldmap.pending_goto_spawn_event = target_spawn_event_id;
+            }
+        }
+    }
 
 room_goto(Room_battle);
     return true;
@@ -65,19 +77,43 @@ function worldmap_ReturnToMapAfterVictory() {
     worldmap_InitGlobals();
 
     var _event_id = global.worldmap.active_event_id;
-    if (_event_id > 0) {
-        worldmap_MarkEventCleared(_event_id);
-        global.worldmap.pending_spawn_event_id = _event_id;
+    var _first_clear = (_event_id > 0) && !worldmap_IsEventCleared(_event_id);
+
+    var _goto_room = noone;
+    var _goto_spawn = -1;
+    if (_first_clear
+        && global.worldmap.pending_goto_room != noone
+        && global.worldmap.pending_goto_room != -1
+        && room_exists(global.worldmap.pending_goto_room)) {
+        _goto_room = global.worldmap.pending_goto_room;
+        _goto_spawn = global.worldmap.pending_goto_spawn_event;
     }
 
-    var _return_room = global.worldmap.return_room;
-    if (_return_room == noone) _return_room = Room_Worldmap1;
+    global.worldmap.pending_goto_room = noone;
+    global.worldmap.pending_goto_spawn_event = -1;
+
+    if (_event_id > 0) {
+        worldmap_MarkEventCleared(_event_id);
+    }
 
     global.worldmap.active_event_id = -1;
     global.worldmap.victory_pending = false;
     global.worldmap.last_reward_text = "";
     battle_SyncExtraDeckFromBattleState();
     battle_EndSession();
+
+    if (_first_clear && _goto_room != noone) {
+        global.worldmap.pending_spawn_event_id = (_goto_spawn > 0) ? _goto_spawn : -1;
+        room_goto(_goto_room);
+        return;
+    }
+
+    if (_event_id > 0) {
+        global.worldmap.pending_spawn_event_id = _event_id;
+    }
+
+    var _return_room = global.worldmap.return_room;
+    if (_return_room == noone) _return_room = Room_Worldmap1;
 
     room_goto(_return_room);
 }
@@ -225,8 +261,13 @@ function worldmap_AssignEventMarkers() {
 function worldmap_InitRoom(_config_file = "Grasslands_WorldMap01.json") {
     worldmap_InitGlobals();
     collection_EnsurePlayerInitialized();
+
+    var _prev_config = global.worldmap.config_file;
     global.worldmap.return_room = room;
     worldmap_LoadMapConfig(_config_file);
+    if (_prev_config != "" && _prev_config != global.worldmap.config_file) {
+        global.worldmap.cleared = [];
+    }
     worldmap_SyncMarkersFromRoom();
 }
 
@@ -234,8 +275,25 @@ function worldmap_InitRoom(_config_file = "Grasslands_WorldMap01.json") {
 function worldmap_GetRoomConfigFile(_room = room) {
     switch (_room) {
         case Room_Worldmap1: return "Grasslands_WorldMap01.json";
+        case Room_Worldmap2: return "Grasslands_WorldMap02.json";
         default: return "Grasslands_WorldMap01.json";
     }
+}
+
+function worldmap_DrawMapDebugInfo(_gh) {
+    worldmap_InitGlobals();
+
+    var _cleared = array_length(global.worldmap.cleared);
+    var _total = array_length(global.worldmap.event_flow);
+
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_bottom);
+    draw_set_color(c_yellow);
+    draw_text(12, _gh - 36, worldmap_GetMapDisplayName());
+    draw_text(12, _gh - 18, "Cleared: " + string(_cleared) + " / " + string(_total));
+    draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
+    draw_set_color(c_white);
 }
 
 function worldmap_GetCollectionButtonBounds() {

@@ -1,0 +1,16 @@
+{
+  "map_id": "grasslands_02",
+  "map_name": "Map 2",
+  "battleset": "Grasslands_Battleset01_starter.json",
+  "event_flow": [1, 2, 3, 4, 5, 6, 7, 8],
+  "events": [
+    { "id": 1, "label": "Grass Trail", "battle": "battle01", "replay_pool": ["battle01", "battle02"] },
+    { "id": 2, "label": "Wind Ridge", "battle": "battle02", "replay_pool": ["battle02", "battle03"] },
+    { "id": 3, "label": "Old Path", "battle": "battle03", "replay_pool": ["battle03", "battle04"] },
+    { "id": 4, "label": "Stone Circle", "battle": "battle04", "replay_pool": ["battle04", "battle05"] },
+    { "id": 5, "label": "River Bend", "battle": "battle05", "replay_pool": ["battle05", "battle06"] },
+    { "id": 6, "label": "Hill Camp", "battle": "battle06", "replay_pool": ["battle06", "battle07"] },
+    { "id": 7, "label": "Deep Grass", "battle": "battle07", "replay_pool": ["battle07", "battle08"] },
+    { "id": 8, "label": "Final Gate", "battle": "battle08", "replay_pool": ["battle08", "battle05"] }
+  ]
+}
