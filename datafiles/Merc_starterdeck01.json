@@ -8,7 +8,7 @@
       "name": "Mercenary Warrior I",
       "type": "monster",
       "tag": ["Mercenary"],
-      "sprite": "SPR_Monsterplaceholder",
+      "sprite": "SPR_Card_Warrior1", "field_sprite": "SPR_Unit_Warrior1",
       "health": 10,
       "ability": [
         {
@@ -26,7 +26,7 @@
       "name": "Mercenary Warrior II",
       "type": "monster",
       "tag": ["Mercenary"],
-      "sprite": "SPR_Monsterplaceholder",
+      "sprite": "SPR_Card_Warrior2", "field_sprite": "SPR_Unit_Warrior2",
       "health": 20,
       "ability": [
         {
@@ -50,7 +50,7 @@
       "name": "Mercenary Recruiter I",
       "type": "monster",
       "tag": ["Mercenary", "Warrior"],
-      "sprite": "SPR_Monsterplaceholder",
+      "sprite": "SPR_Card_Recruiter1", "field_sprite": "SPR_Unit_Recruiter1",
       "health": 5,
       "ability": [
         {
@@ -67,7 +67,7 @@
       "name": "Mercenary Recruiter II",
       "type": "monster",
       "tag": ["Mercenary", "Warrior"],
-      "sprite": "SPR_Monsterplaceholder",
+      "sprite": "SPR_Card_Recruiter2", "field_sprite": "SPR_Unit_Recruiter2",
       "health": 5,
       "ability": [
         {
@@ -223,7 +223,7 @@
       "name": "Mercenary Hawk",
       "type": "spirit",
       "tag": ["Mercenary"],
-      "sprite": "SPR_Monsterplaceholder",
+      "sprite": "SPR_Card_Hawk", "field_sprite": "SPR_Unit_Hawk",
       "health": 2000,
       "attack": 5,
       "ability": [
@@ -249,7 +249,7 @@
       "name": "Mercenary Amnesia",
       "type": "spirit",
       "tag": ["Mercenary"],
-      "sprite": "SPR_Monsterplaceholder",
+      "sprite": "SPR_Card_Amnesia", "field_sprite": "SPR_Unit_Amnesia",
       "health": 10,
       "ability": [
         {
@@ -279,7 +279,7 @@
       "name": "Mercenary Wolf",
       "type": "spirit",
       "tag": ["Mercenary"],
-      "sprite": "SPR_Monsterplaceholder",
+      "sprite": "SPR_Card_Wolf", "field_sprite": "SPR_Unit_Wolf",
       "health": 30,
       "attack": 15,
       "ability": [

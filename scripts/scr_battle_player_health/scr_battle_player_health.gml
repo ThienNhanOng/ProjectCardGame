@@ -78,11 +78,12 @@ function battle_PlayerDefeat() {
 }
 
 function battle_GetPlayerHealthBarRect() {
+    // on the battlefield, just above the bottom bar (left)
     return {
-        left: 21,
-        top: 276,
-        right: 282,
-        bottom: 290
+        left: 46,
+        top: BATTLE_UI_Y - 36,
+        right: 330,
+        bottom: BATTLE_UI_Y - 14
     };
 }
 

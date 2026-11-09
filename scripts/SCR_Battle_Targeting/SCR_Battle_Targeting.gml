@@ -134,21 +134,18 @@ function battle_FindPlayerCardAt(_mx, _my, _include_hand) {
 
     var _found = undefined;
     with (_board) {
-        if (action_slot.visible && action_slot.occupied && action_slot.card != undefined
-            && SCR_Board_IsSlotMouseOver(action_slot)) {
-            _found = action_slot.card;
-        }
-
-        for (var w = 0; w < array_length(player_weapon_slots) && _found == undefined; w++) {
-            var _wslot = player_weapon_slots[w];
-            if (!_wslot.visible || !_wslot.occupied || _wslot.card == undefined) continue;
-            if (SCR_Board_IsSlotMouseOver(_wslot)) _found = _wslot.card;
-        }
+        // a weapon shows as a chip on its monster's card
+        _found = SCR_Board_WeaponChipAt(_mx, _my);
 
         for (var m = 0; m < array_length(player_monster_slots) && _found == undefined; m++) {
             var _mslot = player_monster_slots[m];
             if (!_mslot.visible || !_mslot.occupied || _mslot.card == undefined) continue;
             if (SCR_Board_IsSlotMouseOver(_mslot)) _found = _mslot.card;
+        }
+
+        if (_found == undefined && action_slot.visible && action_slot.occupied && action_slot.card != undefined
+            && SCR_Board_IsSlotMouseOver(action_slot)) {
+            _found = action_slot.card;
         }
     }
     return _found;
@@ -270,11 +267,16 @@ function battle_TargetingDrawEnemyHighlights(_board, _color) {
     var _mm = instance_find(OBJ_MonsterManager, 0);
     if (_mm == noone) return;
 
+    // a pulsing ring on each target's pedestal; the one under the mouse is bold
+    var _hover = unit_GetSlotAt(SIDE_ENEMY, mouse_x, mouse_y);
     draw_set_color(_color);
     for (var j = 0; j < _mm.active_slot_count; j++) {
         var _eslot = _board.enemy_slots[j];
         if (!_eslot.visible || !_eslot.occupied) continue;
-        var _box = monster_GetHitbox(_eslot);
-        draw_rectangle(_box.card_left, _box.card_top, _box.card_right, _box.full_bottom, true);
+        var _f = battle_LayoutEnemyFeet(j);
+        var _bold = (j == _hover);
+        draw_set_alpha(_bold ? 1 : 0.45 + 0.35 * sin(current_time / 170));
+        for (var k = 0; k < (_bold ? 4 : 2); k++) draw_ellipse(_f.x - 56 - k, _f.y - 15 - k, _f.x + 56 + k, _f.y + 15 + k, true);
     }
+    draw_set_alpha(1);
 }

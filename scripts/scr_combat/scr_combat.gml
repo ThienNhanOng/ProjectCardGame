@@ -49,6 +49,7 @@ function combat_RemoveUnit(_side, _slot) {
     var _card = unit_Get(_side, _slot);
     if (_card == undefined) return false;
     var _board = instance_find(OBJ_BoardManager, 0);
+    battlefx_Death(_side, _slot);   // a pile of bones where it stood
 
     if (_side == SIDE_ENEMY) {
         var _mm = instance_find(OBJ_MonsterManager, 0);
@@ -56,10 +57,12 @@ function combat_RemoveUnit(_side, _slot) {
         var _eslot = _board.enemy_slots[_slot];
         _eslot.occupied = false;
         _eslot.card = undefined;
+        global.battlefx_spawn_delay = BATTLEFX_REPLACE_DELAY;   // the next enemy waits for the bones to land
         with (_mm) {
             monster_SpawnIntoSlot(_board, _slot);
             monster_CheckVictory(_board);
         }
+        global.battlefx_spawn_delay = -1;
         return true;
     }
 

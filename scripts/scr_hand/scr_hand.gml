@@ -2,7 +2,7 @@
 
 function SCR_Hand_Create() {
 	hand_X = 40;
-	hand_Y = 615;
+	hand_Y = 618;   // resting card centre in the bottom bar
 	hand_Spacing = 85;
 	//max cards in hand
 	hand_MaxSize = 40;
@@ -104,6 +104,11 @@ function SCR_Hand_DrawFromDeck() {
 }
 
 function SCR_Hand_GetSprite(_card) {
+    // the card's own art (JSON "sprite") when it names a real sprite
+    if (variable_struct_exists(_card, "sprite") && is_string(_card.sprite) && _card.sprite != "") {
+        var _own = asset_get_index(_card.sprite);
+        if (_own != -1 && asset_get_type(_card.sprite) == asset_sprite) return _own;
+    }
     var _spr = SPR_Monsterplaceholder;
     switch (_card.type) {
         case "monster":

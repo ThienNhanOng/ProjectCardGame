@@ -4,5 +4,5 @@ eventmarker_apply_config(2, "Crossroads", "battle02", "Grasslands_Battleset01_st
 eventmarker_set_dialog_pre(dialog_Map1_Marker02_PreBattle);
 eventmarker_set_dialog_pre_once(true);
 
-// TEST DEBUG: win battle here, then go to Map 2
-eventmarker_set_room_goto("Room_Worldmap2");
+// TEST DEBUG: win battle here, then go to Map 2 (turned off for testing — uncomment to go to Map 2 again)
+// eventmarker_set_room_goto("Room_Worldmap2");

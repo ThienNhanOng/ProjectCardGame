@@ -26,11 +26,12 @@ function battle_EnemyLog_EnsureGlobals() {
 }
 
 function battle_EnemyLog_GetPanelLayout() {
+    // top-right corner, clear of the enemies
     return {
-        x: 663,
-        y: 50,
-        w: 290,
-        h: 210
+        x: 992,
+        y: 8,
+        w: 280,
+        h: 150
     };
 }
 

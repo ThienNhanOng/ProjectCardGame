@@ -26,6 +26,60 @@ function SCR_Board_GetSlotAt(_mx, _my) {
     return undefined;
 }
 
+/// Cards that go into a monster slot
+function SCR_Board_IsMonsterCard(_card) {
+    return _card != undefined && (_card.type == "monster" || _card.type == "special_monster" || _card.type == "spirit");
+}
+
+/// Your monster slot under a point (_occupied: look for a filled one or an empty one), or -1
+function SCR_Board_MonsterSlotAt(_mx, _my, _occupied) {
+    for (var i = 0; i < array_length(player_monster_slots); i++) {
+        var _s = player_monster_slots[i];
+        if (!_s.visible || _s.locked || _s.occupied != _occupied) continue;
+        if (_occupied && _s.card == undefined) continue;
+        if (point_in_rectangle(_mx, _my, _s.x, _s.y, _s.x + _s.w, _s.y + _s.h)) return i;
+    }
+    return -1;
+}
+
+/// Can a weapon / action card be dropped on your monster in slot _i?
+function SCR_Board_CanDropOnMonster(_i, _card) {
+    if (_card == undefined || _i < 0 || _i >= array_length(player_monster_slots)) return false;
+    var _ms = player_monster_slots[_i];
+    if (!_ms.visible || _ms.locked || !_ms.occupied || _ms.card == undefined) return false;
+    if (_card.type == "weapon") {
+        var _ws = player_weapon_slots[_i];
+        return !_ws.occupied && !_ws.locked;
+    }
+    if (_card.type == "action") return !action_slot.occupied;
+    return false;
+}
+
+/// Where the dragged card would go: { slot, monster } or undefined
+///   monster / spirit card -> an empty monster spot
+///   weapon -> that monster's weapon slot     action -> the action slot, acted out by that monster
+function SCR_Board_GetDropTarget(_mx, _my, _card) {
+    if (_card == undefined) return undefined;
+    if (SCR_Board_IsMonsterCard(_card)) {
+        var _empty = SCR_Board_MonsterSlotAt(_mx, _my, false);
+        return (_empty >= 0) ? { slot: player_monster_slots[_empty], monster: _empty } : undefined;
+    }
+    var _m = SCR_Board_MonsterSlotAt(_mx, _my, true);
+    if (!SCR_Board_CanDropOnMonster(_m, _card)) return undefined;
+    return { slot: (_card.type == "weapon") ? player_weapon_slots[_m] : action_slot, monster: _m };
+}
+
+/// The weapon card whose chip (bottom-left of a monster card) is under the point, or undefined
+function SCR_Board_WeaponChipAt(_mx, _my) {
+    for (var i = 0; i < array_length(player_weapon_slots); i++) {
+        var _ws = player_weapon_slots[i];
+        if (!_ws.occupied || _ws.card == undefined) continue;
+        var _ms = player_monster_slots[i];
+        if (point_distance(_mx, _my, _ms.x + 10, _ms.y + _ms.h - 12) <= 17) return _ws.card;
+    }
+    return undefined;
+}
+
 function SCR_Board_UpdateHover(_mx, _my, _dragging_card, _drag_hand_index = -1) {
     if (_dragging_card == undefined) {
         SCR_Board_ClearHover();
@@ -128,6 +182,7 @@ function SCR_Board_PlaceCard(_slot, _card) {
     _slot.occupied = true;
     _slot.card = _card;
     _slot.hovered = false;
+    if (_slot.type == "monster") battlefx_Arrive(_card, SIDE_PLAYER, _slot.index, 0);   // hops in from the left
     battle_NotifyCardPlaced(_slot, _card);
     
     // If this was a monster slot, update weapon slot availability

@@ -484,17 +484,7 @@ function SCR_DBD_GetCardPreviewSprite(_card) {
         return SCR_Monster_GetSprite(_card);
     }
 
-    switch (_card.type) {
-        case "monster":
-        case "spirit":
-        case "special_monster":
-            return SPR_Monsterplaceholder;
-        case "weapon":
-            return SPR_Weaponplaceholder;
-        case "action":
-            return SPR_Actionplaceholder;
-    }
-    return noone;
+    return SCR_Hand_GetSprite(_card);
 }
 
 function SCR_DBD_GetSpiritCardRowBounds(_row_index) {
@@ -594,8 +584,9 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
         _cy += string_height_ext(_tags_line, _line_h, _inner_w) + 10;
     }
 
-    var _img_w = min(108, floor(_inner_w * 0.38));
-    var _img_h = 136;
+    // picture shrinks with smaller panels (the battle's compact panel); full size in the deck builder
+    var _img_h = min(136, floor(_panel.h * 0.34));
+    var _img_w = min(108, floor(_inner_w * 0.38), floor(_img_h * 0.73));
     var _side_x = _cx + _img_w + 10;
     var _side_w = max(80, _inner_w - _img_w - 10);
     var _side_start_y = _cy;

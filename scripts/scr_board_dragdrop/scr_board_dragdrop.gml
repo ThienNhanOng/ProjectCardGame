@@ -68,7 +68,8 @@ function SCR_DragDrop_Step() {
         SCR_Board_UpdateHover(_mx, _my, drag_card, drag_hand_index);
         
         if (mouse_check_button_released(mb_left)) {
-            var _slot = SCR_Board_GetSlotAt(_mx, _my);
+            var _target = SCR_Board_GetDropTarget(_mx, _my, drag_card);
+            var _slot = (_target != undefined) ? _target.slot : undefined;
             
             if (_slot != undefined) {
                 if (!variable_struct_exists(_slot, "locked")) {
@@ -85,6 +86,13 @@ function SCR_DragDrop_Step() {
                                 hand_RemoveCard(_index);
                             }
                         }
+                        // an action dropped on a monster: that monster is the one that acts
+                        if (_slot.type == "action" && _target.monster >= 0 && _bm != noone) {
+                            var _actor = _target.monster;
+                            with (_bm) {
+                                if (target_mode == "pick_player_monster") battle_TargetingClickPlayerSlot(_actor);
+                            }
+                        }
                     }
                 }
             }
@@ -95,11 +103,22 @@ function SCR_DragDrop_Step() {
 
 function SCR_DragDrop_Draw() {
     if (!is_dragging || drag_card == undefined) return;
-    
+
+    // over a monster that can take it: the card shrinks onto that monster's corner
+    var _target = SCR_Board_GetDropTarget(drag_x, drag_y, drag_card);
+    if (_target != undefined && !SCR_Board_IsMonsterCard(drag_card)) {
+        var _ms = player_monster_slots[_target.monster];
+        card_DrawFramedAtCenter(_ms.x + _ms.w * 1.02, _ms.y + 8, 0.62, drag_card, 1);
+        return;
+    }
+
     card_DrawFramedAtCenter(drag_x, drag_y, 1.1, drag_card, 0.85);
-    draw_set_color(c_black);
     draw_set_halign(fa_center);
-    draw_text(drag_x, drag_y - 60, drag_card.name);
+    battle_DrawOutlinedText(drag_x, drag_y - 66, drag_card.name, c_white);
+    var _hint = "Drop on the monster that should act";
+    if (SCR_Board_IsMonsterCard(drag_card)) _hint = "Drop on a lit spot";
+    else if (drag_card.type == "weapon") _hint = "Drop on one of your monsters to arm it";
+    battle_DrawOutlinedText(room_width / 2, 8, _hint, make_color_rgb(239, 227, 196));
     draw_set_halign(fa_left);
     draw_set_color(c_white);
 }

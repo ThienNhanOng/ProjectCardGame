@@ -75,6 +75,7 @@ function monster_SpawnIntoSlot(_board, _slot_index) {
     _slot.occupied = true;
     _slot.visible = true;
     _slot.card = _monster;
+    battlefx_Arrive(_monster, SIDE_ENEMY, _slot_index, battlefx_SpawnDelay(_slot_index));   // hops in from the right
 
     return true;
 }

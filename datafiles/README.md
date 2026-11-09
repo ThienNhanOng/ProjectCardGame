@@ -1327,6 +1327,8 @@ During summon the player clicks matching hand cards to discard them. This step c
 
 | `icon` | Optional — still picture for the hover preview (e.g. `"SPR_GoblinIcon"`); falls back to `sprite`, then the placeholder |
 
+| `arrival` | Optional — how it enters a spot: `"side"` (hops in from the side), `"drop"` (falls from above). Leave it out for a random pick each time. Works on cards too |
+
 
 
 ### Animated enemies
@@ -1338,6 +1340,8 @@ During summon the player clicks matching hand cards to discard them. This step c
 - Idle plays all the time. Attack plays automatically when the enemy attacks or uses an ability; from code, `monsterAnim_PlayAttack(monster)`.
 
 - Size on the board: `MONSTER_ANIM_SCALE` in `scr_monster_anim`.
+
+- Draw every character sprite **facing right**. Enemies stand on the right side, so the game mirrors them to face left (`MONSTER_FACING`). The same sprite can then be used for a player monster or an enemy.
 
 
 

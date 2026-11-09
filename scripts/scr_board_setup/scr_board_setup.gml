@@ -28,7 +28,10 @@ function SCR_Board_EnemySlots() {
 
     enemy_slots = [];
     for (var i = 0; i < 3; i++) {
-        var _x = enemy_start_x + i * (board_card_w + enemy_slot_spacing);
+        // the slot box ends at the enemy's feet (scr_battle_layout)
+        var _feet = battle_LayoutEnemyFeet(i);
+        var _x = _feet.x - board_card_w / 2;
+        enemy_y = _feet.y + 5 - board_card_h;
         array_push(enemy_slots, {
             index    : i,
             type     : "monster",
@@ -50,28 +53,31 @@ function SCR_Board_EnemySlots() {
 /// @description Define all slot positions
 function SCR_Board_DefineMonsterSlots() {
     var _slots = [];
-    // (index, x, y, visible, locked)
-    _slots[0] = SCR_SlotFactory_CreateMonsterSlot(0, 16, 342, true, false);
-    _slots[1] = SCR_SlotFactory_CreateMonsterSlot(1, 94, 342, true, false);
-    _slots[2] = SCR_SlotFactory_CreateMonsterSlot(2, 172, 342, true, false);
-    _slots[3] = SCR_SlotFactory_CreateMonsterSlot(3, 250, 342, false, true);
-    _slots[4] = SCR_SlotFactory_CreateMonsterSlot(4, 328, 342, false, true);
+    // front column 0-2 (open), back column 3-4 (hidden zones, unlocked by abilities) — scr_battle_layout
+    for (var i = 0; i < 5; i++) {
+        var _c = battle_LayoutPlayerSlotCentre(i);
+        _slots[i] = SCR_SlotFactory_CreateMonsterSlot(i, _c.x - BATTLE_CARD_W / 2, _c.y - BATTLE_CARD_H / 2, i < 3, i >= 3);
+        _slots[i].w = BATTLE_CARD_W;
+        _slots[i].h = BATTLE_CARD_H;
+    }
     return _slots;
 }
 
 function SCR_Board_DefineWeaponSlots() {
     var _slots = [];
-    // (index, x, y, visible, locked)
-    _slots[0] = SCR_SlotFactory_CreateWeaponSlot(0, 16, 428, true, false);
-    _slots[1] = SCR_SlotFactory_CreateWeaponSlot(1, 94, 428, true, false);
-    _slots[2] = SCR_SlotFactory_CreateWeaponSlot(2, 172, 428, true, false);
-    _slots[3] = SCR_SlotFactory_CreateWeaponSlot(3, 250, 428, false, true);
-    _slots[4] = SCR_SlotFactory_CreateWeaponSlot(4, 328, 428, false, true);
+    // weapon slot i sits on monster slot i: you drop the weapon on the monster
+    for (var i = 0; i < 5; i++) {
+        var _c = battle_LayoutPlayerSlotCentre(i);
+        _slots[i] = SCR_SlotFactory_CreateWeaponSlot(i, _c.x - BATTLE_CARD_W / 2, _c.y - BATTLE_CARD_H / 2, i < 3, i >= 3);
+        _slots[i].w = BATTLE_CARD_W;
+        _slots[i].h = BATTLE_CARD_H;
+    }
     return _slots;
 }
 
 function SCR_Board_DefineActionSlot() {
-    return SCR_SlotFactory_CreateActionSlot(420, 394);
+    // only shows while an action card is resolving; you drop actions on a monster
+    return SCR_SlotFactory_CreateActionSlot(604, 390);
 }
 
 function SCR_SlotFactory_CreateMonsterSlot(_index, _x, _y, _visible, _locked) {

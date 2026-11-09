@@ -213,7 +213,8 @@ function battle_NormalizeWaveConfig(_data) {
     return {
         battle: _data.battle,
         active_slots: _data.active_slots,
-        wave: _wave
+        wave: _wave,
+        background: variable_struct_exists(_data, "background") ? string(_data.background) : ""   // optional battlefield sprite
     };
 }
 

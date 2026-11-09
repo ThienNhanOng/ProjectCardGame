@@ -16,7 +16,7 @@ if (_cam == -1) {
 }
 
 // ===== CHANGE THIS VALUE TO MOVE =====
-camera_set_view_pos(_cam, -100, 0);  // ← Change this number!
+camera_set_view_pos(_cam, 0, 0);  // the battle layout fills the whole 1280x700 room (was -100 for the old board)
 
 camera_set_view_size(_cam, 1280, 700);
 view_set_wport(0, 1280);

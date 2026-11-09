@@ -33,6 +33,7 @@ function worldmap_InitGlobals() {
             collection_return_room: noone,
             victory_pending: false,
             victory_time: 0,
+            battle_background: "",
             last_reward_text: "",
             rewards_obtained: [],
             pending_spawn_event_id: -1,
@@ -55,6 +56,7 @@ function worldmap_InitGlobals() {
     if (!variable_struct_exists(global.worldmap, "side_pending")) global.worldmap.side_pending = -1;
     if (!variable_struct_exists(global.worldmap, "node_confirm")) global.worldmap.node_confirm = -1;
     if (!variable_struct_exists(global.worldmap, "victory_time")) global.worldmap.victory_time = 0;
+    if (!variable_struct_exists(global.worldmap, "battle_background")) global.worldmap.battle_background = "";
     if (!variable_struct_exists(global.worldmap, "node_map_key")) global.worldmap.node_map_key = "";
     if (!variable_struct_exists(global.worldmap, "node_pos")) global.worldmap.node_pos = 0;
     if (!variable_struct_exists(global.worldmap, "node_start")) global.worldmap.node_start = undefined;
@@ -197,6 +199,7 @@ function worldmap_LoadMapConfig(_filename) {
     global.worldmap.map_id = variable_struct_exists(_data, "map_id") ? string(_data.map_id) : "map";
     global.worldmap.map_name = variable_struct_exists(_data, "map_name") ? string(_data.map_name) : "";
     global.worldmap.battleset_file = variable_struct_exists(_data, "battleset") ? string(_data.battleset) : "";
+    global.worldmap.battle_background = variable_struct_exists(_data, "battle_background") ? string(_data.battle_background) : "";
     global.worldmap.events = {};
     global.worldmap.event_flow = [];
     global.worldmap.side_events = worldmap_SideReadSettings(_data);   // random side branches (scr_worldmap_graph)

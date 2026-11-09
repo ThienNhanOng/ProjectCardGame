@@ -1,6 +1,7 @@
 /// @desc OBJ_BattleManager entry points — Create / Step / Draw
 
 function SCR_Battle_Init() {
+    battle_ApplyBackground();   // this map's / battle's battlefield (scr_battle_layout)
 
     battle_phase = "player";
 
@@ -145,8 +146,8 @@ function SCR_Battle_Draw() {
 
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board != noone && _board.action_slot.occupied && _board.action_slot.card != undefined) {
-        var _x = room_width - 220;
-        var _y = 10;
+        var _x = _board.action_slot.x + _board.action_slot.w + 10;
+        var _y = _board.action_slot.y;
         var _card = _board.action_slot.card;
         var _traits = battle_GetActionTraits();
 

@@ -56,6 +56,7 @@ function load_MonsterSet(_filename) {
             _entry.animation = _src.animation;
         }
         if (variable_struct_exists(_src, "icon")) _entry.icon = _src.icon;
+        if (variable_struct_exists(_src, "arrival")) _entry.arrival = _src.arrival;
         if (variable_struct_exists(_src, "elite")) {
             _entry.elite = _src.elite;
         }
@@ -102,6 +103,7 @@ function load_MixedContent(_filename) {
             };
             if (variable_struct_exists(_src, "animation")) _entry.animation = _src.animation;
             if (variable_struct_exists(_src, "icon")) _entry.icon = _src.icon;
+            if (variable_struct_exists(_src, "arrival")) _entry.arrival = _src.arrival;
             if (variable_struct_exists(_src, "elite")) _entry.elite = _src.elite;
             array_push(global.monster_DB.enemies, _entry);
             _enemy_count++;
@@ -216,6 +218,7 @@ function monster_CreateInstance(_wave_entry) {
         alive: true,
         animation: variable_struct_exists(_def, "animation") ? _def.animation : "",
         elite: variable_struct_exists(_def, "elite") && _def.elite,
+        arrival: variable_struct_exists(_def, "arrival") ? _def.arrival : "",   // "side" / "drop" / "" = random
         status_effects: [],
         silenced_turns: 0,
         silenced_ability_backup: undefined,

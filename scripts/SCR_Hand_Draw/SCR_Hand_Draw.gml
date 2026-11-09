@@ -6,7 +6,7 @@ function SCR_Hand_GetMetrics() {
         card_h: 101,
         hover_scale: 1.3,
         hover_lift: 30,
-        center_x: 600 / 2 + 35
+        center_x: 585      // middle of the bottom bar's hand section
     };
 }
 

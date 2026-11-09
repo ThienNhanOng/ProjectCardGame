@@ -19,27 +19,40 @@ function monster_DrawHealthBar(_x, _y, _w, _h, _current, _max) {
 function monster_DrawActive(_slot, _monster) {
     var _layout = monster_GetSlotLayout(_slot);
 
+    // still on its way in: only its shadow (the smoke reveals it)
+    if (battlefx_IsArriving(_monster)) {
+        var _set = monsterAnim_GetSpriteSet(_monster);
+        var _feet = battle_LayoutEnemyFeet(_slot.index);
+        if (_set != undefined) {
+            battlefx_DrawArrivalShadow(_monster, _set.idle, floor(current_time / 1000 * MONSTER_ANIM_IDLE_FPS) mod sprite_get_number(_set.idle),
+                _feet.x, _feet.y, MONSTER_ANIM_SCALE * MONSTER_FACING, MONSTER_ANIM_SCALE);
+        } else {
+            var _st = SCR_Monster_ResolveSprite(_monster);
+            battlefx_DrawArrivalShadow(_monster, _st, 0, _feet.x, _feet.y, 1, 1, -sprite_get_height(_st) / 2);
+        }
+        return;
+    }
+
     monsterAnim_Draw(_slot, _monster, _layout);
 
-    draw_set_halign(fa_left);
+    // name above the head
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_bottom);
+    battle_DrawOutlinedText(_layout.cx, _slot.y - 2, _monster.name, monster_IsElite(_monster) ? make_color_rgb(255, 120, 100) : c_white);
     draw_set_valign(fa_top);
-    draw_set_color(monster_IsElite(_monster) ? c_red : c_black);
-    draw_text(_slot.x + 4, _slot.y + 5, SCR_Hand_TruncateName(_monster.name, _layout.card_w - 8));
 
     monster_DrawHealthBar(_layout.health_x, _layout.health_y, _layout.health_w, _layout.health_h,
         battlefx_DisplayHealth(_monster), _monster.max_health);
 
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
-    draw_set_color(c_maroon);
-    draw_text(_layout.stats_cx, _layout.atk_y, "ATK " + string(card_GetBoardAttackDisplay(_monster)));
+    battle_DrawOutlinedText(_layout.stats_cx, _layout.atk_y, "ATK " + string(card_GetBoardAttackDisplay(_monster)), make_color_rgb(255, 184, 168));
 
     card_DrawAttackGainBadge(_slot.x, _slot.y, _layout.card_w, _layout.card_h, card_GetAttackBuff(_monster));
 
     var _status = status_GetDisplayText(_monster);
     if (_status != "") {
-        draw_set_color(c_orange);
-        draw_text(_layout.stats_cx, _layout.status_y, _status);
+        battle_DrawOutlinedText(_layout.stats_cx, _layout.status_y, _status, c_orange);
     }
 
     draw_set_halign(fa_left);

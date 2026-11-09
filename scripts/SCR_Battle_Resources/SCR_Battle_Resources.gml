@@ -182,8 +182,9 @@ function battle_DrawResourcesCounter() {
     var _icon = sprite_get_width(Map_marker_Active) * _scale;
     if (_icon <= 0) _icon = 18;
     var _gap = 3;
-    var _start_x = BATTLE_RESOURCE_X;
-    var _y = BATTLE_RESOURCE_Y;
+    // on the battlefield, just above the bottom bar (right-aligned)
+    var _start_x = room_width - 18 - _slot_count * (_icon + _gap);
+    var _y = BATTLE_UI_Y - 25 - _icon / 2;
 
     for (var i = 0; i < _slot_count; i++) {
         var _x = _start_x + i * (_icon + _gap);

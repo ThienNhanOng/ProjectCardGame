@@ -3,8 +3,8 @@
 function SCR_Deck_createinit() {
 	
     // ===== DECK PROPERTIES =====
-    deck_X = 548;
-    deck_Y = 478;
+    deck_X = 1008;      // bottom bar, right section
+    deck_Y = 612;
     deck_Width = 73;
     deck_Height = 101;
     deck_Min = 8;
@@ -27,8 +27,8 @@ function SCR_Deck_createinit() {
         extra_deck[e] = 0;
     }
 
-    extra_deck_X = 548;
-    extra_deck_Y = 371.5;
+    extra_deck_X = 1090;
+    extra_deck_Y = 612;
     extra_deck_Width = 73;
     extra_deck_Height = 101;
     extra_deck_picker_open = false;

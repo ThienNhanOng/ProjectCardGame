@@ -738,6 +738,21 @@ function conditions_summon_Draw() {
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return;
 
+    // the card being summoned, shown mid-field (same spot as an action card being played)
+    if (conditions_summon_card != undefined) {
+        var _ax = _board.action_slot.x + _board.action_slot.w / 2;
+        var _ay = _board.action_slot.y + _board.action_slot.h / 2;
+        card_DrawFramedAtCenter(_ax, _ay, 1.15, conditions_summon_card, 1);
+        draw_set_halign(fa_center);
+        draw_set_valign(fa_bottom);
+        battle_DrawOutlinedText(_ax, _ay - 62, "Summoning", make_color_rgb(239, 227, 196));
+        draw_set_halign(fa_left);
+        draw_set_valign(fa_top);
+        battle_DrawOutlinedText(_ax + 50, _ay - 50, conditions_summon_card.name, c_white);
+        draw_text_ext_color(_ax + 50, _ay - 30, conditions_summon_prompt, 16, 150,
+            make_color_rgb(239, 227, 196), make_color_rgb(239, 227, 196), make_color_rgb(239, 227, 196), make_color_rgb(239, 227, 196), 1);
+    }
+
     if (conditions_summon_mode == "pick_slot") {
         for (var e = 0; e < array_length(_board.player_monster_slots); e++) {
             var _eslot = _board.player_monster_slots[e];

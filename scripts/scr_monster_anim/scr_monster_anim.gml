@@ -65,7 +65,7 @@ function monster_GetSlotLayout(_slot) {
     var _card_h = _slot.h;
     var _cx = _slot.x + _card_w / 2;
     var _cy = _slot.y + _card_h / 2 + 12;
-    var _stats_pad = 6;
+    var _stats_pad = 24;   // below the pedestal
     var _health_h = 8;
     var _health_pad_x = 4;
     var _health_y = _slot.y + _card_h + _stats_pad;
@@ -119,7 +119,8 @@ function SCR_Monster_ResolveSprite(_monster) {
 
 #macro MONSTER_ANIM_IDLE_FPS 12
 #macro MONSTER_ANIM_ATTACK_FPS 24
-#macro MONSTER_ANIM_SCALE 0.82    // draw size of animated enemies (1 = full sprite size)
+#macro MONSTER_ANIM_SCALE 0.95
+#macro MONSTER_FACING -1           // character sprites face right; enemies stand on the right, so they are mirrored to face left    // draw size of animated enemies (1 = full sprite size)
 
 /// { idle, attack } sprites for this monster, or undefined if it has no animated set
 function monsterAnim_GetSpriteSet(_monster) {
@@ -159,7 +160,7 @@ function monsterAnim_DrawSpriteBody(_slot, _monster, _layout) {
             _frame = floor((current_time / 1000 + _monster.anim_phase) * MONSTER_ANIM_IDLE_FPS);
         }
         _frame = _frame mod sprite_get_number(_spr);
-        draw_sprite_ext(_spr, _frame, _layout.cx, _layout.sprite_y + _layout.card_h * 0.58 - 5, MONSTER_ANIM_SCALE, MONSTER_ANIM_SCALE, 0, c_white, battlefx_BlinkAlpha(_monster));
+        draw_sprite_ext(_spr, _frame, _layout.cx, _layout.sprite_y + _layout.card_h * 0.58 - 5, MONSTER_ANIM_SCALE * MONSTER_FACING, MONSTER_ANIM_SCALE, 0, c_white, battlefx_BlinkAlpha(_monster));
         return;
     }
 

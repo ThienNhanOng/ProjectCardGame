@@ -2,6 +2,7 @@
   "map_id": "grasslands_02",
   "map_name": "Map 2",
   "battleset": "Grasslands_Battleset01_starter.json",
+  "battle_background": "SPR_BattleBG_GrassPlainsDusk",
   "side_events": {
     "chance": 1.0,
     "shape_weights": { "single": 1, "fork": 1, "chain": 1 },

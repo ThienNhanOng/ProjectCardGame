@@ -8,9 +8,9 @@ function deck_AnyPickerOpen() {
 
 function deck_ScrollPicker_GetLayout() {
 
-    var _field_w = sprite_get_width(SPR_Field);
+    var _field_w = room_width;
 
-    var _field_h = sprite_get_height(SPR_Field);
+    var _field_h = BATTLE_UI_Y;
 
     var _panel_w = min(520, _field_w - 40);
 
@@ -240,7 +240,7 @@ function deck_ScrollPicker_DrawPanel(_title, _card_ids, _scroll, _focus, _empty_
 
     draw_set_color(c_black);
 
-    draw_rectangle(0, 0, sprite_get_width(SPR_Field), sprite_get_height(SPR_Field), false);
+    draw_rectangle(0, 0, room_width, BATTLE_UI_Y, false);
 
     draw_set_alpha(1);
 

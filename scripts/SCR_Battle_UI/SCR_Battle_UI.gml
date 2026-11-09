@@ -1,18 +1,11 @@
 /// @desc End Turn button + turn HUD helpers
 
 function battle_GetEndTurnButtonRect() {
-    var _deck = instance_find(OBJ_Deck, 0);
-    var _left = 600;
-
-    if (_deck != noone) {
-        _left = _deck.deck_X + 52;
-    }
-
     return {
-        left: _left,
-        top: 585,
-        right: _left + 120,
-        bottom: 633
+        left: 1146,
+        top: BATTLE_UI_Y + 48,
+        right: 1266,
+        bottom: BATTLE_UI_Y + 98
     };
 }
 
@@ -36,54 +29,46 @@ function SCR_Battle_UI_Draw() {
     var _hover = battle_IsEndTurnButtonHovered();
     var _enabled = battle_CanEndTurn();
 
+    // turn counter on the left of the bottom bar
     var _phase_text = battle_IsPlayerPhase() ? "Your turn" : "Enemy turn";
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_set_color(make_color_rgb(168, 151, 122));
+    draw_text(105, BATTLE_UI_Y + 34, "TURN");
+    draw_set_color(make_color_rgb(201, 162, 74));
+    draw_text_transformed(105, BATTLE_UI_Y + 74, string(turn_number), 3, 3, 0);
+    draw_set_color(make_color_rgb(239, 227, 196));
+    draw_text(105, BATTLE_UI_Y + 118, _phase_text);
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
-    draw_set_color(c_white);
-    draw_text(_rect.left, _rect.top - 32, "Turn " + string(turn_number) + " — " + _phase_text);
 
-    if (battle_IsEnemyPhase()) {
-        draw_set_color(c_ltgray);
-        draw_rectangle(_rect.left, _rect.top, _rect.right, _rect.bottom, false);
-        draw_set_halign(fa_center);
-        draw_set_valign(fa_middle);
-        draw_text((_rect.left + _rect.right) / 2, (_rect.top + _rect.bottom) / 2, "Enemy...");
-        draw_set_halign(fa_left);
-        draw_set_valign(fa_top);
-        return;
-    }
-
-    if (_enabled && _hover) draw_set_color(c_yellow);
-    else if (_enabled) draw_set_color(c_white);
-    else draw_set_color(c_gray);
-
-    draw_rectangle(_rect.left, _rect.top, _rect.right, _rect.bottom, false);
-
-    if (_enabled && _hover) {
-        draw_set_color(c_orange);
-        draw_rectangle(_rect.left, _rect.top, _rect.right, _rect.bottom, true);
-    }
+    // brass button (dimmed while the enemies act)
+    var _live = _enabled && !battle_IsEnemyPhase();
+    var _top_col = _live ? (_hover ? make_color_rgb(230, 194, 106) : make_color_rgb(201, 162, 74)) : make_color_rgb(91, 80, 68);
+    var _bot_col = _live ? make_color_rgb(141, 106, 38) : make_color_rgb(61, 53, 45);
+    draw_rectangle_color(_rect.left, _rect.top, _rect.right, _rect.bottom, _top_col, _top_col, _bot_col, _bot_col, false);
+    draw_set_color(make_color_rgb(26, 19, 13));
+    draw_rectangle(_rect.left, _rect.top, _rect.right, _rect.bottom, true);
+    draw_rectangle(_rect.left + 1, _rect.top + 1, _rect.right - 1, _rect.bottom - 1, true);
 
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
-    draw_set_color(_enabled ? c_black : c_dkgray);
-    draw_text((_rect.left + _rect.right) / 2, (_rect.top + _rect.bottom) / 2, "End Turn");
+    draw_set_color(_live ? make_color_rgb(26, 19, 13) : make_color_rgb(154, 140, 120));
+    draw_text((_rect.left + _rect.right) / 2, (_rect.top + _rect.bottom) / 2, battle_IsEnemyPhase() ? "Enemy turn" : "END TURN");
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
     draw_set_color(c_white);
 }
 
 function battle_GetPreviewPanelLayout() {
-    var _field_right = sprite_get_width(SPR_Field);
-    var _field_bottom = sprite_get_height(SPR_Field);
-    var _gap = 10;
-    var _y = 38;
-    var _bottom_pad = 12;
+    // far right, right under the battle log (battle_EnemyLog_GetPanelLayout)
+    var _log = battle_EnemyLog_GetPanelLayout();
+    var _top = _log.y + _log.h + 8;
     return {
-        x: _field_right + _gap,
-        y: _y,
-        w: 250,
-        h: max(420, _field_bottom - _y - _bottom_pad)
+        x: _log.x,
+        y: _top,
+        w: _log.w,
+        h: BATTLE_UI_Y - 64 - _top
     };
 }
 

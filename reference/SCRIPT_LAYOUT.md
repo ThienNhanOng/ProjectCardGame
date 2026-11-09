@@ -22,6 +22,7 @@ scripts/
 │   ├── scr_battle_targeting   click targeting (target_mode)
 │   ├── scr_battle_attack      column (monster + weapon) attacks
 │   ├── scr_battle_resources, scr_battle_player_health, scr_battle_spirit_shuffle, scr_battle_log, scr_battle_ui
+│   ├── scr_battle_layout    screen layout (positions, battlefield background, bottom bar), scr_battle_fx (arrows, sword swing, blink, health drain)
 │   ├── Board/  scr_board_setup, scr_board_slots, scr_board_draw, scr_board_dragdrop
 │   ├── Deck/   scr_deck, scr_deck_draw, scr_deck_extra, scr_deck_picker
 │   └── Hand/   scr_hand, scr_hand_draw
