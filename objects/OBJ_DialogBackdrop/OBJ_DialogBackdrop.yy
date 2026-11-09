@@ -9,8 +9,8 @@
   "name":"OBJ_DialogBackdrop",
   "overriddenProperties":[],
   "parent":{
-    "name":"WorldMapSystem",
-    "path":"folders/objects/WorldMapSystem.yy",
+    "name":"Dialog",
+    "path":"folders/objects/Dialog.yy",
   },
   "parentObjectId":null,
   "persistent":false,

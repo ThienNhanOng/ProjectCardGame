@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_card_data",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_card_data",
+  "parent":{
+    "name":"Data",
+    "path":"folders/scripts/Data.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

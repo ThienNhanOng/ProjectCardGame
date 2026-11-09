@@ -11,7 +11,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"EventMarkers",
-    "path":"folders/objects/WorldMapSystem/EventMarkers.yy",
+    "path":"folders/objects/WorldMap/EventMarkers.yy",
   },
   "parentObjectId":null,
   "persistent":false,

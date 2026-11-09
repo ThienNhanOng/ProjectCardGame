@@ -8,7 +8,7 @@ Shuffle draw pile, deal hand, render card fan, feed plays to board.
 
 - `SCR_Deck_createinit`, `SCR_Deck_Draw`
 - `SCR_Hand_Init`, `SCR_Hand_Create`, `SCR_Hand_DrawFromDeck`
-- `SCR_Hand_Draw`, `SCR_Hand_Layout`, `SCR_Hand_GetSpacing`
+- `SCR_Hand_Draw`, `scr_hand_draw`, `SCR_Hand_GetSpacing`
 
 ## Main objects
 
@@ -25,7 +25,7 @@ Shuffle draw pile, deal hand, render card fan, feed plays to board.
 ## Dependencies
 
 - `global.battle_deck_source` (from deck builder READY)
-- `SCR_Card_Draw` for visuals
+- `scr_card_draw` for visuals
 - Must exist before `OBJ_BoardManager`
 
 ## Public API
@@ -56,12 +56,12 @@ Draw trait mid-battle:
 ```json
 "ability": "draw:2"
 ```
-→ `SCR_Trait_Draw` → `SCR_Hand_DrawFromDeck(2)`
+→ `scr_card_effects` → `SCR_Hand_DrawFromDeck(2)`
 
 ## Common pitfalls
 
 - **Creation order** — Hand before Deck breaks references
-- `SCR_Hand_Functions` in old notes — use `SCR_Hand_Create.gml` instead
+- `SCR_Hand_Functions` in old notes — hand functions live in `scr_hand` (storage/draw) and `scr_hand_draw` (layout/render)
 
 ## Future expansion
 

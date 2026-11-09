@@ -5,8 +5,8 @@ PURPOSE
 Overworld navigation, marker unlock chain, battle launch, first-clear rewards, return after victory.
 
 MAIN SCRIPTS
-- SCR_WorldMap_Controller, SCR_WorldMap_Config, SCR_WorldMap_Progress
-- SCR_EventMaker (eventmarker_* API)
+- scr_worldmap_controller, scr_worldmap_config, scr_worldmap_progress
+- scr_worldmap_events (eventmarker_* API)
 
 MAIN OBJECTS
 - OBJ_WorldMapController

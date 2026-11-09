@@ -13,8 +13,8 @@
   "name":"OBJ_CardSlot",
   "overriddenProperties":[],
   "parent":{
-    "name":"DeckBuilder",
-    "path":"folders/objects/DeckBuilder.yy",
+    "name":"Collection",
+    "path":"folders/objects/Collection.yy",
   },
   "parentObjectId":null,
   "persistent":false,

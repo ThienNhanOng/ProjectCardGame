@@ -44,8 +44,8 @@
   },
   "origin":4,
   "parent":{
-    "name":"cardsprites",
-    "path":"folders/sprites/cardsprites.yy",
+    "name":"Board",
+    "path":"folders/sprites/Board.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

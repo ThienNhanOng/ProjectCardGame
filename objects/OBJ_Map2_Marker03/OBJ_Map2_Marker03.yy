@@ -8,8 +8,8 @@
   "name":"OBJ_Map2_Marker03",
   "overriddenProperties":[],
   "parent":{
-    "name":"Map2Assets",
-    "path":"folders/objects/WorldMapSystem/Map2Assets.yy",
+    "name":"Map2",
+    "path":"folders/objects/WorldMap/EventMarkers/Map2.yy",
   },
   "parentObjectId":{
     "name":"OBJ_EventMarker",

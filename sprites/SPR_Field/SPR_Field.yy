@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"placeholder_board",
-    "path":"folders/sprites/placeholder_board.yy",
+    "name":"Board",
+    "path":"folders/sprites/Board.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

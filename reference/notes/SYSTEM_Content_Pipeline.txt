@@ -13,7 +13,7 @@ MAIN SCRIPTS / ASSETS
 
 RESPONSIBILITIES
 - Store per-level battlesets, rewards, dialog sources, portraits, backgrounds
-- Keep engine code generic — no hardcoded story in SCR_Battle_* etc.
+- Keep engine code generic — no hardcoded story in scr_battle_* etc.
 
 DEPENDENCIES
 - World map, dialog, data bootstrap systems consume content

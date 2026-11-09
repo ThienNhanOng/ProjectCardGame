@@ -7,9 +7,9 @@ Manage battle board columns and drag-drop card placement.
 ## Main scripts
 
 - `SCR_Board_Create` — entry
-- `SCR_Board_PlayerSlots`, `SCR_Board_EnemySlots`, `SCR_Board_ActionSlot`
-- `SlotFactory`, `SCR_Slot_init`
-- `SCR_DragDrop_Init`, `SCR_Board_SlotManager`, `SCR_Board_Draw`
+- `scr_board_setup`, `SCR_Board_EnemySlots`, `scr_board_setup`
+- `scr_board_setup`, `scr_board_setup`
+- `SCR_DragDrop_Init`, `scr_board_slots`, `SCR_Board_Draw`
 
 ## Main objects
 
@@ -30,15 +30,15 @@ Manage battle board columns and drag-drop card placement.
 ## Dependencies
 
 - `OBJ_Hand` for drag source
-- `SCR_Battle_PlayCard` for validation
-- `SCR_Trait_OpenZone`
+- `scr_battle_play` for validation
+- `scr_card_effects`
 
 ## Public API
 
 ```gml
 SCR_Board_Create();        // Create event
 SCR_DragDrop_Init();       // Step input
-SCR_Board_SlotManager();   // Per-step updates
+scr_board_slots();   // Per-step updates
 ```
 
 ## Initialization order
@@ -48,7 +48,7 @@ After `OBJ_Hand`, before `OBJ_BattleManager`.
 ## Runtime flow
 
 ```
-Hand card selected → drag → slot hit test → SCR_Battle_PlayCard → traits
+Hand card selected → drag → slot hit test → scr_battle_play → traits
 ```
 
 ## Example usage

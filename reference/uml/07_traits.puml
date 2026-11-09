@@ -3,22 +3,29 @@ left to right direction
 skinparam componentStyle rectangle
 
 [card/enemy JSON ability field] as JSON
-[SCR_Trait_Parse trait_NormalizeEntry] as Parse
-[SCR_Trait_Execute] as Exec
-[SCR_Trait_Playereffects] as PE
-[SCR_Trait_Resources] as RES
-[SCR_Conditions] as COND
-[SCR_MonsterAbility_*] as MA
-[SCR_Battle_PlayCard] as PlayCard
-[SCR_Battle_EnemyTurn] as EnemyTurn
+[scr_trait_parse trait_NormalizeEntry] as Parse
+[scr_battle_targeting (player clicks)] as Click
+[scr_enemy_ai (enemy decisions)] as AI
+[scr_trait_execute trait_Execute] as Exec
+[scr_card_effects card_*] as FX
+[scr_card_targeting unit_* / targets_*] as TGT
+[scr_combat combat_*] as COMBAT
+[scr_status_effects status_*] as STATUS
+[scr_card_conditions] as COND
+[scr_battle_play] as Play
+[scr_enemy_abilities] as EA
 
 JSON --> Parse
-Parse --> Exec
-Exec --> PE
-Exec --> RES
-Exec --> COND
-Exec --> MA
-PlayCard --> Exec
-EnemyTurn --> MA
+Parse --> Play
+Parse --> AI
+Play --> Click
+Click --> Exec
+AI --> EA
+EA --> Exec
+Exec --> FX
+FX --> TGT
+FX --> COMBAT
+FX --> STATUS
+Play --> COND
 
 @enduml

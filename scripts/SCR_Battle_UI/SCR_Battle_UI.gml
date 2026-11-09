@@ -97,18 +97,6 @@ function battle_FormatPreviewTurnCount(_turns) {
     return string(_count) + " " + _word;
 }
 
-function battle_FindEnemySlotForCard(_card) {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    var _mm = instance_find(OBJ_MonsterManager, 0);
-    if (_board == noone || _mm == noone || _card == undefined) return -1;
-
-    for (var i = 0; i < _mm.active_slot_count; i++) {
-        var _slot = _board.enemy_slots[i];
-        if (_slot.occupied && _slot.card == _card) return i;
-    }
-    return -1;
-}
-
 function battle_EnemyMonsterAttackPendingThisPhase(_slot_index) {
     if (_slot_index < 0 || !battle_IsEnemyPhase()) return false;
 
@@ -158,7 +146,7 @@ function battle_GetPreviewAttackAllLine(_card) {
     if (_card == undefined) return "";
 
     if (battle_IsEnemyPreviewCard(_card)) {
-        var _slot = battle_FindEnemySlotForCard(_card);
+        var _slot = unit_FindSlotOfCard(SIDE_ENEMY, _card);
         if (_slot < 0) return "";
 
         if (!battle_EnemyWillUseAttackAllSoon(_card, _slot)) return "";
@@ -252,7 +240,7 @@ function battle_GetPreviewSummaryLines(_card) {
 
     if (card_IsAstral(_card)) {
         array_push(_lines, "Astral — persists in extra deck");
-    } else if (battle_IsSpiritMonster(_card)
+    } else if (card_IsSpiritType(_card)
         && variable_struct_exists(_card, "board_turns_left")
         && _card.board_turns_left >= 0) {
         array_push(_lines, "Turns left: " + string(_card.board_turns_left));
@@ -328,56 +316,13 @@ function battle_FindHoveredPreviewCard() {
         }
     }
 
-    var _mm = instance_find(OBJ_MonsterManager, 0);
-    if (_mm != noone && _board != noone) {
-        for (var e = 0; e < _mm.active_slot_count; e++) {
-            var _eslot = _board.enemy_slots[e];
-            if (!_eslot.visible || !_eslot.occupied || _eslot.card == undefined || !_eslot.card.alive) continue;
-            if (monster_IsMouseOverSlot(_eslot)) return _eslot.card;
-        }
-    }
+    var _enemy_slot = unit_GetSlotAt(SIDE_ENEMY, mouse_x, mouse_y);
+    if (_enemy_slot >= 0) return unit_Get(SIDE_ENEMY, _enemy_slot);
 
-    if (_board != noone) {
-        var _found = undefined;
-        with (_board) {
-            if (action_slot.visible && action_slot.occupied && action_slot.card != undefined
-                && SCR_Board_IsSlotMouseOver(action_slot)) {
-                _found = action_slot.card;
-            }
+    var _board_card = battle_FindPlayerCardAt(mouse_x, mouse_y, false);
+    if (_board_card != undefined) return _board_card;
 
-            if (_found == undefined) {
-                for (var w = 0; w < array_length(player_weapon_slots); w++) {
-                    var _wslot = player_weapon_slots[w];
-                    if (!_wslot.visible || !_wslot.occupied || _wslot.card == undefined) continue;
-                    if (SCR_Board_IsSlotMouseOver(_wslot)) {
-                        _found = _wslot.card;
-                        break;
-                    }
-                }
-            }
-
-            if (_found == undefined) {
-                for (var m = 0; m < array_length(player_monster_slots); m++) {
-                    var _mslot = player_monster_slots[m];
-                    if (!_mslot.visible || !_mslot.occupied || _mslot.card == undefined) continue;
-                    if (SCR_Board_IsSlotMouseOver(_mslot)) {
-                        _found = _mslot.card;
-                        break;
-                    }
-                }
-            }
-        }
-        if (_found != undefined) return _found;
-    }
-
-    var _hand = instance_find(OBJ_Hand, 0);
-    if (_hand != noone && _hand.hand_Count > 0) {
-        var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
-        var _idx = SCR_Hand_PickCardIndex(mouse_x, mouse_y, _hand.hand_Count, _spacing, _hand.hand_Y);
-        if (_idx >= 0) return _hand.hand[_idx];
-    }
-
-    return undefined;
+    return battle_FindHandCardAt(mouse_x, mouse_y);
 }
 
 function battle_DrawHoverPreview() {

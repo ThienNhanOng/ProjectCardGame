@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"mapMarker",
-    "path":"folders/sprites/Map/mapMarker.yy",
+    "name":"Markers",
+    "path":"folders/sprites/WorldMap/Markers.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

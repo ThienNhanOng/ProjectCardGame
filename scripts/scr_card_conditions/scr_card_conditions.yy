@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_card_conditions",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_card_conditions",
+  "parent":{
+    "name":"Cards",
+    "path":"folders/scripts/CardSystem/Cards.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

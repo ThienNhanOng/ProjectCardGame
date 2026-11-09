@@ -8,7 +8,7 @@ file "dialog_pre.gml / portraits / bg PNG" as dialog_src
 file "rewards.json / battleset.json" as event_json
 [Import to GameMaker assets] as import
 folder "datafiles/ Included Files" as datafiles
-[SCR_DialogExample_* scripts] as scripts
+[scr_dialog_map1 / scr_dialog_map2 scripts] as scripts
 [sprites/map art] as sprites
 [OBJ_Map1_Marker Create] as marker
 [World map + battle engine] as engine

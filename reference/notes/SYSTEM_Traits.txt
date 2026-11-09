@@ -1,24 +1,27 @@
-Traits & Effects — System Summary
+Card System (traits, effects, targeting, status) — System Summary
 
 
 PURPOSE
-Unified ability pipeline for player cards, weapons, actions, spirits, and enemy abilities.
+One ability pipeline for player cards, weapons, actions, spirits AND enemy monsters.
+The same effect functions run for both sides; only target choice differs (player clicks / enemy AI).
 
-MAIN SCRIPTS
-- SCR_Trait_Parse (trait_NormalizeEntry)
-- SCR_Trait_Execute
-- SCR_Trait_Attack, Heal, Buff, Draw, AddDeck, OpenZone, Destroy, Silence, …
-- SCR_Trait_Resources (add_counter, add_cost)
-- SCR_Conditions (spirit summon requirements)
-- SCR_MonsterAbility_* (enemy-side dispatch)
-
-FOLDER (IDE)
-- scripts/cardcollection/Traits/
+MAIN SCRIPTS (Scripts → CardSystem)
+- scr_trait_parse        trait_NormalizeEntry, trait_GetFromCard / trait_GetFromMonster, display text
+- scr_trait_execute      trait_Execute(trait, context) — every trait type in one switch; add_cost chain
+- scr_card_effects       card_Damage, card_Heal, card_Destroy, card_BuffAttack, card_Silence, card_Shroud,
+                         card_DrawCards, card_AddToHand / Deck / ExtraDeck, openzone, counters, board turns
+- scr_card_targeting     unit_* (side + slot), targets_* (single, all allies, all opponents, attack defender)
+- scr_combat             combat_DamageUnit, combat_RemoveUnit, attack stats, weapon data
+- scr_status_effects     status_Apply / Has / Tick / Remove (silence, shroud, timed attack buffs)
+- scr_card_costs         play costs, tributes
+- scr_card_conditions    spirit summon requirements
+- scr_card_search_picker add_*_tag picker
+Enemy side (Scripts → Enemy): scr_enemy_ai (decide what/who), scr_enemy_abilities (execute via trait_Execute)
 
 RESPONSIBILITIES
-- Parse JSON ability strings/objects into normalized entries
-- Dispatch to effect script by trait type
-- Shared between SCR_Battle_PlayCard and enemy turn
+- Parse JSON ability entries into normalized traits
+- Execute traits for any source through universal effects
+- Resolve all damage / deaths / statuses in one place
 
 DEPENDENCIES
 - card_DB / monster_DB ability fields
@@ -26,24 +29,25 @@ DEPENDENCIES
 
 PUBLIC API
 - trait_NormalizeEntry(raw)
-- trait_Execute(entry, context)
-- Per-effect SCR_Trait_<Name>(...)
+- trait_Execute(trait, trait_CreateContext(effect_Source(side, slot), targets))
+- card_<Effect>(source, targets, amount)
+- status_Apply(unit, status, turns)
 
 INITIALIZATION ORDER
 Stateless — invoked during battle play and enemy turns
 
 RUNTIME FLOW
-JSON ability → normalize → execute → mutate battle/board/hand state
+JSON ability → normalize → choose targets (player click / enemy AI) → trait_Execute → card_* → combat_* / status_*
 
 EXAMPLE
-"ability": "attack:3" on weapon → SCR_Trait_Attack
+enemy "heal" → scr_enemy_ai picks the most hurt ally → trait_Execute → card_Heal (same code a player heal card uses)
 
 COMMON PITFALLS
-- Typo in trait name → silent no-op or debug message
-- New trait added to JSON but no SCR_Trait_* handler
+- Trait type in JSON with no case in trait_Execute → silent no-op
+- trait_Execute never chooses targets — pass them in the context
 
 FUTURE EXPANSION
-- Data-driven trait registry table
+- New statuses (poison, burn, regen): one case per switch in scr_status_effects
 - Conditional chains (if/then in JSON)
 
 PARENT / CHILD

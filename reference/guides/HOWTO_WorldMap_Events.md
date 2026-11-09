@@ -6,10 +6,71 @@ Overworld progression: move player, interact with markers, launch battles, earn 
 
 ## Main scripts
 
-- `SCR_WorldMap_Controller` — map room init, HUD, collection button
-- `SCR_WorldMap_Config` — globals, JSON load, event flow, cleared state
-- `SCR_WorldMap_Progress` — battle launch, victory, spawn, player movement
-- `SCR_EventMaker` — `eventmarker_*` marker API
+- `scr_worldmap_controller` — map room init, HUD, collection button
+- `scr_worldmap_config` — globals, JSON load, event flow, cleared state
+- `scr_worldmap_progress` — battle launch, victory, spawn, player movement
+- `scr_worldmap_events` — `eventmarker_*` marker API
+- `scr_worldmap_graph` — node travel (WASD / click, "are you sure?" box) and random side branches
+
+## Story path + random side branches
+
+Your hand-placed markers stay the story path, in `event_flow` order: start → 1 → 2 → …
+The next story node opens once the one before it is cleared; you can walk back to earlier ones.
+
+After each **first** win of a story battle, a random side branch may pop up off that node:
+
+```
+story → side                 (single)
+story → side → side          (chain: the second opens after the first is done)
+side ← story → side          (fork: one on each side of the path)
+```
+
+Side nodes are a side battle (from the map's `battleset`, near the story battle's difficulty) or a treasure
+(a short scene — "Hero has explored the valley." / "What's this?!?!" / "Found a card - <name>" — then the card).
+A branch **stays until every node in it is done** — you can walk away and come back. Once it's all done it
+disappears as soon as you walk off it. Several branches (one per story node) can be on the map at once.
+Side nodes are one-shot (no replay). Side node ids start at 1001; `global.worldmap.side_branches` holds the
+branches (each node has `parent` and `children` ids).
+
+```json
+"side_events": {
+  "chance": 1.0,
+  "shape_weights": { "single": 1, "fork": 1, "chain": 1 },
+  "treasure_chance": 0.3,
+  "chain_treasure_chance": 0.5,
+  "battle_rewards": [],
+  "chain_battle_rewards": [ { "id": 6, "chance": 100 }, { "id": 11, "chance": 100 }, 12 ],
+  "treasure_rewards": [{ "id": 8, "chance": 100, "once": true }, { "id": 9, "chance": 100 }],
+  "battle_names": ["Bandit Ambush", "Wolf Den", "Goblin Camp"],
+  "treasure_names": ["Hidden Cache", "Old Chest", "Mossy Shrine"],
+  "places": ["valley", "forest clearing", "old ruins"]
+}
+```
+
+| Setting | What it controls |
+|---------|------------------|
+| `chance` | 0–1 chance of a branch after each first story win (1.0 = always) |
+| `shape_weights` | how often each shape appears — `single` (left **or** right), `fork` (left **and** right), `chain` (two in a row). 0 = never |
+| `treasure_chance` | single / fork: chance each node is a treasure instead of a battle |
+| `chain_treasure_chance` | chain: chance of **battle → treasure** instead of **battle → battle** (a chain always starts with a battle) |
+| `battle_rewards` | single / fork side battles drop one card from this list (`[]` = no card) |
+| `chain_battle_rewards` | battle → battle: **each** of the two battles drops one card from this list |
+| `treasure_rewards` | treasures give one card from this list |
+
+Battle → treasure: the battle drops nothing, only the treasure gives a card.
+Reward lists take `{ "id", "chance", "once" }` entries or plain card ids (`12` = id 12, chance 100);
+`chance` is a weight — one card is picked per battle / treasure.
+
+`battle_names` / `treasure_names` are the names shown on side nodes (picked at random, avoiding names already
+on the map). `places` is only used in the treasure scene text. Remove the block to turn side events off for that map. No branch is made when the win sends you to another map.
+
+**Controls:** WASD / arrow keys slide to the linked node in that direction; clicking a glowing node travels there.
+Arriving never starts anything — press **E / Enter** on a node to start it (or replay a cleared story battle).
+With the mouse, clicking a node that would start something opens **"Are you sure you want to go here?" Yes / No**
+(Y / N / Esc also work); Yes travels there and starts it.
+
+**Winning a battle:** the battle ends the moment the last enemy dies — a Victory panel shows the reward and the
+map comes back after 2 seconds (click / E skips the wait).
 
 ## Main objects
 
@@ -95,7 +156,7 @@ eventmarker_reward_add(9, 100);
 
 - Place `OBJ_Map1_MarkerXX` in room, **not** `OBJ_EventMarker`
 - `marker_order` must match intended unlock sequence
-- `WORLDMAP_SNAP_BREAK_HOLD` macro in `SCR_WorldMap_Config` controls hold duration (0.25s)
+- `WORLDMAP_SNAP_BREAK_HOLD` macro in `scr_worldmap_config` controls hold duration (0.25s)
 
 ## Future expansion
 

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_deck_extra",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_deck_extra",
+  "parent":{
+    "name":"Deck",
+    "path":"folders/scripts/Battle/Deck.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

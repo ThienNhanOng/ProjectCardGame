@@ -5,10 +5,10 @@ PURPOSE
 Load all card and enemy definitions at startup. Split card pool (card_DB) from player ownership (player_collection).
 
 MAIN SCRIPTS
-- LoadCollection.gml / SCR_LoadAllCollections
-- LoadMonsters.gml / battle_EnsureMonsterDatabase
-- SCR_PlayerCollection.gml
-- SCR_Card_Draw.gml, deck_Clear.gml
+- scr_card_data.gml / SCR_LoadAllCollections
+- scr_monster_data.gml / battle_EnsureMonsterDatabase
+- scr_player_collection.gml
+- scr_card_draw.gml, deck_Clear.gml
 
 MAIN OBJECTS
 - OBJ_GameController (Create only)

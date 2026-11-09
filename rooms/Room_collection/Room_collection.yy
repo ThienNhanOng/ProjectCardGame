@@ -20,8 +20,8 @@
   ],
   "name":"Room_collection",
   "parent":{
-    "name":"card set up",
-    "path":"folders/rooms/card set up.yy",
+    "name":"Collection",
+    "path":"folders/rooms/Collection.yy",
   },
   "parentRoom":null,
   "physicsSettings":{

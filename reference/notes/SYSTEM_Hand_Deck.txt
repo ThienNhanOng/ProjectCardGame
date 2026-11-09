@@ -7,7 +7,7 @@ In-battle card flow: deck holds card IDs, hand holds full card structs, draw and
 MAIN SCRIPTS
 - SCR_Deck_createinit, SCR_Deck_Draw, deck_Clear
 - SCR_Hand_Init, SCR_Hand_Create, SCR_Hand_DrawFromDeck
-- SCR_Hand_Draw, SCR_Hand_DrawCard, SCR_Hand_Layout, SCR_Hand_GetSpacing
+- SCR_Hand_Draw, SCR_Hand_DrawCard, scr_hand_draw, SCR_Hand_GetSpacing
 
 MAIN OBJECTS
 - OBJ_Deck (draw pile)
@@ -22,7 +22,7 @@ RESPONSIBILITIES
 DEPENDENCIES
 - card_DB for ID → struct resolution
 - global.battle_deck_source from deck builder
-- SCR_Card_Draw for rendering
+- scr_card_draw for rendering
 
 PUBLIC API
 - SCR_Hand_Init() / SCR_Hand_Create()
@@ -40,7 +40,7 @@ SCR_Hand_DrawFromDeck(5) at battle start after SCR_Battle_Init
 
 COMMON PITFALLS
 - Hand created before Deck → broken reference
-- Notes mention SCR_Hand_Functions — functions live in SCR_Hand_Create.gml
+- Notes mention SCR_Hand_Functions — functions live in scr_hand / scr_hand_draw
 
 FUTURE EXPANSION
 - Hand size limit enforcement

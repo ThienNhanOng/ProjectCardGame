@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_hand",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_hand",
+  "parent":{
+    "name":"Hand",
+    "path":"folders/scripts/Battle/Hand.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

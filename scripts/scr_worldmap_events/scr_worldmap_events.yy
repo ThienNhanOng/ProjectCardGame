@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_worldmap_events",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_worldmap_events",
+  "parent":{
+    "name":"WorldMap",
+    "path":"folders/scripts/WorldMap.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

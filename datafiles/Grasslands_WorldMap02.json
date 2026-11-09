@@ -2,15 +2,124 @@
   "map_id": "grasslands_02",
   "map_name": "Map 2",
   "battleset": "Grasslands_Battleset01_starter.json",
-  "event_flow": [1, 2, 3, 4, 5, 6, 7, 8],
+  "side_events": {
+    "chance": 1.0,
+    "shape_weights": { "single": 1, "fork": 1, "chain": 1 },
+    "treasure_chance": 0.3,
+    "chain_treasure_chance": 0.5,
+    "battle_rewards": [],
+    "chain_battle_rewards": [
+      { "id": 6, "chance": 100 },
+      { "id": 11, "chance": 100 },
+      { "id": 12, "chance": 50 }
+    ],
+    "battle_names": ["Raider Patrol", "Ruined Outpost", "Cave Lurkers", "Hilltop Ambush", "Mercenary Duel", "Night Prowlers"],
+    "treasure_names": ["Forgotten Vault", "Traveler's Pack", "Sunken Chest", "Collapsed Tent", "Shining Rocks"],
+    "places": [
+      "valley",
+      "forest clearing",
+      "old ruins",
+      "riverbank",
+      "hillside cave"
+    ],
+    "treasure_rewards": [
+      {
+        "id": 8,
+        "chance": 100,
+        "once": true
+      },
+      {
+        "id": 9,
+        "chance": 100
+      },
+      {
+        "id": 10,
+        "chance": 100
+      }
+    ]
+  },
+  "event_flow": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
   "events": [
-    { "id": 1, "label": "Grass Trail", "battle": "battle01", "replay_pool": ["battle01", "battle02"] },
-    { "id": 2, "label": "Wind Ridge", "battle": "battle02", "replay_pool": ["battle02", "battle03"] },
-    { "id": 3, "label": "Old Path", "battle": "battle03", "replay_pool": ["battle03", "battle04"] },
-    { "id": 4, "label": "Stone Circle", "battle": "battle04", "replay_pool": ["battle04", "battle05"] },
-    { "id": 5, "label": "River Bend", "battle": "battle05", "replay_pool": ["battle05", "battle06"] },
-    { "id": 6, "label": "Hill Camp", "battle": "battle06", "replay_pool": ["battle06", "battle07"] },
-    { "id": 7, "label": "Deep Grass", "battle": "battle07", "replay_pool": ["battle07", "battle08"] },
-    { "id": 8, "label": "Final Gate", "battle": "battle08", "replay_pool": ["battle08", "battle05"] }
+    {
+      "id": 1,
+      "label": "Grass Trail",
+      "battle": "battle01",
+      "replay_pool": [
+        "battle01",
+        "battle02"
+      ]
+    },
+    {
+      "id": 2,
+      "label": "Wind Ridge",
+      "battle": "battle02",
+      "replay_pool": [
+        "battle02",
+        "battle03"
+      ]
+    },
+    {
+      "id": 3,
+      "label": "Old Path",
+      "battle": "battle03",
+      "replay_pool": [
+        "battle03",
+        "battle04"
+      ]
+    },
+    {
+      "id": 4,
+      "label": "Stone Circle",
+      "battle": "battle04",
+      "replay_pool": [
+        "battle04",
+        "battle05"
+      ]
+    },
+    {
+      "id": 5,
+      "label": "River Bend",
+      "battle": "battle05",
+      "replay_pool": [
+        "battle05",
+        "battle06"
+      ]
+    },
+    {
+      "id": 6,
+      "label": "Hill Camp",
+      "battle": "battle06",
+      "replay_pool": [
+        "battle06",
+        "battle07"
+      ]
+    },
+    {
+      "id": 7,
+      "label": "Deep Grass",
+      "battle": "battle07",
+      "replay_pool": [
+        "battle07",
+        "battle08"
+      ]
+    },
+    {
+      "id": 8,
+      "label": "Final Gate",
+      "battle": "battle08",
+      "replay_pool": [
+        "battle08",
+        "battle05"
+      ]
+    }
   ]
 }

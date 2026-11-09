@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Board_Draw",
+  "%Name":"scr_board_draw",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Board_Draw",
+  "name":"scr_board_draw",
   "parent":{
-    "name":"draw",
-    "path":"folders/scripts/BoardManager/draw.yy",
+    "name":"Board",
+    "path":"folders/scripts/Battle/Board.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -1,8 +1,5 @@
 /// @desc World map config — load JSON, define event flow, battles, replay pools
 
-#macro WORLDMAP_INTERACT_RADIUS 56
-#macro WORLDMAP_SNAP_OFFSET_Y 40
-#macro WORLDMAP_SNAP_BREAK_HOLD 0.25
 #macro WORLDMAP_BG_OFFSET_Y -64
 #macro WORLDMAP_SPRITE_TOP_BAR 120
 #macro WORLDMAP_SPRITE_BOTTOM_BAR 120
@@ -35,13 +32,32 @@ function worldmap_InitGlobals() {
             return_room: Room_Worldmap1,
             collection_return_room: noone,
             victory_pending: false,
+            victory_time: 0,
             last_reward_text: "",
             rewards_obtained: [],
             pending_spawn_event_id: -1,
             pending_goto_room: noone,
-            pending_goto_spawn_event: -1
+            pending_goto_spawn_event: -1,
+            side_events: undefined,
+            side_branches: [],
+            side_next_id: 1001,
+            side_pending: -1,
+            node_confirm: -1,
+            node_map_key: "",
+            node_pos: 0,
+            node_start: undefined
         };
     }
+
+    if (!variable_struct_exists(global.worldmap, "side_events")) global.worldmap.side_events = undefined;
+    if (!variable_struct_exists(global.worldmap, "side_branches")) global.worldmap.side_branches = [];
+    if (!variable_struct_exists(global.worldmap, "side_next_id")) global.worldmap.side_next_id = 1001;
+    if (!variable_struct_exists(global.worldmap, "side_pending")) global.worldmap.side_pending = -1;
+    if (!variable_struct_exists(global.worldmap, "node_confirm")) global.worldmap.node_confirm = -1;
+    if (!variable_struct_exists(global.worldmap, "victory_time")) global.worldmap.victory_time = 0;
+    if (!variable_struct_exists(global.worldmap, "node_map_key")) global.worldmap.node_map_key = "";
+    if (!variable_struct_exists(global.worldmap, "node_pos")) global.worldmap.node_pos = 0;
+    if (!variable_struct_exists(global.worldmap, "node_start")) global.worldmap.node_start = undefined;
 
     if (!variable_struct_exists(global.worldmap, "pending_goto_room")) {
         global.worldmap.pending_goto_room = noone;
@@ -173,24 +189,17 @@ function worldmap_LoadMapConfig(_filename) {
     worldmap_InitGlobals();
 
     if (!file_exists(_filename)) {
-return false;
+        return false;
     }
 
-    var _file = file_text_open_read(_filename);
-    var _json_str = "";
-    while (!file_text_eof(_file)) {
-        _json_str += file_text_read_string(_file);
-        file_text_readln(_file);
-    }
-    file_text_close(_file);
-
-    var _data = json_parse(_json_str);
+    var _data = data_ReadJsonFile(_filename);
     global.worldmap.config_file = _filename;
     global.worldmap.map_id = variable_struct_exists(_data, "map_id") ? string(_data.map_id) : "map";
     global.worldmap.map_name = variable_struct_exists(_data, "map_name") ? string(_data.map_name) : "";
     global.worldmap.battleset_file = variable_struct_exists(_data, "battleset") ? string(_data.battleset) : "";
     global.worldmap.events = {};
     global.worldmap.event_flow = [];
+    global.worldmap.side_events = worldmap_SideReadSettings(_data);   // random side branches (scr_worldmap_graph)
 
     if (variable_struct_exists(_data, "event_flow") && is_array(_data.event_flow)) {
         worldmap_SetEventFlow(_data.event_flow);
@@ -260,7 +269,7 @@ return false;
         }
     }
 
-return true;
+    return true;
 }
 
 function worldmap_BuildRewardFromLegacySource(_src) {
@@ -331,6 +340,8 @@ function worldmap_GetNextUnclearedEventId() {
 
 function worldmap_GetEventState(_event_id) {
     var _id = floor(_event_id);
+    if (worldmap_IsSideId(_id)) return worldmap_SideGetEventState(_id);
+
     if (worldmap_IsEventCleared(_id)) return WORLDMAP_EVENT_STATE.CLEARED;
 
     var _next = worldmap_GetNextUnclearedEventId();
@@ -341,6 +352,8 @@ function worldmap_GetEventState(_event_id) {
 
 function worldmap_CanInteractEvent(_event_id) {
     var _state = worldmap_GetEventState(_event_id);
+    // side events are one-shot; story events can be replayed
+    if (worldmap_IsSideId(_event_id)) return _state == WORLDMAP_EVENT_STATE.AVAILABLE;
     return _state == WORLDMAP_EVENT_STATE.AVAILABLE || _state == WORLDMAP_EVENT_STATE.CLEARED;
 }
 

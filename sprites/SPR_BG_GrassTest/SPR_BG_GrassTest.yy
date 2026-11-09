@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"map1art",
-    "path":"folders/sprites/Map/map1art.yy",
+    "name":"Backgrounds",
+    "path":"folders/sprites/WorldMap/Backgrounds.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

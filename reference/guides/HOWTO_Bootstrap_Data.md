@@ -6,10 +6,10 @@ Load card and enemy databases at game start. Maintain separate **definitions** (
 
 ## Main scripts
 
-- `LoadCollection.gml` — `SCR_LoadAllCollections()`
-- `LoadMonsters.gml` — `battle_EnsureMonsterDatabase()`
-- `SCR_PlayerCollection.gml` — grant, format, ensure initialized
-- `SCR_Card_Draw.gml` — render card visuals from structs
+- `scr_card_data.gml` — `SCR_LoadAllCollections()`
+- `scr_monster_data.gml` — `battle_EnsureMonsterDatabase()`
+- `scr_player_collection.gml` — grant, format, ensure initialized
+- `scr_card_draw.gml` — render card visuals from structs
 
 ## Main objects
 

@@ -310,7 +310,7 @@ Step C — Included Files (if new JSON file)
   If you create a NEW collection file (not EnemyCollection01.json):
   1. Put the file in datafiles/
   2. GameMaker → Included Files → add the JSON
-  3. Open scripts/LoadMonsters/LoadMonsters.gml
+  3. Open scripts/scr_monster_data/scr_monster_data.gml
   4. In SCR_LoadAllMonsters(), add:
        load_MonsterSet("YourNewCollection.json");
 

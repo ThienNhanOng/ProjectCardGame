@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_status_effects",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_status_effects",
+  "parent":{
+    "name":"Effects",
+    "path":"folders/scripts/CardSystem/Effects.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

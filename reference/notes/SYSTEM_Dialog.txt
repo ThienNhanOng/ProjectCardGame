@@ -5,10 +5,10 @@ PURPOSE
 Visual-novel style overlays on world map: portraits, typewriter text, colored text, optional full-screen backgrounds.
 
 MAIN SCRIPTS
-- SCR_Dialog_System (runtime, draw, step)
-- SCR_Dialog_Builder (dialog_Left, dialog_LineKey, dialog_Background, …)
-- SCR_Dialog_Text (parse colored text, text script format)
-- SCR_DialogExample_map1marker (content example)
+- scr_dialog_system (runtime, draw, step)
+- scr_dialog_builder (dialog_Left, dialog_LineKey, dialog_Background, …)
+- scr_dialog_text (parse colored text, text script format)
+- scr_dialog_map1 (content example)
 
 MAIN OBJECTS
 - OBJ_DialogController (Draw GUI → dialog_DrawGui)
@@ -21,7 +21,7 @@ RESPONSIBILITIES
 - Block map input while active
 
 DEPENDENCIES
-- SCR_WorldMap_Controller calls dialog_Step
+- scr_worldmap_controller calls dialog_Step
 - Event markers stash pending_dialog_post before battle
 
 PUBLIC API

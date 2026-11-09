@@ -5,10 +5,10 @@ PURPOSE
 Run combat turns: play cards, targeting, attacks, resources, enemy turns, victory detection.
 
 MAIN SCRIPTS
-- SCR_Battle_Init, SCR_Battle_Load, SCR_Battle_Session
-- SCR_Battle_Step, SCR_Battle_Turn, SCR_Battle_PlayCard
-- SCR_Battle_Attack, SCR_Battle_Targeting, SCR_Battle_EnemyTurn
-- SCR_Battle_Draw, SCR_Battle_UI, SCR_Battle_Resources
+- SCR_Battle_Init, scr_battle_session, scr_battle_session
+- SCR_Battle_Step, scr_battle_turn, scr_battle_play
+- scr_battle_attack, scr_battle_targeting, scr_battle_turn
+- SCR_Battle_Draw, scr_battle_ui, scr_battle_resources
 
 MAIN OBJECTS
 - OBJ_BattleManager
@@ -24,7 +24,7 @@ RESPONSIBILITIES
 
 DEPENDENCIES
 - OBJ_BoardManager, OBJ_Hand, OBJ_Deck, OBJ_MonsterManager
-- SCR_Trait_* for card effects
+- scr_trait_execute / scr_card_effects for card effects
 - global.battle_runtime_config from world map OR Battle01.json fallback
 
 PUBLIC API

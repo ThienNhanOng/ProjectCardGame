@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_WorldMap_Config",
+  "%Name":"scr_worldmap_config",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_WorldMap_Config",
+  "name":"scr_worldmap_config",
   "parent":{
-    "name":"WorldMap1",
-    "path":"folders/scripts/WorldMap/WorldMap1.yy",
+    "name":"WorldMap",
+    "path":"folders/scripts/WorldMap.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

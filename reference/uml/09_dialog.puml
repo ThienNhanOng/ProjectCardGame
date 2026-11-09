@@ -12,8 +12,8 @@ skinparam componentStyle rectangle
 [full-screen bg if told] as BG
 [portraits + inactive dim] as Portraits
 [typewriter text box] as Text
-[SCR_Dialog_Builder] as Builder
-[SCR_Dialog_Text] as DialogText
+[scr_dialog_builder] as Builder
+[scr_dialog_text] as DialogText
 
 Marker --> Start
 Start --> Show

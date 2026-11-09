@@ -9,7 +9,7 @@ function worldmap_StartBattle(_battle_id, _battleset_file = "") {
         _battleset_file = global.worldmap.battleset_file;
     }
     if (_battleset_file == "") {
-return false;
+        return false;
     }
 
     var _config = battle_GetBattlesetBattle(_battleset_file, _battle_id);
@@ -27,12 +27,12 @@ function worldmap_LaunchEventBattle(_event_id) {
     dialog_ForceClose();
 
     if (!worldmap_CanInteractEvent(_event_id)) {
-return false;
+        return false;
     }
 
     var _battle_id = worldmap_ResolveBattleIdForEvent(_event_id);
     if (_battle_id == "") {
-return false;
+        return false;
     }
 
     var _config = battle_GetBattlesetBattle(worldmap_GetEventBattleset(_event_id), _battle_id);
@@ -58,7 +58,7 @@ return false;
         }
     }
 
-room_goto(Room_battle);
+    room_goto(Room_battle);
     return true;
 }
 
@@ -71,6 +71,7 @@ function worldmap_NotifyBattleVictory() {
 
     var _event_id = global.worldmap.active_event_id;
     global.worldmap.last_reward_text = worldmap_GrantEventRewards(_event_id);
+    global.worldmap.victory_time = current_time;
 }
 
 function worldmap_ReturnToMapAfterVictory() {
@@ -94,6 +95,8 @@ function worldmap_ReturnToMapAfterVictory() {
 
     if (_event_id > 0) {
         worldmap_MarkEventCleared(_event_id);
+        // a first story win may open a random side branch (not when leaving for another map)
+        if (_goto_room == noone) worldmap_NodeOnEventCleared(_event_id, _first_clear);
     }
 
     global.worldmap.active_event_id = -1;
@@ -118,14 +121,7 @@ function worldmap_ReturnToMapAfterVictory() {
     room_goto(_return_room);
 }
 
-function worldmap_GetMarkerSnapPosition(_marker_inst) {
-    if (_marker_inst == noone) return { x: 0, y: 0 };
-
-    return {
-        x: _marker_inst.x,
-        y: _marker_inst.y - WORLDMAP_SNAP_OFFSET_Y
-    };
-}
+/// Where the player stands on a marker (player sprite origin is bottom-centre, marker origin top-left)
 
 function worldmap_GetEventMarkerById(_event_id) {
     if (_event_id <= 0) return noone;
@@ -144,113 +140,74 @@ function worldmap_ApplyPendingPlayerSpawn() {
     if (_event_id <= 0) return;
 
     global.worldmap.pending_spawn_event_id = -1;
-
-    var _marker = worldmap_GetEventMarkerById(_event_id);
-    if (_marker == noone) return;
-
-    var _player = instance_find(OBJ_PlayerMarker, 0);
-    if (_player == noone) return;
-
-    var _pos = worldmap_GetMarkerSnapPosition(_marker);
-    _player.x = _pos.x;
-    _player.y = _pos.y;
-    _player.snap_event_id = _event_id;
-    _player.snap_break_free = false;
-    _player.snap_hold_timer = 0;
+    worldmap_NodePlaceAtEvent(_event_id);   // the player is placed on that node (scr_worldmap_graph)
 }
 
+/// Node-to-node travel: WASD / arrows or clicking a linked node (scr_worldmap_graph)
 function worldmap_PlayerMovementStep(_inst) {
-    if (_inst == noone || dialog_IsActive()) return;
-
-    var _move_spd = 4;
-    var _hor = keyboard_check(ord("D")) - keyboard_check(ord("A"));
-    var _ver = keyboard_check(ord("S")) - keyboard_check(ord("W"));
-    var _moving = (_hor != 0 || _ver != 0);
-
-    var _nearest = worldmap_GetNearestInteractableEvent(_inst);
-    var _dt = delta_time / 1000000;
-    if (_dt <= 0) _dt = 1 / max(1, game_get_speed(gamespeed_fps));
-
-    if (_nearest == noone) {
-        _inst.snap_break_free = false;
-        _inst.snap_event_id = -1;
-        _inst.snap_hold_timer = 0;
-        if (_moving) {
-            _inst.x += _hor * _move_spd;
-            _inst.y += _ver * _move_spd;
-        }
-    } else {
-        var _dist = point_distance(_inst.x, _inst.y, _nearest.x, _nearest.y);
-
-        if (_dist > WORLDMAP_INTERACT_RADIUS) {
-            _inst.snap_break_free = false;
-            _inst.snap_event_id = -1;
-            _inst.snap_hold_timer = 0;
-            if (_moving) {
-                _inst.x += _hor * _move_spd;
-                _inst.y += _ver * _move_spd;
-            }
-        } else if (!_inst.snap_break_free) {
-            var _pos = worldmap_GetMarkerSnapPosition(_nearest);
-            _inst.x = _pos.x;
-            _inst.y = _pos.y;
-            _inst.snap_event_id = _nearest.event_id;
-
-            if (_moving) {
-                _inst.snap_hold_timer += _dt;
-                if (_inst.snap_hold_timer >= WORLDMAP_SNAP_BREAK_HOLD) {
-                    _inst.snap_break_free = true;
-                    _inst.snap_hold_timer = 0;
-                    _inst.x += _hor * _move_spd;
-                    _inst.y += _ver * _move_spd;
-                }
-            } else {
-                _inst.snap_hold_timer = 0;
-            }
-        } else if (_moving) {
-            _inst.x += _hor * _move_spd;
-            _inst.y += _ver * _move_spd;
-        }
-    }
-
-    var _bounds = worldmap_GetMovementBounds();
-    _inst.x = clamp(_inst.x, _bounds.x1, _bounds.x2);
-    _inst.y = clamp(_inst.y, _bounds.y1, _bounds.y2);
+    worldmap_NodePlayerStep(_inst);
 }
 
-function worldmap_BattleVictoryStep() {
+#macro WORLDMAP_VICTORY_AUTO_RETURN 2.0   // seconds before the map comes back on its own
+#macro WORLDMAP_VICTORY_SKIP_DELAY 0.35    // ignore the click that killed the last enemy
+
+function worldmap_IsBattleWon() {
     worldmap_InitGlobals();
-    if (!global.worldmap.victory_pending) return;
-
+    if (!global.worldmap.victory_pending) return false;
     var _mm = instance_find(OBJ_MonsterManager, 0);
-    if (_mm == noone || !_mm.battle_won) return;
+    return _mm != noone && _mm.battle_won;
+}
 
-    if (keyboard_check_pressed(vk_enter) || keyboard_check_pressed(ord("E"))
-        || mouse_check_button_pressed(mb_left)) {
+/// The battle ends as soon as the last enemy dies: back to the map after a moment, or on click / E / Enter
+function worldmap_BattleVictoryStep() {
+    if (!worldmap_IsBattleWon()) return;
+
+    var _elapsed = (current_time - global.worldmap.victory_time) / 1000;
+    var _skip = _elapsed >= WORLDMAP_VICTORY_SKIP_DELAY
+        && (keyboard_check_pressed(vk_enter) || keyboard_check_pressed(ord("E")) || mouse_check_button_pressed(mb_left));
+    if (_skip || _elapsed >= WORLDMAP_VICTORY_AUTO_RETURN) {
         worldmap_ReturnToMapAfterVictory();
     }
 }
 
+/// Draw GUI: centred victory panel, on top of the hand
 function worldmap_DrawBattleVictoryPrompt() {
-    worldmap_InitGlobals();
-    if (!global.worldmap.victory_pending) return;
+    if (!worldmap_IsBattleWon()) return;
 
-    var _mm = instance_find(OBJ_MonsterManager, 0);
-    if (_mm == noone || !_mm.battle_won) return;
+    var _gw = display_get_gui_width();
+    var _gh = display_get_gui_height();
+    var _cx = _gw * 0.5;
+    var _cy = _gh * 0.5;
+    var _reward = global.worldmap.last_reward_text;
+    var _elapsed = (current_time - global.worldmap.victory_time) / 1000;
+
+    draw_set_alpha(0.5);
+    draw_set_color(c_black);
+    draw_rectangle(0, 0, _gw, _gh, false);
+    draw_set_alpha(0.95);
+    draw_set_color(make_color_rgb(25, 45, 30));
+    draw_rectangle(_cx - 220, _cy - 70, _cx + 220, _cy + 70, false);
+    draw_set_alpha(1);
+    draw_set_color(c_lime);
+    draw_rectangle(_cx - 220, _cy - 70, _cx + 220, _cy + 70, true);
 
     draw_set_halign(fa_center);
-    draw_set_valign(fa_top);
+    draw_set_valign(fa_middle);
+    draw_text_transformed(_cx, _cy - 36, "VICTORY!", 2, 2, 0);
+    draw_set_color(c_white);
+    if (_reward != "") draw_text(_cx, _cy + 4, "Obtained: " + _reward);
+
+    // bar that fills until the map comes back
+    var _t = clamp(_elapsed / WORLDMAP_VICTORY_AUTO_RETURN, 0, 1);
+    draw_set_color(c_dkgray);
+    draw_rectangle(_cx - 150, _cy + 30, _cx + 150, _cy + 36, false);
     draw_set_color(c_lime);
+    draw_rectangle(_cx - 150, _cy + 30, _cx - 150 + 300 * _t, _cy + 36, false);
+    draw_set_color(c_ltgray);
+    draw_text(_cx, _cy + 52, "Returning to map...  (click / E to skip)");
 
-    var _msg = "Victory! Press E / Enter / Click to return to map";
-    if (variable_struct_exists(global.worldmap, "last_reward_text")
-        && global.worldmap.last_reward_text != "") {
-        _msg = "Victory! Obtained: " + global.worldmap.last_reward_text
-            + " — Press E / Enter / Click to return";
-    }
-
-    draw_text(room_width / 2, room_height - 48, _msg);
     draw_set_halign(fa_left);
+    draw_set_valign(fa_top);
     draw_set_color(c_white);
 }
 
@@ -268,7 +225,9 @@ function worldmap_InitRoom(_config_file = "Grasslands_WorldMap01.json") {
     if (_prev_config != "" && _prev_config != global.worldmap.config_file) {
         global.worldmap.cleared = [];
     }
-    worldmap_SyncMarkersFromRoom();
+
+    worldmap_SyncMarkersFromRoom();   // your story markers
+    worldmap_NodeSetupRoom();         // start point + any side branch
 }
 
 /// @desc Default JSON config per map room (override via room creation code global)
@@ -285,6 +244,8 @@ function worldmap_DrawMapDebugInfo(_gh) {
 
     var _cleared = array_length(global.worldmap.cleared);
     var _total = array_length(global.worldmap.event_flow);
+    _cleared = 0;   // story events only (side events come and go)
+    for (var i = 0; i < _total; i++) if (worldmap_IsEventCleared(global.worldmap.event_flow[i])) _cleared++;
 
     draw_set_halign(fa_left);
     draw_set_valign(fa_bottom);
@@ -326,18 +287,18 @@ function worldmap_DrawCollectionButton() {
 }
 
 function worldmap_HandleCollectionButton() {
-    if (dialog_IsActive()) return;
+    if (dialog_IsActive() || global.worldmap.node_confirm >= 0) return;
     if (!mouse_check_button_pressed(mb_left)) return;
+    if (!worldmap_IsMouseOverCollectionButton()) return;
 
+    worldmap_OpenCollection();
+}
+
+function worldmap_IsMouseOverCollectionButton() {
     var _mx = device_mouse_x_to_gui(0);
     var _my = device_mouse_y_to_gui(0);
     var _bounds = worldmap_GetCollectionButtonBounds();
-    if (_mx < _bounds.x1 || _mx > _bounds.x2
-        || _my < _bounds.y1 || _my > _bounds.y2) {
-        return;
-    }
-
-    worldmap_OpenCollection();
+    return _mx >= _bounds.x1 && _mx <= _bounds.x2 && _my >= _bounds.y1 && _my <= _bounds.y2;
 }
 
 function worldmap_OpenCollection() {
@@ -478,32 +439,7 @@ function worldmap_RefreshAllMarkers() {
     }
 }
 
-function worldmap_GetNearestInteractableEvent(_player_inst) {
-    if (_player_inst == noone) return noone;
-
-    var _best = noone;
-    var _best_dist = WORLDMAP_INTERACT_RADIUS + 1;
-
-    with (OBJ_EventMarker) {
-        if (!worldmap_CanInteractEvent(event_id)) continue;
-        var _dist = point_distance(_player_inst.x, _player_inst.y, x, y);
-        if (_dist <= WORLDMAP_INTERACT_RADIUS && _dist < _best_dist) {
-            _best = id;
-            _best_dist = _dist;
-        }
-    }
-
-    return _best;
-}
-
+/// E / Enter: start or replay the node the player stands on
 function worldmap_TryPlayerInteract(_player_inst) {
-    if (dialog_IsActive()) return false;
-
-    var _marker = worldmap_GetNearestInteractableEvent(_player_inst);
-    if (_marker == noone) return false;
-
-    with (_marker) {
-        eventmarker_trigger();
-    }
-    return true;
+    return worldmap_NodeTryInteract(_player_inst);
 }

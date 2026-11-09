@@ -6,10 +6,10 @@ Overlay dialog on world map: portraits, typewriter lines, colored text, optional
 
 ## Main scripts
 
-- `SCR_Dialog_System` — `dialog_Start`, `dialog_Step`, `dialog_DrawGui`
-- `SCR_Dialog_Builder` — entry builders (`dialog_LineKey`, `dialog_Left`, …)
-- `SCR_Dialog_Text` — colored text parse, text-script format
-- Content example: `SCR_DialogExample_map1marker`
+- `scr_dialog_system` — `dialog_Start`, `dialog_Step`, `dialog_DrawGui`
+- `scr_dialog_builder` — entry builders (`dialog_LineKey`, `dialog_Left`, …)
+- `scr_dialog_text` — colored text parse, text-script format
+- Content example: `scr_dialog_map1`
 
 ## Main objects
 
@@ -24,7 +24,7 @@ Overlay dialog on world map: portraits, typewriter lines, colored text, optional
 
 ## Dependencies
 
-- `SCR_WorldMap_Controller` calls `dialog_Step()` each frame
+- `scr_worldmap_controller` calls `dialog_Step()` each frame
 - Marker stashes `pending_dialog_post` before battle
 
 ## Public API

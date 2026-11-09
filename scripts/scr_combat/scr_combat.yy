@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_combat",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_combat",
+  "parent":{
+    "name":"Effects",
+    "path":"folders/scripts/CardSystem/Effects.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

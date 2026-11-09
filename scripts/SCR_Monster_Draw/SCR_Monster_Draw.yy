@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Monster_Draw",
+  "%Name":"scr_monster_draw",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Monster_Draw",
+  "name":"scr_monster_draw",
   "parent":{
-    "name":"draw",
-    "path":"folders/scripts/BoardManager/MonsterSystem/draw.yy",
+    "name":"Enemy",
+    "path":"folders/scripts/Enemy.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -8,9 +8,9 @@ Spawn enemy waves from battleset JSON, animate attacks, run `enemyability` trait
 
 | Area | Scripts |
 |------|---------|
-| Core | `SCR_Monster_Init`, `SCR_Monster_Data`, `SCR_Monster_Queue`, `SCR_Monster_Draw` |
-| Animations | `SCR_Monster_AnimRegistry`, `SCR_MonsterAnim_Goblin*` etc. |
-| Abilities | `SCR_MonsterAbility_Execute`, `SCR_MonsterAbility_Picker`, `SCR_MonsterAbility_*` |
+| Core | `SCR_Monster_Init`, `scr_monster_data`, `scr_monster_manager`, `SCR_Monster_Draw` |
+| Animations | `scr_monster_anim` (registry + per-monster hooks `monsterAnim_<Name>_Draw/Update`) |
+| Abilities | `scr_enemy_ai` (decisions/targets), `scr_enemy_abilities` (execution via `trait_Execute`), `scr_enemy_picker` |
 
 ## Main objects
 
@@ -27,13 +27,13 @@ Spawn enemy waves from battleset JSON, animate attacks, run `enemyability` trait
 
 - `EnemyCollection01.json` (monster_DB)
 - `Grasslands_Battleset01_starter.json` (wave definitions)
-- `SCR_Battle_EnemyTurn`
+- `scr_battle_turn`
 
 ## Public API
 
 ```gml
 SCR_Monster_Init();                          // Create
-SCR_MonsterAbility_Execute(enemy, entry);    // Run one ability
+scr_enemy_abilities(enemy, entry);    // Run one ability
 monster_CheckVictory();                      // Win detection
 ```
 

@@ -9,8 +9,8 @@
   "name":"OBJ_Hand",
   "overriddenProperties":[],
   "parent":{
-    "name":"GameObjects",
-    "path":"folders/objects/GameObjects.yy",
+    "name":"Battle",
+    "path":"folders/objects/Battle.yy",
   },
   "parentObjectId":null,
   "persistent":false,

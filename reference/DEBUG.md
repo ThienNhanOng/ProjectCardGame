@@ -1,10 +1,10 @@
 # Debug System
 
-All runtime debug output has been **removed from the game**. Use `SCR_Debug.gml` to turn features back on.
+All runtime debug output has been **removed from the game**. Use `scr_debug.gml` to turn features back on.
 
 ## Quick enable
 
-In `scripts/SCR_Debug/SCR_Debug.gml`, set macros to `true`:
+In `scripts/scr_debug/scr_debug.gml`, set macros to `true`:
 
 | Macro | What it shows |
 |-------|----------------|

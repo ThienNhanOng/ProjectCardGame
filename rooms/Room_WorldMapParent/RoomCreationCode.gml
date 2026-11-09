@@ -1,1 +1,1 @@
-/// @desc Shared world-map parent — child rooms set worldmap_room_config_file before instances spawn.
+/// @desc Shared world-map parent — each map room's JSON file is chosen in worldmap_GetRoomConfigFile.

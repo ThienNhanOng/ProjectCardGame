@@ -7,8 +7,8 @@ Let the player browse owned cards, build main deck (min 8) and auto-fill spirit 
 MAIN SCRIPTS
 - SCR_DBC_Create, SCR_DBC_InitGrid, SCR_DBC_InitDeck, SCR_DBC_LoadPage
 - SCR_DBD_Draw*, SCR_DBS_HandleReadyButton, SCR_DBS_HandleDeckClick
-- SCR_CardSlot_* (draw, click, add to deck)
-- SCR_Deck_ExtraDeck, SCR_ExtraDeck_*
+- scr_collection_cardslot (draw, add to deck)
+- scr_deck_extra, scr_deckbuilder_extradeck
 
 MAIN OBJECTS
 - OBJ_DeckBuilder (orchestrator)
@@ -31,7 +31,7 @@ PUBLIC API
 - SCR_DBC_Create() — deckbuilder init
 - SCR_DBS_HandleReadyButton() — save + leave
 - battle_SaveDeckSources() — writes battle_deck_source
-- collection_Open / grant functions from SCR_PlayerCollection
+- collection_Open / grant functions from scr_player_collection
 
 INITIALIZATION ORDER
 1. OBJ_GameController loads DBs

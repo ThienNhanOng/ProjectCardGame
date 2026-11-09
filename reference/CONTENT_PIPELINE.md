@@ -36,10 +36,10 @@ content/
 
 | Content (authoring) | Tool (engine — this repo) |
 |---------------------|---------------------------|
-| Dialog scripts per event | `SCR_Dialog_System`, `SCR_Dialog_Builder` |
-| Marker config per map | `SCR_EventMaker`, `SCR_WorldMap_Config` |
-| Battle wave JSON | `SCR_Battle_Load`, `SCR_Monster_Init` |
-| Card / enemy JSON | `LoadCollection`, `LoadMonsters`, trait scripts |
+| Dialog scripts per event | `scr_dialog_system`, `scr_dialog_builder` |
+| Marker config per map | `scr_worldmap_events`, `scr_worldmap_config` |
+| Battle wave JSON | `scr_battle_session`, `SCR_Monster_Init` |
+| Card / enemy JSON | `scr_card_data`, `scr_monster_data`, trait scripts |
 | Map background PNGs | Room background layers, sprite assets |
 | Event portrait images | `SPR_Dialog_*` sprites, draw pipeline |
 
@@ -59,9 +59,9 @@ content/
 
 ## Dependencies
 
-- World map system (`SCR_WorldMap_*`, `SCR_EventMaker`)
-- Dialog system (`SCR_Dialog_*`)
-- Data layer (`LoadCollection`, `LoadMonsters`)
+- World map system (`scr_worldmap_*` scripts)
+- Dialog system (`scr_dialog_system`, `scr_dialog_builder`, `scr_dialog_text`)
+- Data layer (`scr_card_data`, `scr_monster_data`)
 - GameMaker Included Files + sprite import
 
 ## Common pitfalls

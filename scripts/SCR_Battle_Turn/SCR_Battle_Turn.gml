@@ -1,4 +1,4 @@
-/// @desc Turn flow — player draw, end turn, enemy phase
+/// @desc Turn flow — player turn, end turn, enemy phase steps, board monster lifespan
 
 /// Non-spirit board monsters are removed after this many player turns on board
 #macro BOARD_MONSTER_TURN_LIMIT 3
@@ -25,6 +25,7 @@ function battle_CanEndTurn() {
 }
 
 function battle_StartBattle() {
+    battlefx_Reset();
     turn_number = 1;
     battle_phase = "player";
     battle_ResetTurnUses();
@@ -37,10 +38,7 @@ function battle_BeginNextPlayerTurn() {
     battle_ResetTurnUses();
     battle_RefreshResourcesForTurn();
 
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board != noone) {
-        status_DecrementPlayerSilence(_board);
-    }
+    status_TickPlayerUnitsAtTurnStart();
 
     SCR_Hand_DrawFromDeck();
 }
@@ -57,7 +55,7 @@ function battle_EndTurn() {
     battle_ClearTurnResourceAddBuffs();
     battle_TickBoardMonsterLifespan();
     battle_phase = "enemy";
-battle_RunEnemyTurn();
+    battle_BeginEnemyTurn();
 }
 
 function battle_ResetTurnUses() {
@@ -70,56 +68,9 @@ function battle_ResetTurnUses() {
     battle_RefreshWeaponRepeatableEffects();
 }
 
-function battle_CanUseActionTrait(_trait_index) {
-    if (!battle_IsPlayerPhase()) return false;
-    if (battle_IsPlayerDefeated()) return false;
-    if (_trait_index < 0 || _trait_index >= array_length(action_trait_uses)) return false;
-    return action_trait_uses[_trait_index] > 0;
-}
-
-function battle_ConsumeActionTrait(_trait_index) {
-    if (!battle_CanUseActionTrait(_trait_index)) return false;
-    action_trait_uses[_trait_index]--;
-    return true;
-}
-
-function battle_GetActionTraits() {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board == noone || !_board.action_slot.occupied) return [];
-    return trait_GetFromCard(_board.action_slot.card);
-}
-
-function battle_PickRandomPlayerMonsterSlot() {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board == noone) return -1;
-
-    var _choices = [];
-    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
-        var _slot = _board.player_monster_slots[i];
-        if (_slot.visible && _slot.occupied && _slot.card != undefined) {
-            array_push(_choices, i);
-        }
-    }
-
-    if (array_length(_choices) == 0) return -1;
-    return _choices[irandom(array_length(_choices) - 1)];
-}
-
-function battle_PlayerMonsterCount() {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board == noone) return 0;
-
-    var _count = 0;
-    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
-        var _slot = _board.player_monster_slots[i];
-        if (_slot.visible && _slot.occupied && _slot.card != undefined) _count++;
-    }
-    return _count;
-}
-
 function battle_InitBoardMonsterLifespan(_card) {
     if (_card == undefined) return;
-    if (battle_IsSpiritMonster(_card)) {
+    if (card_IsSpiritType(_card)) {
         if (card_IsAstral(_card)) {
             _card.board_expire = false;
             _card.board_turns_left = -1;
@@ -135,7 +86,7 @@ function battle_InitBoardMonsterLifespan(_card) {
 
 function battle_SetBoardMonsterExpire(_card, _expires) {
     if (_card == undefined) return false;
-    if (battle_IsSpiritMonster(_card) && card_IsAstral(_card)) return true;
+    if (card_IsSpiritType(_card) && card_IsAstral(_card)) return true;
 
     _card.board_expire = _expires;
     if (!_expires) {
@@ -151,7 +102,7 @@ function battle_SetBoardMonsterExpire(_card, _expires) {
 
 function battle_AddBoardMonsterTurns(_card, _amount) {
     if (_card == undefined) return false;
-    if (battle_IsSpiritMonster(_card) && card_IsAstral(_card)) return true;
+    if (card_IsSpiritType(_card) && card_IsAstral(_card)) return true;
     if (_amount <= 0) return false;
 
     if (!variable_struct_exists(_card, "board_expire") || !_card.board_expire) return true;
@@ -160,34 +111,6 @@ function battle_AddBoardMonsterTurns(_card, _amount) {
     }
     _card.board_turns_left += _amount;
     return true;
-}
-
-function battle_GetPlayerMonsterCard(_slot_index) {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board == noone) return undefined;
-    if (_slot_index < 0 || _slot_index >= array_length(_board.player_monster_slots)) return undefined;
-
-    var _slot = _board.player_monster_slots[_slot_index];
-    if (!_slot.visible || !_slot.occupied || _slot.card == undefined) return undefined;
-    return _slot.card;
-}
-
-function trait_ExecuteNoBoardExpire(_trait, _player_slot) {
-    var _card = battle_GetPlayerMonsterCard(_player_slot);
-    if (_card == undefined) return false;
-
-    battle_SetBoardMonsterExpire(_card, false);
-return true;
-}
-
-function trait_ExecuteAddBoardTurns(_trait, _player_slot) {
-    var _card = battle_GetPlayerMonsterCard(_player_slot);
-    if (_card == undefined) return false;
-
-    var _add = max(1, _trait.amount);
-    if (!battle_AddBoardMonsterTurns(_card, _add)) return false;
-
-return true;
 }
 
 function battle_TickBoardMonsterLifespan() {
@@ -200,7 +123,7 @@ function battle_TickBoardMonsterLifespan() {
         if (variable_struct_exists(_slot.card, "board_expire") && !_slot.card.board_expire) continue;
 
         if (!variable_struct_exists(_slot.card, "board_turns_left")) {
-            _slot.card.board_turns_left = battle_IsSpiritMonster(_slot.card)
+            _slot.card.board_turns_left = card_IsSpiritType(_slot.card)
                 ? SPIRIT_SUMMON_TURN_LIMIT
                 : BOARD_MONSTER_TURN_LIMIT;
         }
@@ -208,33 +131,192 @@ function battle_TickBoardMonsterLifespan() {
 
         _slot.card.board_turns_left--;
         if (_slot.card.board_turns_left <= 0) {
-battle_DestroyPlayerMonster(i);
+            combat_RemoveUnit(SIDE_PLAYER, i);
         }
     }
 }
 
-/// Enemies hit board monsters first; overflow from a kill hits the player (spirits never overflow).
-function battle_DamagePlayerSide(_amount, _preferred_slot = -1) {
-    if (_amount <= 0) return false;
+#macro ENEMY_TURN_STEP_DELAY room_speed
 
-    if (battle_PlayerMonsterCount() <= 0) {
-        return battle_DamagePlayer(_amount);
+function battle_EnemyTurn_Init() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return;
+    with (_bm) {
+        enemy_turn_active = false;
+        enemy_turn_waiting = false;
+        enemy_turn_timer = 0;
+        enemy_turn_slot_index = 0;
+        enemy_turn_step_index = 0;
+        monsterAbility_Picker_Init();
     }
-
-    var _target = _preferred_slot;
-    if (_target < 0 || !battle_IsOccupiedPlayerMonsterSlot(_target)) {
-        _target = battle_PickRandomPlayerMonsterSlot();
-    }
-    if (_target < 0) return battle_DamagePlayer(_amount);
-
-    return battle_DamagePlayerMonster(_target, _amount);
 }
 
-function battle_IsOccupiedPlayerMonsterSlot(_slot_index) {
+function battle_EnemyTurn_IsActive() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return false;
+    with (_bm) return enemy_turn_active;
+}
+
+function battle_BeginEnemyTurn() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) {
+        battle_CompleteEnemyTurn();
+        return;
+    }
+
+    with (_bm) {
+        enemy_turn_active = true;
+        enemy_turn_waiting = false;
+        enemy_turn_timer = 0;
+        enemy_turn_slot_index = -1;
+        enemy_turn_step_index = 0;
+    }
+
+    battle_EnemyLog_Write("--- Enemy phase ---");
+    battle_EnemyTurn_QueueDelay();
+}
+
+function battle_CompleteEnemyTurn() {
+    status_TickAllTimedAttackBuffs();
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm != noone) {
+        with (_bm) {
+            enemy_turn_active = false;
+            enemy_turn_waiting = false;
+            enemy_turn_timer = 0;
+        }
+    }
+
+    if (!battle_IsPlayerDefeated()) {
+        battle_BeginNextPlayerTurn();
+    }
+}
+
+function battle_EnemyTurn_QueueDelay() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return;
+    with (_bm) {
+        enemy_turn_waiting = true;
+        enemy_turn_timer = ENEMY_TURN_STEP_DELAY;
+    }
+}
+
+function battle_EnemyTurn_FindNextSlot(_start_index) {
     var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board == noone) return false;
-    if (_slot_index < 0 || _slot_index >= array_length(_board.player_monster_slots)) return false;
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_board == noone || _mm == noone) return -1;
 
-    var _slot = _board.player_monster_slots[_slot_index];
-    return _slot.visible && _slot.occupied && _slot.card != undefined;
+    for (var i = _start_index; i < _mm.active_slot_count; i++) {
+        if (unit_Get(SIDE_ENEMY, i) != undefined) return i;
+    }
+    return -1;
 }
+
+function battle_EnemyTurn_RunCurrentStep(_slot_index, _monster) {
+    switch (enemy_turn_step_index) {
+        case 0:
+            monsterAbility_InitState(_monster);
+            if (!status_IsSilenced(_monster)) {
+                monsterAbility_LogCountdown(_slot_index, _monster);
+            }
+            break;
+
+        case 1:
+            if (!status_IsSilenced(_monster)) {
+                monsterAbility_TryActivateStep(_slot_index, _monster);
+            }
+            break;
+
+        case 2:
+            monsterAbility_PerformAttack(_slot_index, _monster);
+            break;
+
+        case 3:
+            battle_EnemyLog_Action(_monster.name + " ended its turn.");
+            break;
+
+        case 4:
+            if (!status_IsSilenced(_monster)) {
+                monsterAbility_TickDelayedCountdown(_monster);
+                monsterAbility_AdvanceCycle(_monster);
+            }
+            status_TickSilence(_monster);
+            break;
+    }
+}
+
+function battle_EnemyTurn_AdvanceStep() {
+    if (battle_IsPlayerDefeated()) {
+        battle_CompleteEnemyTurn();
+        return;
+    }
+
+    var _board = instance_find(OBJ_BoardManager, 0);
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_board == noone || _mm == noone) {
+        battle_CompleteEnemyTurn();
+        return;
+    }
+
+    if (enemy_turn_slot_index < 0) {
+        enemy_turn_slot_index = battle_EnemyTurn_FindNextSlot(0);
+        if (enemy_turn_slot_index < 0) {
+            battle_CompleteEnemyTurn();
+            return;
+        }
+        enemy_turn_step_index = 0;
+    }
+
+    var _monster = unit_Get(SIDE_ENEMY, enemy_turn_slot_index);
+    if (_monster == undefined) {
+        enemy_turn_slot_index = battle_EnemyTurn_FindNextSlot(enemy_turn_slot_index + 1);
+        enemy_turn_step_index = 0;
+        if (enemy_turn_slot_index < 0) {
+            battle_CompleteEnemyTurn();
+            return;
+        }
+        battle_EnemyTurn_QueueDelay();
+        return;
+    }
+
+    battle_EnemyTurn_RunCurrentStep(enemy_turn_slot_index, _monster);
+
+    // Move on even if the step opened a player choice (discard picker); otherwise the same
+    // ability step would run again once the choice closes and the ability would fire twice.
+    enemy_turn_step_index++;
+    if (enemy_turn_step_index > 4) {
+        enemy_turn_step_index = 0;
+        enemy_turn_slot_index = battle_EnemyTurn_FindNextSlot(enemy_turn_slot_index + 1);
+        if (enemy_turn_slot_index < 0) {
+            battle_CompleteEnemyTurn();
+            return;
+        }
+    }
+
+    // a choice is open: monsterAbility_Picker_Finish resumes the turn when the player is done
+    if (enemy_turn_picker_pause || monsterAbility_picker_active) return;
+
+    battle_EnemyTurn_QueueDelay();
+}
+
+function battle_EnemyTurn_Step() {
+    if (!battle_IsEnemyPhase()) return;
+    if (!battle_EnemyTurn_IsActive()) return;
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm == noone) return;
+
+    with (_bm) {
+        if (enemy_turn_picker_pause || monsterAbility_picker_active) {
+            return;
+        }
+        if (enemy_turn_waiting) {
+            enemy_turn_timer--;
+            if (enemy_turn_timer > 0) return;
+            enemy_turn_waiting = false;
+        }
+        battle_EnemyTurn_AdvanceStep();
+    }
+}
+

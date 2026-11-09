@@ -24,9 +24,9 @@ All game data JSON files live in **`datafiles/`**. Traits are implemented as GML
 
 3. Load it at startup:
 
-   - **Player cards** → `scripts/LoadCollection/LoadCollection.gml` → `load_Collection("YourFile.json")`
+   - **Player cards** → `scripts/scr_card_data/scr_card_data.gml` → `load_Collection("YourFile.json")`
 
-   - **Enemies** → `scripts/LoadMonsters/LoadMonsters.gml` → `load_MonsterSet("YourFile.json")`
+   - **Enemies** → `scripts/scr_monster_data/scr_monster_data.gml` → `load_MonsterSet("YourFile.json")`
 
    - **Battle wave** → referenced from `scripts/SCR_Monster_Init/SCR_Monster_Init.gml` (or set `global.battle_config_file` before battle init)
 
@@ -74,9 +74,9 @@ Loaded by `load_Collection()` via `SCR_LoadAllCollections()` in `objects/OBJ_Gam
 
 
 
-**Active set:** `datafiles/Merc_starterdeck01.json` (loaded in `LoadCollection.gml`)
+**Active set:** `datafiles/Merc_starterdeck01.json` (loaded in `scr_card_data.gml`)
 
-Test sets (`MonsterTestset`, `TestActionset`, `TestWeaponset`) remain in the project but are not loaded unless you add them back to `LoadCollection.gml`.
+Test sets (`MonsterTestset`, `TestActionset`, `TestWeaponset`) remain in the project but are not loaded unless you add them back to `scr_card_data.gml`.
 
 
 
@@ -810,7 +810,7 @@ Preview text appends `(once per turn)` or `(Nx per turn)` automatically.
 
 
 
-### Aliases (normalized in `SCR_Trait_Parse`)
+### Aliases (normalized in `scr_trait_parse`)
 
 
 
@@ -842,6 +842,29 @@ Preview text appends `(once per turn)` or `(Nx per turn)` automatically.
 
 
 
+### Targets (`target`)
+
+Every effect trait (`attack`, `damage`, `heal`, `buff`, `destroy`, `silence`, `shroud`) has a **target rule**.
+The trait names keep their usual target, and an optional `"target"` changes it. **The same JSON works on player
+monsters, spirits, weapons, action cards and enemies** ("ally" / "enemy" are relative to the card's owner).
+
+| `target` | Who is affected | Player card | Enemy |
+|----------|-----------------|-------------|-------|
+| `self` | the card's own monster | automatic (action card: you pick one of your monsters) | itself |
+| `single_ally` / `ally` | one ally | you pick | heal → most hurt ally, buff → weakest ally, other → random ally |
+| `all_allies` / `allies` | every ally | automatic | automatic |
+| `single_enemy` / `enemy` | one opponent | you pick | random player monster |
+| `all_enemies` / `enemies` | every opponent (an empty player board means the player) | automatic | automatic |
+| `single_any` / `any` | any monster | you pick | picks an ally |
+
+Defaults: `attack`, `damage`, `destroy`, `silence`, `shroud` → `single_enemy`; `attack_all` → `all_enemies`;
+`heal` → `single_ally`; `heal_all` → `all_allies`; `self_buff` → `self`; `buff` → `single_any`.
+`{ "type": "heal", "target": "all_allies" }` is exactly `heal_all`, and `{ "type": "buff", "target": "self" }` is
+`self_buff`, so old and new spellings behave the same.
+
+Enemy-only behaviour that stays separate: enemy `attack_all` makes its next N attacks hit everything, enemy buffs
+wear off after `turns`, and enemy `destroy` removes `amount` random monsters.
+
 ### Supported trait types
 
 
@@ -850,47 +873,49 @@ Preview text appends `(once per turn)` or `(Nx per turn)` automatically.
 
 |-------------|--------------|--------------|--------------|
 
-| `draw` / `draw_cards` | Draw cards | `{ "type": "draw_cards", "amount": 2 }` | `SCR_Trait_Draw` |
+| `draw` / `draw_cards` | Draw cards | `{ "type": "draw_cards", "amount": 2 }` | `scr_card_effects` |
 
-| `attack` | Single-target attack | `{ "type": "attack", "amount": 4, "repeat": true, "recursion": 1 }` | `SCR_Trait_Attack` |
+| `attack` | Single-target attack | `{ "type": "attack", "amount": 4, "repeat": true, "recursion": 1 }` | `scr_card_effects` |
 
-| `attack_all` | Hit all enemies (targeting step, not auto on play) | `{ "type": "attack_all", "amount": 2 }` | `SCR_Trait_AttackAll` |
+| `attack_all` | Hit all enemies (targeting step, not auto on play) | `{ "type": "attack_all", "amount": 2 }` | `scr_card_effects` |
 
-| `heal` | Heal one ally | `{ "type": "heal", "amount": 5 }` | `SCR_Trait_Heal` |
+| `heal` | Heal one ally | `{ "type": "heal", "amount": 5 }` | `scr_card_effects` |
 
-| `heal_all` | Heal all allies | `{ "type": "heal_all", "amount": 2 }` | `SCR_Trait_HealAll` |
+| `heal_all` | Heal all allies | `{ "type": "heal_all", "amount": 2 }` | `scr_card_effects` |
 
-| `self_buff` | +ATK on the card's own monster slot | `{ "type": "self_buff", "amount": 2, "repeat": true, "recursion": 1 }` | `SCR_Trait_BuffAttack` |
+| `self_buff` | +ATK on the card's own monster slot | `{ "type": "self_buff", "amount": 2, "repeat": true, "recursion": 1 }` | `scr_card_effects` |
 
-| `buff` | +ATK on any player or enemy monster | `{ "type": "buff", "amount": 2 }` | `SCR_Trait_BuffAttack` |
+| `buff` | +ATK on any player or enemy monster | `{ "type": "buff", "amount": 2 }` | `scr_card_effects` |
 
-| `destroy` | Destroy one enemy | `{ "type": "destroy", "amount": 1 }` | `SCR_Trait_Destroy` |
+| `destroy` | Destroy one enemy | `{ "type": "destroy", "amount": 1 }` | `scr_card_effects` |
 
-| `silence` | Silence enemy abilities | `{ "type": "silence", "amount": 2 }` | `SCR_Trait_Silence` |
+| `silence` | Silence enemy abilities | `{ "type": "silence", "amount": 2 }` | `scr_card_effects` |
 
-| `add` | Add card id to **hand** | `{ "type": "add", "id": 7 }` | `SCR_Trait_AddHand` |
+| `damage` | Direct damage to the units its target rule picks — usable on play, by action cards and by enemies (unlike `attack`, which is a monster's strike) | `{ "type": "damage", "amount": 2, "target": "all_enemies" }` | `scr_card_effects` |
 
-| `add_deck` | Add card id to **main deck** | `{ "type": "add_deck", "id": 1 }` | `SCR_Trait_AddDeck` |
+| `add` | Add card id to **hand** | `{ "type": "add", "id": 7 }` | `scr_card_effects` |
 
-| `add_extra_deck` | Add card id to **extra deck** | `{ "type": "add_extra_deck", "id": 11 }` | `SCR_Trait_AddDeck` |
+| `add_deck` | Add card id to **main deck** | `{ "type": "add_deck", "id": 1 }` | `scr_card_effects` |
 
-| `add_hand_tag` | Tag search → pick card → **hand** | `{ "type": "add_hand_tag", "tags": ["Warrior"] }` | `SCR_Trait_AddTag` |
+| `add_extra_deck` | Add card id to **extra deck** | `{ "type": "add_extra_deck", "id": 11 }` | `scr_card_effects` |
 
-| `add_deck_tag` | Tag search → pick card → **main deck** | `{ "type": "add_deck_tag", "tags": ["Warrior"] }` | `SCR_Trait_AddTag` |
+| `add_hand_tag` | Tag search → pick card → **hand** | `{ "type": "add_hand_tag", "tags": ["Warrior"] }` | `scr_card_search_picker` |
 
-| `add_extra_deck_tag` | Tag search → pick card → **extra deck** | `{ "type": "add_extra_deck_tag", "tags": ["Wizard"] }` | `SCR_Trait_AddTag` |
+| `add_deck_tag` | Tag search → pick card → **main deck** | `{ "type": "add_deck_tag", "tags": ["Warrior"] }` | `scr_card_search_picker` |
 
-| `add_hand_with_cost` | Tag search → pick card → **hand** + apply cost | `{ "type": "add_hand_with_cost", "cost": 3 }` | `SCR_Trait_AddTag` |
+| `add_extra_deck_tag` | Tag search → pick card → **extra deck** | `{ "type": "add_extra_deck_tag", "tags": ["Wizard"] }` | `scr_card_search_picker` |
 
-| `openzone` | Unlock hidden monster slots 3–4 while source is on board | `{ "type": "openzone", "amount": 1 }` | `SCR_Trait_OpenZone` |
+| `add_hand_with_cost` | Tag search → pick card → **hand** + apply cost | `{ "type": "add_hand_with_cost", "cost": 3 }` | `scr_card_search_picker` |
 
-| `add_counter` | +current resources this turn | `{ "type": "add_counter", "amount": 2 }` | `SCR_Trait_Resources` |
+| `openzone` | Unlock hidden monster slots 3–4 while source is on board | `{ "type": "openzone", "amount": 1 }` | `scr_card_effects` |
 
-| `remove_counter` | −max resources while source lives | `{ "type": "remove_counter", "amount": 3 }` | `SCR_Trait_Resources` |
+| `add_counter` | +current resources this turn | `{ "type": "add_counter", "amount": 2 }` | `scr_trait_execute` |
 
-| `add_cost` | Append cost to cards added in the same ability chain | `{ "type": "add_cost", "amount": -2 }` — see [Ability — card cost & tributes](#ability--card-cost--tributes) | `SCR_Trait_Resources` |
+| `remove_counter` | −max resources while source lives | `{ "type": "remove_counter", "amount": 3 }` | `scr_trait_execute` |
 
-| `conditions` | Spirit summon rules | See spirit example | `SCR_Conditions` |
+| `add_cost` | Append cost to cards added in the same ability chain | `{ "type": "add_cost", "amount": -2 }` — see [Ability — card cost & tributes](#ability--card-cost--tributes) | `scr_trait_execute` |
+
+| `conditions` | Spirit summon rules | See spirit example | `scr_card_conditions` |
 
 | `none` | No ability (enemies) | `{ "type": "none" }` | — |
 
@@ -908,7 +933,7 @@ Play cost is declared on the **card root** (`cost` / `costs`). **Ability** trait
 
 
 
-Any card played from hand (monster, weapon, action) can declare costs. Payment runs on drag-drop play (`SCR_Card_Cost`, `SCR_DragDrop_Init`).
+Any card played from hand (monster, weapon, action) can declare costs. Payment runs on drag-drop play (`scr_card_costs`, `SCR_DragDrop_Init`).
 
 
 
@@ -1012,7 +1037,7 @@ Basic Strike has `"cost": 2`. Each copy added to hand gets `{ "amount": -2 }` ap
 
 |-------------|--------|---------|
 
-| `add_cost` | `SCR_Trait_Resources` | Append a cost entry to cards added in the same ability chain |
+| `add_cost` | `scr_trait_execute` | Append a cost entry to cards added in the same ability chain |
 
 
 
@@ -1296,7 +1321,23 @@ During summon the player clicks matching hand cards to discard them. This step c
 
 | `elite` | Optional `true` — elite styling / naming |
 
-| `animation` | Optional — custom anim key for `SCR_MonsterAnim_*` scripts |
+| `animation` | Optional — custom anim key routed in `scr_monster_anim` |
+
+| `sprite` | Battle sprite. If `<sprite>_Idle` and `<sprite>_Attack` exist (e.g. `"SPR_GoblinClub"` → `SPR_GoblinClub_Idle` / `SPR_GoblinClub_Attack`), the enemy animates on its own |
+
+| `icon` | Optional — still picture for the hover preview (e.g. `"SPR_GoblinIcon"`); falls back to `sprite`, then the placeholder |
+
+
+
+### Animated enemies
+
+
+
+- Give the enemy `"sprite": "SPR_<Name>"` and make two sprites: `SPR_<Name>_Idle` (loops, 12 fps) and `SPR_<Name>_Attack` (plays once, 24 fps). Origin at the feet.
+
+- Idle plays all the time. Attack plays automatically when the enemy attacks or uses an ability; from code, `monsterAnim_PlayAttack(monster)`.
+
+- Size on the board: `MONSTER_ANIM_SCALE` in `scr_monster_anim`.
 
 
 
@@ -1376,7 +1417,7 @@ Defines which enemies spawn and how many enemy slots are active.
 
 
 
-Loaded by `battle_LoadConfig()` in `scripts/SCR_Battle_Load/SCR_Battle_Load.gml`.
+Loaded by `battle_LoadConfig()` in `scripts/scr_battle_session/scr_battle_session.gml`.
 
 
 
@@ -1392,111 +1433,67 @@ Default file: **`Battle01.json`**, set in `scripts/SCR_Monster_Init/SCR_Monster_
 
 
 
-## Traits folder (IDE layout)
+## Card system scripts (IDE layout)
 
-
-
-In GameMaker: **Scripts → Traits**
-
-
+In GameMaker: **Scripts → CardSystem** (shared by player cards AND enemy monsters)
 
 ```
-
-Traits/
-
-├── core/           Parsing + dispatch
-
-│   ├── SCR_Trait_Parse      ← reads JSON ability/actionType → trait structs
-
-│   └── SCR_Trait_Execute    ← routes trait type → effect script
-
-├── effects/        One script per combat effect
-
-│   ├── SCR_Trait_Attack
-
-│   ├── SCR_Trait_AttackAll
-
-│   ├── SCR_Trait_Heal
-
-│   ├── SCR_Trait_HealAll
-
-│   ├── SCR_Trait_Draw
-
-│   ├── SCR_Trait_Destroy
-
-│   ├── SCR_Trait_Silence
-
-│   ├── SCR_Trait_BuffAttack   ← self_buff + buff
-
-│   ├── SCR_Trait_AddHand
-
-│   ├── SCR_Trait_AddDeck      ← add_deck + add_extra_deck
-
-│   ├── SCR_Trait_AddTag       ← add_hand_tag + add_deck_tag + add_extra_deck_tag + add_hand_with_cost
-
-│   ├── SCR_Trait_OpenZone     ← openzone
-
-│   └── SCR_Trait_Resources    ← add_counter + remove_counter + add_cost
-
-└── conditions/     Spirit summon (not battle-turn traits)
-
-    └── SCR_Conditions
-
+CardSystem/
+├── Core/
+│   ├── scr_trait_parse        JSON ability / actionType / enemyability → trait {type, effect, target, …}, display text
+│   ├── scr_trait_execute      trait_Execute(): effect + target rule → universal effects
+│   └── scr_card_targeting     unit_* (side + slot) and targets_* lists
+├── Effects/
+│   ├── scr_card_effects       card_Damage / Heal / Destroy / BuffAttack / Silence / Shroud / DrawCards / AddCard
+│   ├── scr_combat             combat_DamageUnit / combat_RemoveUnit (all damage & deaths), attack stats, weapons
+│   ├── scr_status_effects     status_Apply / Has / Tick / Remove (silence, shroud, timed buffs)
+│   └── scr_card_resources     openzone, add/remove_counter, board turns, add_cost chain
+└── Cards/
+    ├── scr_card_costs         play costs and tributes
+    ├── scr_card_conditions    spirit summon requirements (sacrifice, discard, min turn, astral)
+    ├── scr_card_search_picker add_*_tag search picker
+    └── scr_card_draw          card frame rendering
 ```
 
-
+Enemy decisions (which ability, which target) live in **Scripts → Enemy → scr_enemy_ai**; executing them goes through
+the same `trait_Execute` / `card_*` functions as player cards (**scr_enemy_abilities**).
 
 ### How JSON reaches traits
 
-
-
+```
+card / enemy JSON
+  └─ ability / actionType / enemyability array
+       └─ trait_NormalizeEntry()                  [scr_trait_parse]
+            └─ trait_Execute(trait, context)      [scr_trait_execute]
+                 └─ card_Heal / card_Damage / ... [scr_card_effects] → combat_* / status_*
 ```
 
-cardSet JSON
+The context says who acts and which targets were chosen:
 
-  └─ ability / actionType array
-
-       └─ trait_NormalizeEntry()     [SCR_Trait_Parse]
-
-            └─ trait_Execute()       [SCR_Trait_Execute]
-
-                 └─ SCR_Trait_*      [effect script]
-
+```gml
+var _ctx = trait_CreateContext(effect_Source(SIDE_ENEMY, _slot), targets_Single(SIDE_ENEMY, _ally));
+trait_Execute(_trait, _ctx);
 ```
 
-
-
-Enemy JSON follows the same path via `trait_GetFromMonster()` → `enemyability`.
-
-
-
-Spirit `conditions` is parsed by `SCR_Trait_Parse` but executed by **`SCR_Conditions`** during extra-deck summon (not `trait_Execute`).
-
-
+Spirit `conditions` is parsed by `scr_trait_parse` but executed by **`scr_card_conditions`** during extra-deck summon (not `trait_Execute`).
 
 ### Adding a new trait type
 
+Most new abilities need **no code at all**: combine an existing effect with a `target` in JSON
+(e.g. `{ "type": "silence", "amount": 1, "target": "all_enemies" }`). For a genuinely new effect:
 
+1. Add JSON using `"type": "your_trait"` in a card / enemy file.
+2. In **`scr_trait_execute`** add a `case "your_trait":` to `trait_Execute` that calls the existing effects, e.g.
+   `return card_Damage(_src, targets_AllOpponents(_src), _amount);` — or, for a genuinely new effect, add one
+   `card_YourEffect(source, targets, amount)` function to **`scr_card_effects`**.
+3. In **`scr_trait_parse`**: aliases in `trait_NormalizeEntry`, preview text in `trait_GetDisplayText`, and the
+   classification helpers if it needs a target (`trait_OnPlayNeeds*Target`, `trait_ActionNeedsTargeting`) or fires
+   automatically (`trait_ActionIsAuto`, `trait_ExecuteOnPlay`).
+4. Enemies: if the AI must pick a target for it, add the choice in `monsterAbility_RunEffect` (**scr_enemy_abilities**),
+   using the target pickers in **scr_enemy_ai**.
 
-1. Add JSON examples using a new `"type": "your_trait"` in `CardSet` / `MonsterSet`
-
-2. Create `scripts/SCR_Trait_YourTrait/SCR_Trait_YourTrait.gml` under **Traits/effects**
-
-3. Register the script in **`ProjectCardGame.yyp`**
-
-4. Add a `case` in **`SCR_Trait_Execute`** → call your `trait_ExecuteYourTrait()`
-
-5. Update **`SCR_Trait_Parse`**:
-
-   - `trait_NormalizeEntry` — aliases if needed
-
-   - `trait_GetDisplayText` — preview text
-
-   - `trait_ActionNeedsTargeting` / `trait_ExecuteOnPlay` — if used from action slot
-
-6. Wire player/enemy activation in battle scripts if targeting or turn logic is needed (`SCR_Battle_PlayCard`, `SCR_Battle_EnemyTurn`, etc.)
-
-
+New status effects (poison, burn, regen …): add a case to each switch in **`scr_status_effects`**
+(`status_Apply` / `status_Has` / `status_Tick` / `status_Remove`) and tick it from the turn hooks there.
 
 ---
 
@@ -1520,7 +1517,7 @@ Battle room then loads `Battle01.json` (or override) into the enemy spawn queue.
 
 
 
-Player ownership for deckbuilder is built in `SCR_PlayerCollection` from cards with `own` in the JSON at collection room start.
+Player ownership for deckbuilder is built in `scr_player_collection` from cards with `own` in the JSON at collection room start.
 
 
 
@@ -1653,7 +1650,7 @@ First pick → card 8, second → card 9 (chance values ignored).
 
 - **First clear only** — not on replays.
 
-- Implementation: `scripts/SCR_EventMaker/SCR_EventMaker.gml`, `scripts/SCR_WorldMap_Progress/SCR_WorldMap_Progress.gml`
+- Implementation: `scripts/scr_worldmap_events/scr_worldmap_events.gml`, `scripts/scr_worldmap_progress/scr_worldmap_progress.gml`
 
 
 
@@ -1687,34 +1684,34 @@ First pick → card 8, second → card 9 (chance values ignored).
 
 | Battle wave | `datafiles/Battle01.json` |
 
-| Load player cards | `scripts/LoadCollection/LoadCollection.gml` |
+| Load player cards | `scripts/scr_card_data/scr_card_data.gml` |
 
-| Load enemies | `scripts/LoadMonsters/LoadMonsters.gml` |
+| Load enemies | `scripts/scr_monster_data/scr_monster_data.gml` |
 
-| Load battle | `scripts/SCR_Battle_Load/SCR_Battle_Load.gml` |
+| Load battle | `scripts/scr_battle_session/scr_battle_session.gml` |
 
-| Trait parse / display | `scripts/SCR_Trait_Parse/SCR_Trait_Parse.gml` |
+| Trait parse / display | `scripts/scr_trait_parse/scr_trait_parse.gml` |
 
-| Trait dispatch | `scripts/SCR_Trait_Execute/SCR_Trait_Execute.gml` |
+| Trait dispatch | `scripts/scr_trait_execute/scr_trait_execute.gml` |
 
-| Tag-search traits | `scripts/SCR_Trait_AddTag/SCR_Trait_AddTag.gml` |
+| Tag-search traits | `scripts/scr_card_search_picker/scr_card_search_picker.gml` |
 
-| Attack buff / preview totals | `scripts/SCR_Trait_BuffAttack/SCR_Trait_BuffAttack.gml` |
+| Attack buff / preview totals | `scripts/scr_card_effects/scr_card_effects.gml` |
 
-| Weapon attack rules | `scripts/SCR_Battle_Attack/SCR_Battle_Attack.gml` |
+| Weapon attack rules | `scripts/scr_battle_attack/scr_battle_attack.gml` |
 
-| Spirit conditions | `scripts/SCR_Conditions/SCR_Conditions.gml` |
+| Spirit conditions | `scripts/scr_card_conditions/scr_card_conditions.gml` |
 
-| Map marker rewards | `scripts/SCR_EventMaker/SCR_EventMaker.gml` |
+| Map marker rewards | `scripts/scr_worldmap_events/scr_worldmap_events.gml` |
 
-| Resources HUD & pool | `scripts/SCR_Battle_Resources/SCR_Battle_Resources.gml` |
+| Resources HUD & pool | `scripts/scr_battle_resources/scr_battle_resources.gml` |
 
-| Card play costs | `scripts/SCR_Card_Cost/SCR_Card_Cost.gml` |
+| Card play costs | `scripts/scr_card_costs/scr_card_costs.gml` |
 
-| Resource traits | `scripts/SCR_Trait_Resources/SCR_Trait_Resources.gml` |
+| Resource traits | `scripts/scr_trait_execute/scr_trait_execute.gml` |
 
-| Collection / ownership | `scripts/SCR_PlayerCollection/SCR_PlayerCollection.gml` |
+| Collection / ownership | `scripts/scr_player_collection/scr_player_collection.gml` |
 
-| Card preview UI | `scripts/SCR_DBD_Collection/SCR_DBD_Collection.gml` |
+| Card preview UI | `scripts/scr_deckbuilder_collection/scr_deckbuilder_collection.gml` |
 
 

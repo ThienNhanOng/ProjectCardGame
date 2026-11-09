@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_dialog_map1",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_dialog_map1",
+  "parent":{
+    "name":"Content",
+    "path":"folders/scripts/Dialog/Content.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

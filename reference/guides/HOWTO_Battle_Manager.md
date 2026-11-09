@@ -8,9 +8,9 @@ Orchestrate player/enemy turns, card plays, combat resolution, and victory handl
 
 - `SCR_Battle_Init` — room setup entry
 - `SCR_Battle_Step` — per-frame logic + victory step hook
-- `SCR_Battle_Turn`, `SCR_Battle_PlayCard`, `SCR_Battle_Attack`
-- `SCR_Battle_EnemyTurn`, `SCR_Battle_Targeting`
-- `SCR_Battle_UI`, `SCR_Battle_Draw`
+- `scr_battle_turn`, `scr_battle_play`, `scr_battle_attack`
+- `scr_battle_turn`, `scr_battle_targeting`
+- `scr_battle_ui`, `SCR_Battle_Draw`
 
 ## Main objects
 

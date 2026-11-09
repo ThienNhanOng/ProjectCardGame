@@ -1,13 +1,9 @@
 /// @desc Initializes world map progression for the current map room
 
 function SCR_WorldMapController_Init() {
-    var _config = worldmap_GetRoomConfigFile();
-    if (variable_global_exists("worldmap_room_config_file")
-        && is_string(global.worldmap_room_config_file)
-        && global.worldmap_room_config_file != "") {
-        _config = global.worldmap_room_config_file;
-    }
-    worldmap_InitRoom(_config);
+    // The room decides its map file (worldmap_GetRoomConfigFile). Room creation code cannot set it:
+    // GameMaker runs room creation code AFTER the instances' Create events.
+    worldmap_InitRoom(worldmap_GetRoomConfigFile());
     worldmap_ApplyPendingPlayerSpawn();
     dialog_Init();
     dialog_TryRunPendingPost();
@@ -37,4 +33,6 @@ function SCR_WorldMapController_DrawHUD() {
     debug_DrawWorldMapInfo(_gw, _gh);
     worldmap_DrawMapDebugInfo(_gh);
     worldmap_DrawCollectionButton();
+    worldmap_NodeDrawHint();
+    worldmap_NodeDrawConfirm();   // "Are you sure you want to go here?" on top of everything
 }

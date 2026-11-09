@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_monster_manager",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_monster_manager",
+  "parent":{
+    "name":"Enemy",
+    "path":"folders/scripts/Enemy.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

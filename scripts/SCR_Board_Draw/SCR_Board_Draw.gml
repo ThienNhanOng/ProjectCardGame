@@ -9,7 +9,7 @@ function SCR_Board_Draw() {
     for (var i = 0; i < array_length(player_monster_slots); i++) {
         var _slot = player_monster_slots[i];
         if (!_slot.visible || _slot.locked || _slot.occupied) continue;
-        if (drag_card != undefined && (drag_card.type == "monster" || drag_card.type == "special_monster")) {
+        if (drag_card != undefined && card_IsMonsterType(drag_card)) {
             if (drag_card.type == "special_monster") {
                 draw_sprite(SPR_SpiritSlot, 0, _slot.x + _card_w / 2, _slot.y + _card_h / 2);
             } else {
@@ -31,72 +31,6 @@ function SCR_Board_Draw() {
             draw_sprite(SPR_ActionSlot, 0, action_slot.x + _card_w / 2, action_slot.y + _card_h / 2);
         }
     }
-}
-
-function SCR_Board_InitSlots() {
-    var _card_w = 73;
-    var _card_h = 101;
-    
-    var _x_step = 65 / 3;
-    var _y_step = 92 / 3;
-    
-    player_monster_slots = [];
-    for (var i = 0; i < 5; i++) {
-        var _x = 19 + (i * _x_step);
-        var _y = 350 + (i * _y_step);
-        
-        player_monster_slots[i] = {
-            index    : i,
-            type     : "monster",
-            owner    : "player",
-            occupied : false,
-            card     : undefined,
-            x        : _x,
-            y        : _y,
-            w        : _card_w,
-            h        : _card_h,
-            visible  : (i < 3),
-            locked   : (i >= 3),
-            hovered  : false,
-            sprite   : SPR_MonsterSlot
-        };
-    }
-    
-    player_weapon_slots = [];
-    for (var i = 0; i < 3; i++) {
-        player_weapon_slots[i] = {
-            index    : i,
-            type     : "weapon",
-            owner    : "player",
-            occupied : false,
-            card     : undefined,
-            x        : 19 + (i * _x_step),
-            y        : 350 + (i * _y_step) + 120,
-            w        : _card_w,
-            h        : _card_h,
-            visible  : true,
-            locked   : false,
-            hovered  : false,
-            sprite   : SPR_WeaponSlot
-        };
-    }
-    
-    action_slot = {
-        index    : 0,
-        type     : "action",
-        owner    : "player",
-        occupied : false,
-        card     : undefined,
-        x        : 84 + 50,
-        y        : 442,
-        w        : _card_w,
-        h        : _card_h,
-        visible  : true,
-        locked   : false,
-        hovered  : false,
-        sprite   : SPR_ActionSlot
-    };
-    
 }
 
 function SCR_Board_IsSlotMouseOver(_slot) {
@@ -121,12 +55,12 @@ function SCR_Board_DrawPlayerMonsterOverlay(_slot, _card_w, _card_h) {
     // Sit above the weapon slot (weapon y overlaps the bottom of the monster card)
     var _bar_y = _slot.y + _card_h - 26;
     monster_DrawHealthBar(_slot.x + _bar_pad, _bar_y, _card_w - _bar_pad * 2, 8,
-        _slot.card.health, _slot.card.max_health);
+        battlefx_DisplayHealth(_slot.card), _slot.card.max_health);
 
     var _attack_gain = card_GetAttackBuff(_slot.card);
     card_DrawAttackGainBadge(_slot.x, _slot.y, _card_w, _card_h, _attack_gain);
 
-    if (battle_IsSpiritMonster(_slot.card)) {
+    if (card_IsSpiritType(_slot.card)) {
         var _strike = card_GetBoardAttackDisplay(_slot.card, _slot.index);
         if (_strike > 0) {
             draw_set_halign(fa_center);
@@ -177,7 +111,7 @@ function SCR_Board_DrawPlacedCards() {
         var _cx      = _slot.x + _card_w / 2;
         var _cy      = _slot.y + _card_h / 2;
 
-        card_DrawFramedAtCenter(_cx, _cy, _scale, _slot.card, 1);
+        card_DrawFramedAtCenter(_cx, _cy, _scale, _slot.card, battlefx_BlinkAlpha(_slot.card));
         draw_set_color(c_black);
         draw_set_halign(fa_left);
         draw_set_valign(fa_top);
@@ -202,7 +136,7 @@ function SCR_Board_DrawPlacedCards() {
         var _bm = instance_find(OBJ_BattleManager, 0);
         if (_bm != noone) {
             with (_bm) {
-                if (battle_CanWeaponAttack(i)) {
+                if (battle_CanColumnAttack(i)) {
                     draw_set_color(c_yellow);
                     draw_rectangle(_slot.x - 2, _slot.y - 2, _slot.x + _card_w + 2, _slot.y + _card_h + 2, true);
                 } else if (i < array_length(weapon_attacks_used)

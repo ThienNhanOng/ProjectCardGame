@@ -1,654 +1,280 @@
-/// @desc Click targeting for card abilities (JSON traits)
-
-
+/// @desc Player click-targeting for card abilities and column attacks. Runs on OBJ_BattleManager.
+///
+/// target_mode says what the next click picks:
+///   pick_player_monster   attacker for an action attack / attack_all
+///   pick_player_heal      player monster to heal
+///   pick_player_self_buff player monster to buff
+///   pick_any_buff         any monster (player or enemy) to buff
+///   pick_enemy            enemy to attack (action attack or weapon/column strike)
+///   pick_enemy_destroy    enemy to destroy
+///   pick_enemy_silence    enemy to silence
+///   pick_player_effect / pick_any_effect / pick_enemy_effect
+///                         target for any other single-target trait (e.g. "damage", or JSON "target")
 
 function battle_IsTargeting() {
-
     return target_mode != "none";
-
 }
-
-
 
 function battle_CancelTargeting() {
-
     target_mode = "none";
-
     pending_trait_source = "none";
-
     pending_action_trait_index = -1;
-
     pending_player_slot = -1;
-
     pending_monster_slot = -1;
-
     pending_monster_trait_index = -1;
-
     pending_weapon_slot = -1;
-
 }
 
-
-
-function battle_GetPlayerMonsterSlotAt(_mx, _my) {
-
-    var _board = instance_find(OBJ_BoardManager, 0);
-
-    if (_board == noone) return -1;
-
-
-
-    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
-
-        var _slot = _board.player_monster_slots[i];
-
-        if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-
-
-
-        if (_mx >= _slot.x && _mx <= _slot.x + _slot.w &&
-
-            _my >= _slot.y && _my <= _slot.y + _slot.h) {
-
-            return i;
-
-        }
-
-    }
-
-    return -1;
-
-}
-
-
-
-function battle_GetEnemySlotAt(_mx, _my) {
-
-    var _board = instance_find(OBJ_BoardManager, 0);
-
-    var _mm = instance_find(OBJ_MonsterManager, 0);
-
-    if (_board == noone || _mm == noone) return -1;
-
-
-
-    for (var i = 0; i < _mm.active_slot_count; i++) {
-
-        var _slot = _board.enemy_slots[i];
-
-        if (!_slot.visible || !_slot.occupied || _slot.card == undefined || !_slot.card.alive) continue;
-
-
-
-        if (monster_IsMouseOverSlot(_slot)) return i;
-
-    }
-
-    return -1;
-
-}
-
-
-
-function battle_HandleAnyBuffPick(_side, _slot_index) {
-
-    if (pending_trait_source == "monster_on_play") {
-
-        if (battle_ExecuteMonsterOnPlayBuffTrait(pending_monster_slot, pending_monster_trait_index, _side, _slot_index)) {
-
-            battle_MonsterOnPlayContinue(pending_monster_slot, pending_monster_trait_index);
-
-        }
-
-        return;
-
-    }
-
-
-
-    if (pending_trait_source == "weapon_on_play") {
-
-        if (battle_ExecuteWeaponOnPlayBuffTrait(pending_weapon_slot, pending_monster_trait_index, _side, _slot_index)) {
-
-            battle_WeaponOnPlayContinue(pending_weapon_slot, pending_monster_trait_index);
-
-        }
-
-        return;
-
-    }
-
-
-
-    if (battle_ExecuteActionBuff(pending_action_trait_index, _side, _slot_index)) {
-
-        battle_TargetingContinueAfterAction(pending_action_trait_index);
-
-    }
-
-}
-
-
-
-function battle_HandleEnemyTargetPick(_enemy_slot) {
-
-    if (pending_trait_source == "monster_on_play") {
-
-        var _saved_mode = target_mode;
-
-        target_mode = "none";
-
-        if (!battle_ExecuteMonsterOnPlayEnemyTrait(pending_monster_slot, pending_monster_trait_index, _enemy_slot)) {
-
-            target_mode = _saved_mode;
-
-            return;
-
-        }
-
-        battle_MonsterOnPlayContinue(pending_monster_slot, pending_monster_trait_index);
-
-        return;
-
-    }
-
-
-
-    if (pending_trait_source == "weapon_on_play") {
-
-        var _saved_weapon_mode = target_mode;
-
-        target_mode = "none";
-
-        if (!battle_ExecuteWeaponOnPlayEnemyTrait(pending_weapon_slot, pending_monster_trait_index, _enemy_slot)) {
-
-            target_mode = _saved_weapon_mode;
-
-            return;
-
-        }
-
-        battle_WeaponOnPlayContinue(pending_weapon_slot, pending_monster_trait_index);
-
-        return;
-
-    }
-
-
-
-    switch (target_mode) {
-
-        case "pick_enemy_destroy":
-
-            target_mode = "none";
-
-            if (battle_ExecuteActionDestroy(pending_action_trait_index, _enemy_slot)) {
-
-                battle_TargetingContinueAfterAction(pending_action_trait_index);
-
-            } else {
-
-                target_mode = "pick_enemy_destroy";
-
-            }
-
-            break;
-
-        case "pick_enemy_silence":
-
-            target_mode = "none";
-
-            if (battle_ExecuteActionSilence(pending_action_trait_index, _enemy_slot)) {
-
-                battle_TargetingContinueAfterAction(pending_action_trait_index);
-
-            } else {
-
-                target_mode = "pick_enemy_silence";
-
-            }
-
-            break;
-
-    }
-
-}
-
-
+// ---------------------------------------------------------------------------
+// Clicks
+// ---------------------------------------------------------------------------
 
 function SCR_Battle_Targeting_Step() {
-
     if (!battle_IsPlayerPhase() || !battle_IsTargeting()) return;
 
-
-
     if (keyboard_check_pressed(vk_escape) || mouse_check_button_pressed(mb_right)) {
-
         battle_CancelCurrentAction();
-
         return;
-
     }
-
-
 
     if (!mouse_check_button_pressed(mb_left)) return;
 
+    var _player_slot = unit_GetSlotAt(SIDE_PLAYER, mouse_x, mouse_y);
+    if (_player_slot >= 0 && battle_TargetingAcceptsPlayerSlot()) {
+        battle_TargetingClickPlayerSlot(_player_slot);
+        return;
+    }
 
+    var _enemy_slot = unit_GetSlotAt(SIDE_ENEMY, mouse_x, mouse_y);
+    if (_enemy_slot >= 0) {
+        battle_TargetingClickEnemySlot(_enemy_slot);
+    }
+}
 
-    if (target_mode == "pick_player_monster") {
+/// True when the current mode is answered by clicking one of the player's monsters
+function battle_TargetingAcceptsPlayerSlot() {
+    return target_mode == "pick_player_monster"
+        || target_mode == "pick_player_heal"
+        || target_mode == "pick_player_self_buff"
+        || target_mode == "pick_player_effect"
+        || target_mode == "pick_any_buff"
+        || target_mode == "pick_any_effect";
+}
 
-        var _player_slot = battle_GetPlayerMonsterSlotAt(mouse_x, mouse_y);
+/// The player clicked their monster in _slot while targeting
+function battle_TargetingClickPlayerSlot(_slot) {
+    if (!battle_IsPlayerPhase() || !battle_IsTargeting()) return;
+    if (!unit_IsAlive(SIDE_PLAYER, _slot)) return;
 
-        if (_player_slot < 0) return;
+    switch (target_mode) {
+        case "pick_player_monster":
+            if (battle_IsPlayerMonsterSlotShrouded(_slot)) return;
+            pending_player_slot = _slot;
 
-        if (battle_IsPlayerMonsterSlotShrouded(_player_slot)) {
-return;
-        }
-
-        pending_player_slot = _player_slot;
-
-        if (pending_trait_source == "action") {
-            var _traits = battle_GetActionTraits();
-            if (pending_action_trait_index >= 0
-                && pending_action_trait_index < array_length(_traits)
-                && _traits[pending_action_trait_index].type == "attack_all") {
-                if (battle_ExecuteActionAttackAll(pending_action_trait_index, _player_slot)) {
+            var _info = battle_GetPendingTraitInfo();
+            if (pending_trait_source == "action" && _info != undefined && _info.trait.type == "attack_all") {
+                if (battle_ExecuteActionAttack("attack_all")) {
                     battle_TargetingContinueAfterAction(pending_action_trait_index);
                 }
                 return;
             }
-        }
-
-        target_mode = "pick_enemy";
-
-        return;
-
-    }
-
-
-
-    if (target_mode == "pick_player_heal") {
-
-        var _heal_slot = battle_GetPlayerMonsterSlotAt(mouse_x, mouse_y);
-
-        if (_heal_slot < 0) return;
-
-
-
-        if (pending_trait_source == "monster_on_play") {
-
-            if (battle_ExecuteMonsterOnPlayHealTrait(pending_monster_slot, pending_monster_trait_index, _heal_slot)) {
-
-                battle_MonsterOnPlayContinue(pending_monster_slot, pending_monster_trait_index);
-
-            }
-
+            target_mode = "pick_enemy";
             return;
 
-        }
-
-
-
-        if (pending_trait_source == "weapon_on_play") {
-
-            if (battle_ExecuteWeaponOnPlayHealTrait(pending_weapon_slot, pending_monster_trait_index, _heal_slot)) {
-
-                battle_WeaponOnPlayContinue(pending_weapon_slot, pending_monster_trait_index);
-
-            }
-
+        case "pick_player_heal":
+        case "pick_player_self_buff":
+        case "pick_player_effect":
+        case "pick_any_buff":
+        case "pick_any_effect":
+            battle_ResolvePendingTrait(targets_Single(SIDE_PLAYER, _slot));
             return;
-
-        }
-
-
-
-        if (battle_ExecuteActionHeal(pending_action_trait_index, _heal_slot)) {
-
-            battle_TargetingContinueAfterAction(pending_action_trait_index);
-
-        }
-
-        return;
-
     }
-
-
-
-    if (target_mode == "pick_player_self_buff") {
-
-        var _self_buff_slot = battle_GetPlayerMonsterSlotAt(mouse_x, mouse_y);
-
-        if (_self_buff_slot < 0) return;
-
-
-
-        if (battle_ExecuteActionSelfBuff(pending_action_trait_index, _self_buff_slot)) {
-
-            battle_TargetingContinueAfterAction(pending_action_trait_index);
-
-        }
-
-        return;
-
-    }
-
-
-
-    if (target_mode == "pick_add_cost") {
-        var _target = battle_PickAddCostTargetAt(mouse_x, mouse_y);
-        if (_target != undefined && _target.card != undefined) {
-            battle_HandleAddCostPick(_target.card);
-        }
-        return;
-    }
-
-
-
-    if (target_mode == "pick_any_buff") {
-
-        var _player_buff_slot = battle_GetPlayerMonsterSlotAt(mouse_x, mouse_y);
-
-        if (_player_buff_slot >= 0) {
-
-            battle_HandleAnyBuffPick("player", _player_buff_slot);
-
-            return;
-
-        }
-
-
-
-        var _enemy_buff_slot = battle_GetEnemySlotAt(mouse_x, mouse_y);
-
-        if (_enemy_buff_slot >= 0) {
-
-            battle_HandleAnyBuffPick("enemy", _enemy_buff_slot);
-
-        }
-
-        return;
-
-    }
-
-
-
-    if (target_mode == "pick_enemy_destroy"
-
-        || target_mode == "pick_enemy_silence") {
-
-        var _enemy_slot = battle_GetEnemySlotAt(mouse_x, mouse_y);
-
-        if (_enemy_slot < 0) return;
-
-        battle_HandleEnemyTargetPick(_enemy_slot);
-
-        return;
-
-    }
-
-
-
-    if (target_mode == "pick_enemy") {
-
-        var _enemy_slot = battle_GetEnemySlotAt(mouse_x, mouse_y);
-
-        if (_enemy_slot < 0) return;
-
-
-
-        var _ok = false;
-
-        if (pending_trait_source == "weapon") {
-
-            _ok = battle_WeaponAttack(pending_player_slot, _enemy_slot);
-
-            if (_ok) battle_CancelTargeting();
-
-        } else if (battle_ExecuteActionAttack(pending_action_trait_index, pending_player_slot, _enemy_slot)) {
-
-            battle_TargetingContinueAfterAction(pending_action_trait_index);
-
-        }
-
-    }
-
 }
 
+/// The player clicked the enemy in _slot while targeting
+function battle_TargetingClickEnemySlot(_slot) {
+    if (!battle_IsPlayerPhase() || !battle_IsTargeting()) return;
+    if (!unit_IsAlive(SIDE_ENEMY, _slot)) return;
 
+    switch (target_mode) {
+        case "pick_any_buff":
+        case "pick_any_effect":
+        case "pick_enemy_destroy":
+        case "pick_enemy_silence":
+        case "pick_enemy_effect":
+            battle_ResolvePendingTrait(targets_Single(SIDE_ENEMY, _slot));
+            return;
 
-function SCR_Battle_Targeting_Draw() {
+        case "pick_enemy":
+            if (pending_trait_source == "weapon") {
+                if (battle_ColumnAttack(pending_player_slot, _slot)) battle_CancelTargeting();
+                return;
+            }
+            if (battle_ExecuteActionAttack("attack", targets_Single(SIDE_ENEMY, _slot))) {
+                battle_TargetingContinueAfterAction(pending_action_trait_index);
+            }
+            return;
+    }
+}
 
-    if (!battle_IsTargeting()) return;
+function battle_GetPendingTraitText() {
+    var _info = battle_GetPendingTraitInfo();
+    return (_info == undefined) ? "" : trait_GetDisplayText(_info.trait);
+}
 
-
+/// Card the player can pick on their side: hand first (if _include_hand), then action, weapons, monsters
+function battle_FindPlayerCardAt(_mx, _my, _include_hand) {
+    if (_include_hand) {
+        var _hand_card = battle_FindHandCardAt(_mx, _my);
+        if (_hand_card != undefined) return _hand_card;
+    }
 
     var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return undefined;
 
+    var _found = undefined;
+    with (_board) {
+        if (action_slot.visible && action_slot.occupied && action_slot.card != undefined
+            && SCR_Board_IsSlotMouseOver(action_slot)) {
+            _found = action_slot.card;
+        }
+
+        for (var w = 0; w < array_length(player_weapon_slots) && _found == undefined; w++) {
+            var _wslot = player_weapon_slots[w];
+            if (!_wslot.visible || !_wslot.occupied || _wslot.card == undefined) continue;
+            if (SCR_Board_IsSlotMouseOver(_wslot)) _found = _wslot.card;
+        }
+
+        for (var m = 0; m < array_length(player_monster_slots) && _found == undefined; m++) {
+            var _mslot = player_monster_slots[m];
+            if (!_mslot.visible || !_mslot.occupied || _mslot.card == undefined) continue;
+            if (SCR_Board_IsSlotMouseOver(_mslot)) _found = _mslot.card;
+        }
+    }
+    return _found;
+}
+
+function battle_FindHandCardAt(_mx, _my) {
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand == noone || _hand.hand_Count <= 0) return undefined;
+
+    var _spacing = SCR_Hand_GetSpacing(_hand.hand_Count, 5);
+    var _idx = SCR_Hand_PickCardIndex(_mx, _my, _hand.hand_Count, _spacing, _hand.hand_Y);
+    if (_idx >= 0) return _hand.hand[_idx];
+    return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Drawing
+// ---------------------------------------------------------------------------
+
+function SCR_Battle_Targeting_Draw() {
+    if (!battle_IsTargeting()) return;
+
+    var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return;
 
-
-
     draw_set_halign(fa_center);
-
     draw_set_color(c_yellow);
 
-
-
-    if (target_mode == "pick_player_monster") {
-
-        var _is_attack_all = false;
-        if (pending_trait_source == "action") {
-            var _traits = battle_GetActionTraits();
-            if (pending_action_trait_index >= 0
-                && pending_action_trait_index < array_length(_traits)
-                && _traits[pending_action_trait_index].type == "attack_all") {
-                _is_attack_all = true;
-            }
-        }
-
-        if (_is_attack_all) {
-            draw_text(room_width / 2, 8, "Choose your monster to attack all enemies");
-        } else {
-            draw_text(room_width / 2, 8, "Choose your monster card to attack");
-        }
-
-
-
-        for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
-
-            var _slot = _board.player_monster_slots[i];
-
-            if (!_slot.visible || !_slot.occupied) continue;
-            if (battle_IsPlayerMonsterSlotShrouded(i)) continue;
-
-            draw_set_color(c_aqua);
-
-            draw_rectangle(_slot.x, _slot.y, _slot.x + _slot.w, _slot.y + _slot.h, true);
-
-        }
-
-    }
-
-
-
-    if (target_mode == "pick_player_heal") {
-
-        draw_text(room_width / 2, 8, "Choose your monster card to heal");
-
-
-
-        for (var h = 0; h < array_length(_board.player_monster_slots); h++) {
-
-            var _hslot = _board.player_monster_slots[h];
-
-            if (!_hslot.visible || !_hslot.occupied) continue;
-
-            draw_set_color(c_aqua);
-
-            draw_rectangle(_hslot.x, _hslot.y, _hslot.x + _hslot.w, _hslot.y + _hslot.h, true);
-
-        }
-
-    }
-
-
-
-    if (target_mode == "pick_player_self_buff") {
-
-        draw_text(room_width / 2, 8, "Choose your monster for self buff ATK");
-
-
-
-        for (var sb = 0; sb < array_length(_board.player_monster_slots); sb++) {
-
-            var _sbslot = _board.player_monster_slots[sb];
-
-            if (!_sbslot.visible || !_sbslot.occupied) continue;
-
-            draw_set_color(c_aqua);
-
-            draw_rectangle(_sbslot.x, _sbslot.y, _sbslot.x + _sbslot.w, _sbslot.y + _sbslot.h, true);
-
-        }
-
-    }
-
-
-
-    if (target_mode == "pick_add_cost") {
-        draw_text(room_width / 2, 8, "Choose a card to add cost");
-        battle_TargetingDrawPlayerHighlights(_board, c_red);
-    }
-
-
-
-    if (target_mode == "pick_any_buff") {
-
-        draw_text(room_width / 2, 8, "Choose any monster to buff ATK");
-
-        battle_TargetingDrawPlayerHighlights(_board, c_aqua);
-
-        battle_TargetingDrawEnemyHighlights(_board, c_orange);
-
-    }
-
-
-
-    if (target_mode == "pick_enemy_destroy") {
-
-        draw_text(room_width / 2, 8, "Choose an enemy to destroy");
-
-        battle_TargetingDrawEnemyHighlights(_board, c_red);
-
-    }
-
-
-
-    if (target_mode == "pick_enemy_silence") {
-
-        draw_text(room_width / 2, 8, "Choose an enemy to silence");
-
-        battle_TargetingDrawEnemyHighlights(_board, c_purple);
-
-    }
-
-
-
-    if (target_mode == "pick_enemy") {
-
-        if (pending_trait_source == "weapon") {
-
-            draw_text(room_width / 2, 8, "Choose an enemy to attack with your weapon");
-
-        } else {
-
-            draw_text(room_width / 2, 8, "Choose an enemy to attack");
-
-        }
-
-        battle_TargetingDrawEnemyHighlights(_board, c_red);
-
-
-
-        if (pending_player_slot >= 0) {
-
-            var _ps = _board.player_monster_slots[pending_player_slot];
-
-            draw_set_color(c_lime);
-
-            draw_rectangle(_ps.x, _ps.y, _ps.x + _ps.w, _ps.y + _ps.h, true);
-
-
-
-            if (pending_trait_source == "weapon") {
-
-                var _ws = _board.player_weapon_slots[pending_player_slot];
-
-                if (_ws.visible && _ws.occupied) {
-
-                    draw_set_color(c_yellow);
-
-                    draw_rectangle(_ws.x, _ws.y, _ws.x + _ws.w, _ws.y + _ws.h, true);
-
+    switch (target_mode) {
+        case "pick_player_monster":
+            var _info = battle_GetPendingTraitInfo();
+            var _is_attack_all = pending_trait_source == "action" && _info != undefined && _info.trait.type == "attack_all";
+            draw_text(room_width / 2, 8, _is_attack_all
+                ? "Choose your monster to attack all enemies"
+                : "Choose your monster card to attack");
+            battle_TargetingDrawPlayerHighlights(_board, c_aqua, true);
+            break;
+
+        case "pick_player_heal":
+            draw_text(room_width / 2, 8, "Choose your monster card to heal");
+            battle_TargetingDrawPlayerHighlights(_board, c_aqua, false);
+            break;
+
+        case "pick_player_self_buff":
+            draw_text(room_width / 2, 8, "Choose your monster for self buff ATK");
+            battle_TargetingDrawPlayerHighlights(_board, c_aqua, false);
+            break;
+
+        case "pick_player_effect":
+            draw_text(room_width / 2, 8, "Choose your monster: " + battle_GetPendingTraitText());
+            battle_TargetingDrawPlayerHighlights(_board, c_aqua, false);
+            break;
+
+        case "pick_any_effect":
+            draw_text(room_width / 2, 8, "Choose any monster: " + battle_GetPendingTraitText());
+            battle_TargetingDrawPlayerHighlights(_board, c_aqua, false);
+            battle_TargetingDrawEnemyHighlights(_board, c_orange);
+            break;
+
+        case "pick_enemy_effect":
+            draw_text(room_width / 2, 8, "Choose an enemy: " + battle_GetPendingTraitText());
+            battle_TargetingDrawEnemyHighlights(_board, c_red);
+            break;
+
+        case "pick_any_buff":
+            draw_text(room_width / 2, 8, "Choose any monster to buff ATK");
+            battle_TargetingDrawPlayerHighlights(_board, c_aqua, false);
+            battle_TargetingDrawEnemyHighlights(_board, c_orange);
+            break;
+
+        case "pick_enemy_destroy":
+            draw_text(room_width / 2, 8, "Choose an enemy to destroy");
+            battle_TargetingDrawEnemyHighlights(_board, c_red);
+            break;
+
+        case "pick_enemy_silence":
+            draw_text(room_width / 2, 8, "Choose an enemy to silence");
+            battle_TargetingDrawEnemyHighlights(_board, c_purple);
+            break;
+
+        case "pick_enemy":
+            draw_text(room_width / 2, 8, (pending_trait_source == "weapon")
+                ? "Choose an enemy to attack with your weapon"
+                : "Choose an enemy to attack");
+            battle_TargetingDrawEnemyHighlights(_board, c_red);
+
+            if (pending_player_slot >= 0) {
+                var _ps = _board.player_monster_slots[pending_player_slot];
+                draw_set_color(c_lime);
+                draw_rectangle(_ps.x, _ps.y, _ps.x + _ps.w, _ps.y + _ps.h, true);
+
+                if (pending_trait_source == "weapon") {
+                    var _ws = _board.player_weapon_slots[pending_player_slot];
+                    if (_ws.visible && _ws.occupied) {
+                        draw_set_color(c_yellow);
+                        draw_rectangle(_ws.x, _ws.y, _ws.x + _ws.w, _ws.y + _ws.h, true);
+                    }
                 }
-
             }
-
-        }
-
+            break;
     }
-
-
 
     draw_set_halign(fa_left);
-
     draw_set_color(c_white);
-
 }
 
-
-
-function battle_TargetingDrawPlayerHighlights(_board, _color) {
-
+/// Outline the player's monsters (optionally skipping shrouded ones that cannot attack)
+function battle_TargetingDrawPlayerHighlights(_board, _color, _skip_shrouded) {
     draw_set_color(_color);
-
     for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
-
         var _slot = _board.player_monster_slots[i];
-
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-
+        if (_skip_shrouded && battle_IsPlayerMonsterSlotShrouded(i)) continue;
         draw_rectangle(_slot.x, _slot.y, _slot.x + _slot.w, _slot.y + _slot.h, true);
-
     }
-
 }
-
-
 
 function battle_TargetingDrawEnemyHighlights(_board, _color) {
-
     var _mm = instance_find(OBJ_MonsterManager, 0);
-
     if (_mm == noone) return;
 
-
-
     draw_set_color(_color);
-
     for (var j = 0; j < _mm.active_slot_count; j++) {
-
         var _eslot = _board.enemy_slots[j];
-
         if (!_eslot.visible || !_eslot.occupied) continue;
-
         var _box = monster_GetHitbox(_eslot);
-
         draw_rectangle(_box.card_left, _box.card_top, _box.card_right, _box.full_bottom, true);
-
     }
-
 }
-

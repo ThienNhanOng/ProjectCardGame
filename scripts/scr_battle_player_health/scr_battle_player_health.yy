@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_battle_player_health",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_battle_player_health",
+  "parent":{
+    "name":"Battle",
+    "path":"folders/scripts/Battle.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

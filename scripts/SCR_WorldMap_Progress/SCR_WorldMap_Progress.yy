@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_WorldMap_Progress",
+  "%Name":"scr_worldmap_progress",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_WorldMap_Progress",
+  "name":"scr_worldmap_progress",
   "parent":{
-    "name":"WorldMap1",
-    "path":"folders/scripts/WorldMap/WorldMap1.yy",
+    "name":"WorldMap",
+    "path":"folders/scripts/WorldMap.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

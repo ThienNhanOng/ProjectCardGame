@@ -1,4 +1,5 @@
 /// @desc Optional debug overlays and console logging (all disabled by default).
+
 /// Enable macros below, or copy snippets from reference/DEBUG_ARCHIVE.gml
 
 #macro DEBUG_LOG_ENABLED false

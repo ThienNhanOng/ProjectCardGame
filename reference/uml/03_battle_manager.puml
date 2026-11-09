@@ -12,8 +12,8 @@ Victory --> ReturnMap : worldmap_ReturnToMapAfterVictory
 note right of PlayerTurn
   OBJ_BattleManager
   SCR_Battle_Step
-  SCR_Battle_Turn
-  SCR_Battle_PlayCard
+  scr_battle_turn
+  scr_battle_play
 end note
 
 @enduml

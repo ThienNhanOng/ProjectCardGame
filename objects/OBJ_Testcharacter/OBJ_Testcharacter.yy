@@ -8,8 +8,8 @@
   "name":"OBJ_Testcharacter",
   "overriddenProperties":[],
   "parent":{
-    "name":"Player",
-    "path":"folders/scripts/WorldMap/Player.yy",
+    "name":"Debug",
+    "path":"folders/objects/Debug.yy",
   },
   "parentObjectId":null,
   "persistent":false,

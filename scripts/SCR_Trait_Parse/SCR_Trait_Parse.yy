@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Trait_Parse",
+  "%Name":"scr_trait_parse",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Trait_Parse",
+  "name":"scr_trait_parse",
   "parent":{
-    "name":"core",
-    "path":"folders/scripts/cardcollection/Traits/core.yy",
+    "name":"Core",
+    "path":"folders/scripts/CardSystem/Core.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

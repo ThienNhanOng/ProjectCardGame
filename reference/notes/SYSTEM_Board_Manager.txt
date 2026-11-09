@@ -6,9 +6,9 @@ Manage the 5-column battle board: monster, weapon, action, spirit slots; drag-dr
 
 MAIN SCRIPTS
 - SCR_Board_Create, SCR_Board_Dimensions
-- SCR_Board_PlayerSlots, SCR_Board_EnemySlots, SCR_Board_ActionSlot
-- SlotFactory, SCR_Slot_init
-- SCR_Board_SlotManager, SCR_DragDrop_Init, SCR_Board_Draw
+- scr_board_setup, SCR_Board_EnemySlots, scr_board_setup
+- scr_board_setup, scr_board_setup
+- scr_board_slots, SCR_DragDrop_Init, SCR_Board_Draw
 
 MAIN OBJECTS
 - OBJ_BoardManager
@@ -21,20 +21,20 @@ RESPONSIBILITIES
 
 DEPENDENCIES
 - OBJ_Hand (card source for drag)
-- SCR_Battle_PlayCard (play validation)
-- SCR_Trait_OpenZone
+- scr_battle_play (play validation)
+- scr_card_effects
 
 PUBLIC API
 - SCR_Board_Create() — build all slots
 - SCR_DragDrop_Init() — input handling
-- SCR_Board_SlotManager() — per-step slot logic
+- scr_board_slots() — per-step slot logic
 - Slot instance vars: occupied, card_data, zone_open
 
 INITIALIZATION ORDER
 After OBJ_Hand Create, before OBJ_BattleManager Create
 
 RUNTIME FLOW
-Drag card → validate slot → SCR_Battle_PlayCard → traits execute on slot
+Drag card → validate slot → scr_battle_play → traits execute on slot
 
 EXAMPLE
 Weapon card dragged to weapon column → equip → attack traits available
@@ -49,4 +49,4 @@ FUTURE EXPANSION
 
 PARENT / CHILD
 - OBJ_BoardManager: no parent object
-- Slot objects created via SlotFactory (not child objects of BoardManager type)
+- Slot objects created via scr_board_setup (not child objects of BoardManager type)

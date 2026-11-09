@@ -1,4 +1,4 @@
-/// @desc Reusable battle room session — reset deck, health, and runtime state each fight
+/// @desc Battle session (deck sources, spirits lost between fights) and battle wave config loading
 
 function battle_SaveDeckSources(_main_ids, _extra_ids) {
     global.battle_deck_source = [];
@@ -113,34 +113,6 @@ function extraDeck_EntryFromRuntimeCard(_card) {
     return extraDeck_CreateEntry(_card.id);
 }
 
-/// @desc True when a spirit card has the astral condition (persists in extra deck unless it dies)
-function card_HasAstralCondition(_card_or_id) {
-    var _def = undefined;
-
-    if (is_struct(_card_or_id)) {
-        if (variable_struct_exists(_card_or_id, "id")) {
-            _def = deck_GetCardData(_card_or_id.id);
-        } else {
-            _def = _card_or_id;
-        }
-    } else {
-        _def = deck_GetCardData(floor(_card_or_id));
-    }
-
-    if (_def == undefined) return false;
-
-    if (variable_struct_exists(_def, "astral")) {
-        if (is_bool(_def.astral) && _def.astral) return true;
-        if (is_real(_def.astral) && _def.astral > 0) return true;
-    }
-
-    var _reqs = conditions_GetRequirements(_def);
-    for (var i = 0; i < array_length(_reqs); i++) {
-        if (_reqs[i].type == "astral") return true;
-    }
-    return false;
-}
-
 /// @desc Called from Room_battle creation code before instances spawn
 function battle_BeginSession() {
     battle_MigrateLegacyDeckSources();
@@ -162,7 +134,7 @@ function battle_PermanentlyRemoveSpiritById(_card_id) {
 
     collection_RemoveOwnedCopy(_card_id, 1);
     battle_SyncExtraDeckFromBattleState();
-return true;
+    return true;
 }
 
 function battle_PermanentlyRemoveSpiritEntry(_entry) {
@@ -171,14 +143,14 @@ function battle_PermanentlyRemoveSpiritEntry(_entry) {
 }
 
 function battle_PermanentlyLoseSpirit(_card) {
-    if (_card == undefined || !battle_IsSpiritMonster(_card)) return false;
+    if (_card == undefined || !card_IsSpiritType(_card)) return false;
     if (!variable_struct_exists(_card, "id")) return false;
 
     var _card_id = floor(real(_card.id));
     if (_card_id <= 0) return false;
 
     if (variable_struct_exists(_card, "spirit_expired") && _card.spirit_expired) {
-return true;
+        return true;
     }
 
     if (variable_struct_exists(_card, "spirit_temp_consumed") && _card.spirit_temp_consumed) {
@@ -186,7 +158,7 @@ return true;
     }
 
     battle_PermanentlyRemoveSpiritById(_card_id);
-return true;
+    return true;
 }
 
 /// @desc After a fight, extra deck source = cards still in extra deck + spirits still alive on board.
@@ -209,7 +181,7 @@ function battle_SyncExtraDeckFromBattleState() {
         for (var s = 0; s < array_length(_board.player_monster_slots); s++) {
             var _slot = _board.player_monster_slots[s];
             if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
-            if (!battle_IsSpiritMonster(_slot.card)) continue;
+            if (!card_IsSpiritType(_slot.card)) continue;
             if (variable_struct_exists(_slot.card, "spirit_expired") && _slot.card.spirit_expired) continue;
             if (variable_struct_exists(_slot.card, "spirit_temp_consumed") && _slot.card.spirit_temp_consumed) continue;
             if (!card_IsAstral(_slot.card)) continue;
@@ -225,4 +197,74 @@ function battle_SyncExtraDeckFromBattleState() {
 /// @desc Called when leaving Room_battle back to the map
 function battle_EndSession() {
     global.battle_runtime_config = undefined;
+}
+
+function battle_NormalizeWaveConfig(_data) {
+    var _wave = [];
+    if (variable_struct_exists(_data, "wave") && is_array(_data.wave)) {
+        for (var i = 0; i < array_length(_data.wave); i++) {
+            array_push(_wave, {
+                collection: monster_NormalizeCollectionName(_data.wave[i].collection),
+                enemyID: floor(_data.wave[i].enemyID)
+            });
+        }
+    }
+
+    return {
+        battle: _data.battle,
+        active_slots: _data.active_slots,
+        wave: _wave
+    };
+}
+
+function battle_LoadConfig(_filename) {
+    if (!file_exists(_filename)) {
+        return undefined;
+    }
+
+    var _data = data_ReadJsonFile(_filename);
+    var _config = battle_NormalizeWaveConfig(_data);
+
+    return _config;
+}
+
+function battle_LoadBattleset(_filename) {
+    if (!variable_global_exists("battleset_cache")) {
+        global.battleset_cache = {};
+    }
+
+    if (variable_struct_exists(global.battleset_cache, _filename)) {
+        return global.battleset_cache[$ _filename];
+    }
+
+    if (!file_exists(_filename)) {
+        return undefined;
+    }
+
+    var _data = data_ReadJsonFile(_filename);
+    var _battles = {};
+
+    if (variable_struct_exists(_data, "battles") && is_array(_data.battles)) {
+        for (var i = 0; i < array_length(_data.battles); i++) {
+            var _entry = battle_NormalizeWaveConfig(_data.battles[i]);
+            _battles[$ string(_entry.battle)] = _entry;
+        }
+    }
+
+    var _set = { file: _filename, battles: _battles };
+    global.battleset_cache[$ _filename] = _set;
+
+    return _set;
+}
+
+function battle_GetBattlesetBattle(_battleset_file, _battle_id) {
+    var _set = battle_LoadBattleset(_battleset_file);
+    if (_set == undefined) return undefined;
+
+    var _key = string(_battle_id);
+    if (!variable_struct_exists(_set.battles, _key)) {
+        return undefined;
+    }
+
+    return _set.battles[$ _key];
 }

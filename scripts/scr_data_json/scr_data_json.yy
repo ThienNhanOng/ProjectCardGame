@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_data_json",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_data_json",
+  "parent":{
+    "name":"Core",
+    "path":"folders/scripts/Core.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

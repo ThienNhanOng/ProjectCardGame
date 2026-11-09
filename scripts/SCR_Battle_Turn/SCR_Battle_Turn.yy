@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Battle_Turn",
+  "%Name":"scr_battle_turn",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Battle_Turn",
+  "name":"scr_battle_turn",
   "parent":{
-    "name":"turn",
-    "path":"folders/scripts/BattleManager/turn.yy",
+    "name":"Battle",
+    "path":"folders/scripts/Battle.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

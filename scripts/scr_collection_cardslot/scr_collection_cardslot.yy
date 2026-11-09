@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_collection_cardslot",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_collection_cardslot",
+  "parent":{
+    "name":"Collection",
+    "path":"folders/scripts/Collection.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

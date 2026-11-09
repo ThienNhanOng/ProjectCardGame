@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Hand_Draw",
+  "%Name":"scr_hand_draw",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Hand_Draw",
+  "name":"scr_hand_draw",
   "parent":{
-    "name":"draw",
-    "path":"folders/scripts/BoardManager/hand/draw.yy",
+    "name":"Hand",
+    "path":"folders/scripts/Battle/Hand.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

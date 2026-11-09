@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Deck_Draw",
+  "%Name":"scr_deck_draw",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Deck_Draw",
+  "name":"scr_deck_draw",
   "parent":{
-    "name":"draw",
-    "path":"folders/scripts/BoardManager/deck/draw.yy",
+    "name":"Deck",
+    "path":"folders/scripts/Battle/Deck.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

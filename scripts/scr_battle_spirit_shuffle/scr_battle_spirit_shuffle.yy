@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_battle_spirit_shuffle",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_battle_spirit_shuffle",
+  "parent":{
+    "name":"Battle",
+    "path":"folders/scripts/Battle.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

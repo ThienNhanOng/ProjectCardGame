@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_deckbuilder_collection",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_deckbuilder_collection",
+  "parent":{
+    "name":"Collection",
+    "path":"folders/scripts/Collection.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

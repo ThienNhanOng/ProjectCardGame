@@ -8,8 +8,8 @@
   "name":"DebugOBJ_cordinates",
   "overriddenProperties":[],
   "parent":{
-    "name":"GameObjects",
-    "path":"folders/objects/GameObjects.yy",
+    "name":"Debug",
+    "path":"folders/objects/Debug.yy",
   },
   "parentObjectId":null,
   "persistent":false,

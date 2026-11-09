@@ -5,11 +5,11 @@ PURPOSE
 Spawn enemy waves, run enemy animations, execute enemy abilities on enemy turn.
 
 MAIN SCRIPTS
-- SCR_Monster_Init, SCR_Monster_Data, SCR_Monster_Queue, SCR_Monster_Draw
-- SCR_Monster_AnimRegistry + per-enemy SCR_MonsterAnim_*
-- SCR_MonsterAbility_Core, SCR_MonsterAbility_Execute, SCR_MonsterAbility_Picker
-- SCR_MonsterAbility_* (Attack, Buff, Summon, Discard, etc.)
-- LoadMonsters.gml
+- SCR_Monster_Init, scr_monster_data, scr_monster_manager, SCR_Monster_Draw
+- scr_monster_anim (registry + per-enemy hooks)
+- scr_enemy_ai, scr_enemy_abilities, scr_enemy_picker
+- scr_enemy_ai (ability cycle, delays, target choice) + scr_enemy_abilities (attack, buff, summon, discard via shared effects)
+- scr_monster_data.gml
 
 MAIN OBJECTS
 - OBJ_MonsterManager
@@ -22,13 +22,13 @@ RESPONSIBILITIES
 
 DEPENDENCIES
 - monster_DB / EnemyCollection01.json
-- SCR_Battle_EnemyTurn calls ability execute
-- SCR_Trait relay for some cross-system effects
+- scr_battle_turn calls ability execute
+- trait_Execute / card_* effects shared with player cards
 
 PUBLIC API
 - SCR_Monster_Init()
 - monster_CheckVictory() — triggers worldmap notify
-- SCR_MonsterAbility_Execute(enemy, ability_entry)
+- scr_enemy_abilities(enemy, ability_entry)
 
 INITIALIZATION ORDER
 Last in Room_battle creation order (after BattleManager)

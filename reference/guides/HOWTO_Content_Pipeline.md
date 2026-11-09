@@ -65,7 +65,7 @@ Content source for `dialog_Map1_Marker01_PreBattle` should eventually live in:
 ## Common pitfalls
 
 - Duplicating content in `datafiles/` and `content/` without a sync process
-- Hardcoding story strings inside `SCR_Battle_*` instead of dialog/marker scripts
+- Hardcoding story strings inside `scr_battle_*` scripts instead of dialog/marker scripts
 
 ## Future expansion
 

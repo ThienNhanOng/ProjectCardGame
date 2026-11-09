@@ -9,11 +9,11 @@ package "CONTENT" {
 
 package "Bootstrap & Data" as BOOT {
   [OBJ_GameController] as GC
-  [LoadCollection] as LC
+  [scr_card_data] as LC
   database "card_DB" as card_DB
-  [LoadMonsters] as LM
+  [scr_monster_data] as LM
   database "monster_DB" as monster_DB
-  [SCR_PlayerCollection] as PC
+  [scr_player_collection] as PC
   database "player_collection" as coll
   GC --> LC --> card_DB
   GC --> LM --> monster_DB
@@ -41,7 +41,7 @@ package "World Map & Events" as MAP {
 
 package "Dialog System" as DIALOG {
   [OBJ_DialogController] as DC
-  [SCR_Dialog_System] as DS
+  [scr_dialog_system] as DS
   EM --> DS
   DC --> DS
 }
@@ -52,7 +52,7 @@ package "Battle Room" as BATTLE {
   [OBJ_Hand] as HD
   [OBJ_Deck] as DK
   [OBJ_MonsterManager] as MM
-  [SCR_Trait_*] as TR
+  [scr_trait_execute + scr_card_effects] as TR
   BM --> BRD
   BM --> HD
   HD --> DK

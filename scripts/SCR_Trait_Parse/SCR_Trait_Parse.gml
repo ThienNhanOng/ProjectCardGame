@@ -1,6 +1,4 @@
-/// @desc Normalize raw JSON ability/action entries into reusable trait structs
-
-
+/// @desc Normalize JSON abilities into trait structs; trait classification and display text
 
 function trait_NormalizeEntry(_raw) {
 
@@ -11,8 +9,6 @@ function trait_NormalizeEntry(_raw) {
     var _uses = 1;
 
     var _card_id = -1;
-
-
 
     if (variable_struct_exists(_raw, "type")) {
 
@@ -43,8 +39,6 @@ function trait_NormalizeEntry(_raw) {
         _amount = 1;
 
     }
-
-
 
     if (_type == "healing") _type = "heal";
 
@@ -81,19 +75,13 @@ function trait_NormalizeEntry(_raw) {
         }
     }
 
-
-
     if (variable_struct_exists(_raw, "amount")) _amount = _raw.amount;
 
     else if (variable_struct_exists(_raw, "value")) _amount = _raw.value;
 
-
-
     if (variable_struct_exists(_raw, "id")) _card_id = _raw.id;
 
     else if (variable_struct_exists(_raw, "card_id")) _card_id = _raw.card_id;
-
-
 
     if (_type == "shrouded") _type = "shroud";
 
@@ -104,8 +92,6 @@ function trait_NormalizeEntry(_raw) {
         else if (_amount <= 0) _amount = 1;
 
     }
-
-
 
     var _repeat = false;
     var _recursion = 1;
@@ -191,10 +177,20 @@ function trait_NormalizeEntry(_raw) {
 
     }
 
-
+    // effect + target rule (JSON may override the target with "target")
+    var _rule = trait_GetTypeRule(_type);
+    var _target = _rule.target;
+    if (trait_IsUnitEffect(_rule.effect) && variable_struct_exists(_raw, "target")) {
+        var _wanted = trait_NormalizeTargetRule(_raw.target);
+        if (_wanted != "") _target = _wanted;
+    }
+    if (_rule.effect == "attack" && _target != "all_enemies") _target = "single_enemy";
+    _type = trait_CanonicalType(_rule.effect, _target, _type);
 
     return {
         type: _type,
+        effect: _rule.effect,
+        target: _target,
         amount: _amount,
         card_id: _card_id,
         repeat: _repeat,
@@ -238,15 +234,11 @@ function trait_AppendRepeatDisplayText(_text, _trait) {
     return _text + "  (" + string(_limit) + "x per turn)";
 }
 
-
-
 function trait_GetFromCard(_card) {
 
     var _traits = [];
 
     if (_card == undefined) return _traits;
-
-
 
     if (variable_struct_exists(_card, "actionType") && is_array(_card.actionType)) {
 
@@ -258,8 +250,6 @@ function trait_GetFromCard(_card) {
 
     }
 
-
-
     if (variable_struct_exists(_card, "ability") && is_array(_card.ability)) {
 
         for (var j = 0; j < array_length(_card.ability); j++) {
@@ -269,8 +259,6 @@ function trait_GetFromCard(_card) {
         }
 
     }
-
-
 
     // Legacy cardSet_02 action cards: "action": "heal", "heal_value": 5
 
@@ -296,13 +284,9 @@ function trait_GetFromCard(_card) {
 
     }
 
-
-
     return _traits;
 
 }
-
-
 
 function trait_GetFromMonster(_monster) {
 
@@ -311,8 +295,6 @@ function trait_GetFromMonster(_monster) {
     if (_monster == undefined) return _traits;
 
     if (!variable_struct_exists(_monster, "ability") || !is_array(_monster.ability)) return _traits;
-
-
 
     for (var i = 0; i < array_length(_monster.ability); i++) {
 
@@ -323,8 +305,6 @@ function trait_GetFromMonster(_monster) {
     return _traits;
 
 }
-
-
 
 function trait_FindFirst(_traits, _type) {
 
@@ -338,63 +318,16 @@ function trait_FindFirst(_traits, _type) {
 
 }
 
-
-
-function trait_ActionNeedsTargeting(_type) {
-
-    return _type == "attack" || _type == "attack_all" || _type == "heal" || _type == "self_buff" || _type == "buff"
-
-        || _type == "destroy" || _type == "silence";
-
-}
-
-
-
-function trait_ActionIsAuto(_type) {
-
-    return trait_IsDrawType(_type) || _type == "heal_all"
-        || _type == "openzone"
-        || _type == "add_counter" || _type == "remove_counter"
-        || _type == "no_board_expire" || _type == "add_board_turns"
-        || _type == "add_hand_with_cost" || _type == "add_cost"
-        || _type == "add" || _type == "add_deck" || _type == "add_extra_deck"
-        || _type == "add_hand_tag" || _type == "add_deck_tag" || _type == "add_extra_deck_tag";
-
-}
-
-
-
-function trait_OnPlayNeedsEnemyTarget(_type) {
-
-    return _type == "destroy" || _type == "silence";
-
-}
-
-
-
-function trait_OnPlayNeedsPlayerTarget(_type) {
-
-    return _type == "heal";
-
-}
-
-
-
-function trait_OnPlayNeedsAddCostTarget(_type) {
-    return false;
-}
-
-
-
-function trait_OnPlayNeedsAnyTarget(_type) {
-
-    return _type == "buff";
-
-}
-
-
-
+/// Preview / log text. Adds the target when JSON changed it from the trait's usual target.
 function trait_GetDisplayText(_trait) {
+    var _text = trait_GetBaseDisplayText(_trait);
+    if (_trait == undefined || !variable_struct_exists(_trait, "target")) return _text;
+    if (_trait.effect == "damage" || _trait.effect == "silence" || _trait.effect == "shroud") return _text;
+    if (_trait.target == trait_GetTypeRule(_trait.type).target) return _text;
+    return _text + " (" + trait_GetTargetLabel(_trait.target) + ")";
+}
+
+function trait_GetBaseDisplayText(_trait) {
 
     if (_trait == undefined) return "None";
 
@@ -403,6 +336,8 @@ function trait_GetDisplayText(_trait) {
         case "attack": return "Attack " + string(_trait.amount);
 
         case "attack_all": return "Attack all " + string(_trait.amount);
+
+        case "damage": return "Deal " + string(_trait.amount) + " damage to " + trait_GetTargetLabel(_trait.target);
 
         case "heal": return "Heal " + string(_trait.amount);
 
@@ -474,8 +409,10 @@ function trait_GetDisplayText(_trait) {
             if (_entry == undefined) return "Add cost";
             return "Add cost: " + card_FormatCostEntry(_entry);
 
-        case "silence": return "Silence 1 enemy (" + string(max(1, _trait.amount)) + " enemy turn(s))";
-        case "shroud": return "Shroud 1 target (" + string(max(1, _trait.amount)) + " enemy turn(s))";
+        case "silence": return "Silence " + trait_GetTargetLabel(_trait.target) + " (" + string(max(1, _trait.amount)) + " enemy turn(s))";
+        case "shroud":
+            var _shroud_who = (_trait.target == "single_enemy") ? "1 target" : trait_GetTargetLabel(_trait.target);
+            return "Shroud " + _shroud_who + " (" + string(max(1, _trait.amount)) + " enemy turn(s))";
 
         case "discard_action": return "Discard " + string(max(1, _trait.amount)) + " action card(s)";
         case "discard_monster": return "Discard " + string(max(1, _trait.amount)) + " monster card(s)";
@@ -489,8 +426,6 @@ function trait_GetDisplayText(_trait) {
     }
 
 }
-
-
 
 function trait_GetConditionsDisplayText(_trait) {
     if (_trait == undefined) return "Conditions";
@@ -506,103 +441,252 @@ function trait_GetConditionsDisplayText(_trait) {
     return _txt;
 }
 
+function trait_ParseTags(_raw) {
+    var _tags = [];
 
-
-function trait_ExecuteOnPlay(_trait, _player_slot) {
-
-    if (_trait == undefined) return false;
-
-
-
-    switch (_trait.type) {
-
-        case "attack":
-
-        case "heal":
-
-        case "buff":
-
-        case "attack_all":
-
-            return false;
-
-        case "draw":
-
-        case "draw_cards":
-
-            return trait_ExecuteDraw(trait_CreateDrawContext(max(1, _trait.amount)));
-
-        case "heal_all":
-
-            return trait_Execute(_trait, trait_CreateHealAllContext(_trait.amount));
-
-        case "add":
-
-            return trait_Execute(_trait, trait_CreateAddHandContext(_trait.card_id));
-
-        case "add_deck":
-
-            return trait_Execute(_trait, trait_CreateAddDeckContext(_trait.card_id));
-
-        case "add_extra_deck":
-
-            return trait_Execute(_trait, trait_CreateAddExtraDeckContext(_trait.card_id));
-
-        case "add_hand_tag":
-
-            return trait_ExecuteAddHandTag(_trait);
-
-        case "add_hand_with_cost":
-
-            return trait_ExecuteAddHandWithCost(_trait);
-
-        case "add_deck_tag":
-
-            return trait_ExecuteAddDeckTag(_trait);
-
-        case "add_extra_deck_tag":
-
-            return trait_ExecuteAddExtraDeckTag(_trait);
-
-        case "openzone":
-
-            return trait_ExecuteOpenZone(_trait, _player_slot);
-
-        case "add_counter":
-
-            return trait_ExecuteAddCounter(_trait, _player_slot);
-
-        case "remove_counter":
-
-            return trait_ExecuteRemoveCounter(_trait, _player_slot);
-
-        case "no_board_expire":
-
-            return trait_ExecuteNoBoardExpire(_trait, _player_slot);
-
-        case "add_board_turns":
-
-            return trait_ExecuteAddBoardTurns(_trait, _player_slot);
-
-        case "add_cost":
-
-            return trait_ExecuteAddCostToChain(_trait);
-
-        case "destroy":
-
-        case "silence":
-
-            return false;
-
-        case "self_buff":
-
-            return trait_Execute(_trait, trait_CreateBuffAttackContext(_trait.amount, "player", _player_slot));
-
-        default:
-
-return false;
-
+    if (variable_struct_exists(_raw, "tags") && is_array(_raw.tags)) {
+        for (var i = 0; i < array_length(_raw.tags); i++) {
+            array_push(_tags, string(_raw.tags[i]));
+        }
+    } else if (variable_struct_exists(_raw, "tag")) {
+        array_push(_tags, string(_raw.tag));
     }
 
+    return _tags;
 }
 
+function trait_ParseIndeckTags(_raw) {
+    var _tags = [];
+
+    if (variable_struct_exists(_raw, "indeckTags") && is_array(_raw.indeckTags)) {
+        for (var i = 0; i < array_length(_raw.indeckTags); i++) {
+            array_push(_tags, string(_raw.indeckTags[i]));
+        }
+    } else if (variable_struct_exists(_raw, "indeckTag")) {
+        if (is_array(_raw.indeckTag)) {
+            for (var j = 0; j < array_length(_raw.indeckTag); j++) {
+                array_push(_tags, string(_raw.indeckTag[j]));
+            }
+        } else {
+            array_push(_tags, string(_raw.indeckTag));
+        }
+    }
+
+    return _tags;
+}
+
+function trait_TraitUsesIndeckTagSearch(_trait) {
+    return (_trait != undefined
+        && variable_struct_exists(_trait, "indeck_tags")
+        && is_array(_trait.indeck_tags)
+        && array_length(_trait.indeck_tags) > 0);
+}
+
+function trait_GetTraitSearchTags(_trait) {
+    if (trait_TraitUsesIndeckTagSearch(_trait)) return _trait.indeck_tags;
+    if (variable_struct_exists(_trait, "tags") && is_array(_trait.tags)) return _trait.tags;
+    return [];
+}
+
+function trait_GetTagsDisplayText(_tags) {
+    if (_tags == undefined || array_length(_tags) <= 0) return "any tag";
+
+    var _txt = "";
+    for (var i = 0; i < array_length(_tags); i++) {
+        if (i > 0) _txt += ", ";
+        _txt += _tags[i];
+    }
+    return _txt;
+}
+
+function trait_ParseApplyCost(_raw) {
+    if (_raw == undefined || !variable_struct_exists(_raw, "cost")) return 0;
+
+    var _entry = card_NormalizeCostEntry(_raw.cost);
+    if (_entry != undefined) {
+        if (card_CostEntryIsTribute(_entry)) return max(0, _entry.amount);
+        return max(0, _entry.amount);
+    }
+
+    return 0;
+}
+
+function trait_GetTagDestinationFromType(_type) {
+    switch (_type) {
+        case "add_hand_tag":
+        case "add_tag":
+        case "add_hand_with_cost":
+        case "addtohandwithcost": return "hand";
+        case "add_deck_tag": return "deck";
+        case "add_extra_deck_tag": return "extra_deck";
+        default: return "";
+    }
+}
+
+function trait_GetTagDestinationLabel(_destination) {
+    switch (_destination) {
+        case "hand": return "hand";
+        case "deck": return "deck";
+        case "extra_deck": return "extra deck";
+        default: return _destination;
+    }
+}
+
+function trait_IsDrawType(_type) {
+    return _type == "draw" || _type == "draw_cards";
+}
+
+// ---------------------------------------------------------------------------
+// Effects and target rules
+//
+// Every trait has an EFFECT (what happens) and a TARGET rule (who is affected):
+//   self, single_ally, all_allies, single_enemy, all_enemies, single_any, none
+// "ally" / "enemy" are relative to the card's owner, so the same JSON works for player cards and enemies.
+// The existing trait names keep their usual target; JSON can change it with "target":
+//   { "type": "heal", "amount": 3, "target": "all_allies" }      (same as heal_all)
+//   { "type": "silence", "amount": 1, "target": "all_enemies" }
+// ---------------------------------------------------------------------------
+
+/// Effect and default target of a trait type
+function trait_GetTypeRule(_type) {
+    switch (_type) {
+        case "attack":       return { effect: "attack", target: "single_enemy" };
+        case "attack_all":   return { effect: "attack", target: "all_enemies" };
+        case "damage":       return { effect: "damage", target: "single_enemy" };
+        case "heal":         return { effect: "heal", target: "single_ally" };
+        case "heal_all":     return { effect: "heal", target: "all_allies" };
+        case "self_buff":    return { effect: "buff", target: "self" };
+        case "buff":         return { effect: "buff", target: "single_any" };
+        case "destroy":      return { effect: "destroy", target: "single_enemy" };
+        case "silence":      return { effect: "silence", target: "single_enemy" };
+        case "shroud":       return { effect: "shroud", target: "single_enemy" };
+
+        case "add":
+        case "add_deck":
+        case "add_extra_deck":
+            return { effect: "add_card", target: "none" };
+
+        case "add_hand_tag":
+        case "add_deck_tag":
+        case "add_extra_deck_tag":
+        case "add_hand_with_cost":
+            return { effect: "search_card", target: "none" };
+
+        case "openzone":
+        case "add_counter":
+        case "remove_counter":
+        case "no_board_expire":
+        case "add_board_turns":
+            return { effect: _type, target: "self" };
+    }
+    return { effect: _type, target: "none" };
+}
+
+/// Effects that act on monsters (units) and therefore use a target rule
+function trait_IsUnitEffect(_effect) {
+    return _effect == "attack" || _effect == "damage" || _effect == "heal" || _effect == "buff"
+        || _effect == "destroy" || _effect == "silence" || _effect == "shroud";
+}
+
+/// JSON "target" value -> target rule ("" when unknown)
+function trait_NormalizeTargetRule(_raw) {
+    switch (string_lower(string_trim(string(_raw)))) {
+        case "self": return "self";
+        case "ally": case "single_ally": return "single_ally";
+        case "allies": case "all_ally": case "all_allies": return "all_allies";
+        case "enemy": case "single_enemy": return "single_enemy";
+        case "enemies": case "all_enemy": case "all_enemies": return "all_enemies";
+        case "any": case "single_any": return "single_any";
+    }
+    return "";
+}
+
+/// Effect + target -> the existing trait name when there is one (heal + all_allies = heal_all),
+/// so previews, weapon stacking and enemy AI that look at the type keep working.
+function trait_CanonicalType(_effect, _target, _type) {
+    switch (_effect) {
+        case "attack": return (_target == "all_enemies") ? "attack_all" : "attack";
+        case "heal":
+            if (_target == "all_allies") return "heal_all";
+            return "heal";
+        case "buff":
+            if (_target == "self") return "self_buff";
+            return "buff";
+    }
+    return _type;
+}
+
+function trait_GetTargetLabel(_target) {
+    switch (_target) {
+        case "self": return "self";
+        case "single_ally": return "1 ally";
+        case "all_allies": return "all allies";
+        case "single_enemy": return "1 enemy";
+        case "all_enemies": return "all enemies";
+        case "single_any": return "any monster";
+    }
+    return _target;
+}
+
+function trait_GetSinglePick(_target) {
+    switch (_target) {
+        case "single_enemy": return "enemy";
+        case "single_ally": return "ally";
+        case "single_any": return "any";
+    }
+    return "";
+}
+
+/// Unit effects that hit everyone matching the rule (or the source itself) with no player pick
+function trait_IsAutoUnitEffect(_trait) {
+    if (!trait_IsUnitEffect(_trait.effect) || _trait.effect == "attack" || _trait.effect == "shroud") return false;
+    return _trait.target == "self" || _trait.target == "all_allies" || _trait.target == "all_enemies";
+}
+
+// ---------------------------------------------------------------------------
+// What the player has to click (player cards only — enemy targets come from scr_enemy_ai)
+// ---------------------------------------------------------------------------
+
+/// On-play trait of a monster / weapon / spirit: "enemy", "ally", "any", or "" (no pick).
+/// attack / attack_all on a board card are its strike, not an on-play effect; shroud is enemy-only.
+function trait_GetOnPlayPick(_trait) {
+    if (_trait.effect == "attack" || _trait.effect == "shroud") return "";
+    if (!trait_IsUnitEffect(_trait.effect)) return "";
+    return trait_GetSinglePick(_trait.target);
+}
+
+function trait_OnPlayNeedsTarget(_trait) {
+    return trait_GetOnPlayPick(_trait) != "";
+}
+
+/// Action card trait: "attacker" (choose your attacking monster), "ally", "any", "enemy", or "".
+/// An action card has no board slot, so "self" means a monster you choose.
+function trait_GetActionPick(_trait) {
+    if (_trait.effect == "attack") return "attacker";
+    if (_trait.effect == "shroud" || !trait_IsUnitEffect(_trait.effect)) return "";
+    if (_trait.target == "self") return "ally";
+    return trait_GetSinglePick(_trait.target);
+}
+
+function trait_ActionNeedsTargeting(_trait) {
+    return trait_GetActionPick(_trait) != "";
+}
+
+/// Action traits that run by themselves when the card is played
+function trait_ActionIsAuto(_trait) {
+    var _type = _trait.type;
+    return trait_IsDrawType(_type)
+        || _type == "openzone"
+        || _type == "add_counter" || _type == "remove_counter"
+        || _type == "no_board_expire" || _type == "add_board_turns"
+        || _type == "add_hand_with_cost" || _type == "add_cost"
+        || _type == "add" || _type == "add_deck" || _type == "add_extra_deck"
+        || _type == "add_hand_tag" || _type == "add_deck_tag" || _type == "add_extra_deck_tag"
+        || (trait_IsAutoUnitEffect(_trait) && _trait.target != "self");
+}
+
+/// Action traits that need one of the player's own monsters on the board
+function trait_ActionNeedsOwnMonster(_trait) {
+    var _pick = trait_GetActionPick(_trait);
+    return _pick == "attacker" || _pick == "ally";
+}

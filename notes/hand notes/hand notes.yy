@@ -3,8 +3,8 @@
   "%Name":"hand notes",
   "name":"hand notes",
   "parent":{
-    "name":"create",
-    "path":"folders/scripts/BoardManager/hand/create.yy",
+    "name":"Reference",
+    "path":"folders/Reference.yy",
   },
   "resourceType":"GMNotes",
   "resourceVersion":"2.0",

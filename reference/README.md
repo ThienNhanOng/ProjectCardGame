@@ -7,6 +7,7 @@ This folder documents the **engine and tools** used to build the game. Actual ga
 | Section | Purpose |
 |---------|---------|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Full-project overview + master UML |
+| [SCRIPT_LAYOUT.md](SCRIPT_LAYOUT.md) | Script folders, naming, shared player/enemy card system, how to add content |
 | [uml/](uml/) | Per-system UML diagrams (PlantUML `.puml`) |
 | [notes/](notes/) | Short GML-style system summaries (GameMaker note format) |
 | [guides/](guides/) | How-to use each system (API, examples, pitfalls) |

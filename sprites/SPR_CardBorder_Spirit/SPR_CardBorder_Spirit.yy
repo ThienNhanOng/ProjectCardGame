@@ -44,8 +44,8 @@
   },
   "origin":4,
   "parent":{
-    "name":"placeholder_board",
-    "path":"folders/sprites/placeholder_board.yy",
+    "name":"Borders",
+    "path":"folders/sprites/Cards/Borders.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

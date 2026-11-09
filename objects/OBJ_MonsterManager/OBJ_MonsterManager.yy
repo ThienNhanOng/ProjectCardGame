@@ -10,8 +10,8 @@
   "name":"OBJ_MonsterManager",
   "overriddenProperties":[],
   "parent":{
-    "name":"MonsterSystem",
-    "path":"folders/objects/MonsterSystem.yy",
+    "name":"Battle",
+    "path":"folders/objects/Battle.yy",
   },
   "parentObjectId":null,
   "persistent":false,

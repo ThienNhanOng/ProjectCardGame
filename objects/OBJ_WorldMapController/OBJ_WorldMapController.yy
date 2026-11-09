@@ -11,8 +11,8 @@
   "name":"OBJ_WorldMapController",
   "overriddenProperties":[],
   "parent":{
-    "name":"WorldMapSystem",
-    "path":"folders/objects/WorldMapSystem.yy",
+    "name":"WorldMap",
+    "path":"folders/objects/WorldMap.yy",
   },
   "parentObjectId":null,
   "persistent":false,

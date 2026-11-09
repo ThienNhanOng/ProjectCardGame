@@ -59,7 +59,7 @@ function battle_SpendResources(_amount) {
 
     with (_bm) {
         player_resources = max(0, player_resources - _amount);
-}
+    }
     return true;
 }
 
@@ -79,7 +79,7 @@ function battle_AddResourcesTemporary(_amount, _player_slot = -1) {
             resource_add_buff_orphan += _amount;
         }
 
-}
+    }
     return true;
 }
 
@@ -99,7 +99,7 @@ function battle_RemoveResourcesMaxFromSlot(_amount, _player_slot = -1) {
 
         battle_RecalculateResourceMax();
 
-}
+    }
     return true;
 }
 
@@ -128,7 +128,7 @@ function battle_ClearResourceEffectsFromSlot(_player_slot) {
             battle_RecalculateResourceMax();
         }
 
-}
+    }
 }
 
 /// @desc Strip temporary add_counter buffs at end of player turn
@@ -146,7 +146,7 @@ function battle_ClearTurnResourceAddBuffs() {
             resource_add_buff_by_slot[i] = 0;
         }
 
-}
+    }
 }
 
 /// @desc Refill current resources to max at the start of each player turn
@@ -160,7 +160,7 @@ function battle_RefreshResourcesForTurn() {
             resource_add_buff_by_slot[i] = 0;
         }
         player_resources = player_resources_max;
-}
+    }
 }
 
 function battle_GetResourcesDisplayRect() {

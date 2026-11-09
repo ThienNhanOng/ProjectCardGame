@@ -1,4 +1,5 @@
-// Reset battle session globals before instances spawn (reuses this room for every event)
+// Reset battle session globals (reuses this room for every event).
+// Note: room creation code runs AFTER the instances' Create events.
 battle_BeginSession();
 
 // ===== PLAY ROOM CAMERA SETUP =====

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_board_setup",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_board_setup",
+  "parent":{
+    "name":"Board",
+    "path":"folders/scripts/Battle/Board.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

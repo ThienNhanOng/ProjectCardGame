@@ -9,8 +9,8 @@
   "name":"OBJ_PlayerMarker",
   "overriddenProperties":[],
   "parent":{
-    "name":"Player",
-    "path":"folders/scripts/WorldMap/Player.yy",
+    "name":"WorldMap",
+    "path":"folders/objects/WorldMap.yy",
   },
   "parentObjectId":null,
   "persistent":false,

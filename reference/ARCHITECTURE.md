@@ -11,9 +11,9 @@ flowchart TB
 
     subgraph BOOT["1. Bootstrap & Data"]
         GC[OBJ_GameController]
-        LC[LoadCollection]
-        LM[LoadMonsters]
-        PC[SCR_PlayerCollection]
+        LC[scr_card_data]
+        LM[scr_monster_data]
+        PC[scr_player_collection]
         GC --> LC --> card_DB[(card_DB)]
         GC --> LM --> monster_DB[(monster_DB)]
         GC --> PC --> player_col[(global.player_collection)]
@@ -39,8 +39,8 @@ flowchart TB
 
     subgraph DIALOG["9. Dialog"]
         DC[OBJ_DialogController]
-        DS[SCR_Dialog_System]
-        DB[SCR_Dialog_Builder]
+        DS[scr_dialog_system]
+        DB[scr_dialog_builder]
         EM -->|pre/post| DS
         DC --> DS
         DS --> DB
@@ -57,7 +57,7 @@ flowchart TB
         BM --> HD
         HD --> DK
         BM --> MM
-        BM --> TR[7. Traits SCR_Trait_*]
+        BM --> TR[7. Card system: scr_trait_execute + card_* effects]
     end
 
     C_JSON --> BOOT

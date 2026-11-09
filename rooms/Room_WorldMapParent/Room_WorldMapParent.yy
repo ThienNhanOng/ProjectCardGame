@@ -17,8 +17,8 @@
   ],
   "name":"Room_WorldMapParent",
   "parent":{
-    "name":"maps levels",
-    "path":"folders/rooms/maps levels.yy",
+    "name":"WorldMap",
+    "path":"folders/rooms/WorldMap.yy",
   },
   "parentRoom":null,
   "physicsSettings":{

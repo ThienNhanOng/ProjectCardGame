@@ -19,6 +19,7 @@ function card_GetBorderSprite(_card_or_type) {
 
 function card_GetArtSprite(_card) {
     if (_card == undefined) return SPR_Monsterplaceholder;
+    if (variable_struct_exists(_card, "base_attack")) return SCR_Monster_GetSprite(_card);   // enemy: its icon
     return SCR_Hand_GetSprite(_card);
 }
 

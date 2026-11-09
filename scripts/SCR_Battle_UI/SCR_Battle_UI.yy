@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"SCR_Battle_UI",
+  "%Name":"scr_battle_ui",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"SCR_Battle_UI",
+  "name":"scr_battle_ui",
   "parent":{
-    "name":"draw",
-    "path":"folders/scripts/BattleManager/draw.yy",
+    "name":"Battle",
+    "path":"folders/scripts/Battle.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

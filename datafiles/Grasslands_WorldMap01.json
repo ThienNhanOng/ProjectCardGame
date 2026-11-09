@@ -2,37 +2,102 @@
   "map_id": "grasslands_01",
   "map_name": "Map 1",
   "battleset": "Grasslands_Battleset01_starter.json",
-  "event_flow": [1, 2, 3, 4, 5],
+  "side_events": {
+    "chance": 1.0,
+    "shape_weights": { "single": 1, "fork": 1, "chain": 1 },
+    "treasure_chance": 0.3,
+    "chain_treasure_chance": 0.5,
+    "battle_rewards": [],
+    "chain_battle_rewards": [
+      { "id": 6, "chance": 100 },
+      { "id": 11, "chance": 100 },
+      { "id": 12, "chance": 50 }
+    ],
+    "battle_names": ["Bandit Ambush", "Wolf Den", "Goblin Camp", "Roadside Brawl", "Wild Boar Charge", "Thicket Skirmish"],
+    "treasure_names": ["Hidden Cache", "Old Chest", "Abandoned Camp", "Glinting Grass", "Mossy Shrine"],
+    "places": [
+      "valley",
+      "forest clearing",
+      "old ruins",
+      "riverbank",
+      "hillside cave"
+    ],
+    "treasure_rewards": [
+      {
+        "id": 8,
+        "chance": 100,
+        "once": true
+      },
+      {
+        "id": 9,
+        "chance": 100
+      },
+      {
+        "id": 10,
+        "chance": 100
+      }
+    ]
+  },
+  "event_flow": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
   "events": [
     {
       "id": 1,
       "label": "Trail Start",
       "battle": "battle01",
-      "replay_pool": ["battle01", "battle02", "battle03", "battle04", "battle05"]
+      "replay_pool": [
+        "battle01",
+        "battle02",
+        "battle03",
+        "battle04",
+        "battle05"
+      ]
     },
     {
       "id": 2,
       "label": "Crossroads",
       "battle": "battle02",
-      "replay_pool": ["battle02", "battle03", "battle04"]
+      "replay_pool": [
+        "battle02",
+        "battle03",
+        "battle04"
+      ]
     },
     {
       "id": 3,
       "label": "Rocky Pass",
       "battle": "battle03",
-      "replay_pool": ["battle03", "battle04", "battle05"]
+      "replay_pool": [
+        "battle03",
+        "battle04",
+        "battle05"
+      ]
     },
     {
       "id": 4,
       "label": "Old Ruins",
       "battle": "battle04",
-      "replay_pool": ["battle04", "battle05", "battle06"]
+      "replay_pool": [
+        "battle04",
+        "battle05",
+        "battle06"
+      ]
     },
     {
       "id": 5,
       "label": "Boss Gate",
       "battle": "battle05",
-      "replay_pool": ["battle05", "battle06", "battle07", "battle08"]
+      "replay_pool": [
+        "battle05",
+        "battle06",
+        "battle07",
+        "battle08"
+      ]
     }
   ]
 }
