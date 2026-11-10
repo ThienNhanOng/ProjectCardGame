@@ -132,7 +132,6 @@ function SCR_Battle_Step() {
     }
 
     if (battle_IsEnemyPhase()) {
-        var _bm = instance_find(OBJ_BattleManager, 0);
         if (_bm != noone) {
             with (_bm) {
                 if (monsterAbility_picker_active) {

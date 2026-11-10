@@ -136,7 +136,7 @@ function battle_TickBoardMonsterLifespan() {
     }
 }
 
-#macro ENEMY_TURN_STEP_DELAY room_speed
+#macro ENEMY_TURN_STEP_DELAY game_get_speed(gamespeed_fps)   // one second (room_speed is deprecated)
 
 function battle_EnemyTurn_Init() {
     var _bm = instance_find(OBJ_BattleManager, 0);

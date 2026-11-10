@@ -144,11 +144,6 @@ function battle_EnsureMonsterDatabase() {
     if (array_length(global.monster_DB.enemies) <= 0) {
         SCR_LoadAllMonsters();
     }
-
-    if (variable_global_exists("monster_DB")) {
-        monster_DB = global.monster_DB;
-    }
-
 }
 
 function monster_NormalizeCollectionName(_collection) {

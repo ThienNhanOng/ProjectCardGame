@@ -506,10 +506,10 @@ function battlefx_Draw() {
                 break;
 
             case "bones":
-                var _land = sprite_get_number(SPR_FX_Bones) / BATTLEFX_BONES_FPS * 1000;
-                if (_t > _land + BATTLEFX_BONES_HOLD + BATTLEFX_BONES_FADE) { array_delete(global.battle_fx, i, 1); continue; }
+                var _bones_end = sprite_get_number(SPR_FX_Bones) / BATTLEFX_BONES_FPS * 1000;
+                if (_t > _bones_end + BATTLEFX_BONES_HOLD + BATTLEFX_BONES_FADE) { array_delete(global.battle_fx, i, 1); continue; }
                 var _bf = min(sprite_get_number(SPR_FX_Bones) - 1, floor(_t / 1000 * BATTLEFX_BONES_FPS));
-                var _ba = (_t < _land + BATTLEFX_BONES_HOLD) ? 1 : 1 - (_t - _land - BATTLEFX_BONES_HOLD) / BATTLEFX_BONES_FADE;
+                var _ba = (_t < _bones_end + BATTLEFX_BONES_HOLD) ? 1 : 1 - (_t - _bones_end - BATTLEFX_BONES_HOLD) / BATTLEFX_BONES_FADE;
                 draw_sprite_ext(SPR_FX_Bones, _bf, _fx.x, _fx.y, BATTLEFX_BONES_SCALE * _fx.flip, BATTLEFX_BONES_SCALE, 0, c_white, _ba);
                 break;
 
