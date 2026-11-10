@@ -1,4 +1,4 @@
-/// @desc Board slots — hover, place/remove cards, hidden zone slots
+/// @desc Board slots — hover, place/remove cards, opening / closing the back row (openzone)
 
 function SCR_Board_GetSlotAt(_mx, _my) {
     for (var i = 0; i < array_length(player_monster_slots); i++) {
@@ -26,20 +26,52 @@ function SCR_Board_GetSlotAt(_mx, _my) {
     return undefined;
 }
 
+/// Is your monster spot _index open and empty (somewhere a monster can go)?
+function battle_IsFreeMonsterSpot(_index) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone || _index < 0 || _index >= array_length(_board.player_monster_slots)) return false;
+    var _s = _board.player_monster_slots[_index];
+    return _s.visible && !_s.locked && !_s.occupied;
+}
+
+/// Can this summon trait happen now? Its card must be a monster card and there must be a free spot.
+function battle_CanSummon(_trait) {
+    var _def = deck_GetCardData(_trait.card_id);
+    return _def != undefined && _def.type == "monster" && battle_HasFreeMonsterSpot();
+}
+
+function battle_HasFreeMonsterSpot() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return false;
+    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
+        if (battle_IsFreeMonsterSpot(i)) return true;
+    }
+    return false;
+}
+
 /// Cards that go into a monster slot
 function SCR_Board_IsMonsterCard(_card) {
     return _card != undefined && (_card.type == "monster" || _card.type == "special_monster" || _card.type == "spirit");
 }
 
-/// Your monster slot under a point (_occupied: look for a filled one or an empty one), or -1
+/// Your monster slot under a point, or -1. _occupied: the top-most unit there (units can overlap);
+/// otherwise the empty open spot under the point whose centre is closest.
 function SCR_Board_MonsterSlotAt(_mx, _my, _occupied) {
+    if (_occupied) return unit_GetSlotAt(SIDE_PLAYER, _mx, _my);
+
+    var _best = -1;
+    var _best_dist = infinity;
     for (var i = 0; i < array_length(player_monster_slots); i++) {
         var _s = player_monster_slots[i];
-        if (!_s.visible || _s.locked || _s.occupied != _occupied) continue;
-        if (_occupied && _s.card == undefined) continue;
-        if (point_in_rectangle(_mx, _my, _s.x, _s.y, _s.x + _s.w, _s.y + _s.h)) return i;
+        if (!_s.visible || _s.locked || _s.occupied) continue;
+        if (!point_in_rectangle(_mx, _my, _s.x, _s.y, _s.x + _s.w, _s.y + _s.h)) continue;
+        var _dist = point_distance(_mx, _my, _s.x + _s.w / 2, _s.y + _s.h / 2);
+        if (_dist < _best_dist) {
+            _best_dist = _dist;
+            _best = i;
+        }
     }
-    return -1;
+    return _best;
 }
 
 /// Can a weapon / action card be dropped on your monster in slot _i?
@@ -148,7 +180,9 @@ function SCR_Board_UpdateWeaponSlotAvailability() {
     }
 }
 
-function SCR_Board_PlaceCard(_slot, _card) {
+/// Put a card in a slot. _defer_on_play: a monster summoned by another card — its on-play abilities
+/// wait until that card's play is finished (battle_RunDeferredOnPlay).
+function SCR_Board_PlaceCard(_slot, _card, _defer_on_play = false) {
     if (_slot == undefined) return false;
     if (_slot.occupied) {
         return false;
@@ -183,7 +217,7 @@ function SCR_Board_PlaceCard(_slot, _card) {
     _slot.card = _card;
     _slot.hovered = false;
     if (_slot.type == "monster") battlefx_Arrive(_card, SIDE_PLAYER, _slot.index, 0);   // hops in from the left
-    battle_NotifyCardPlaced(_slot, _card);
+    battle_NotifyCardPlaced(_slot, _card, _defer_on_play);
     
     // If this was a monster slot, update weapon slot availability
     if (_slot.type == "monster") {
@@ -209,32 +243,22 @@ function SCR_Board_RemoveCard(_slot) {
     return _card;
 }
 
-function SCR_Board_UnlockSlot(_index) {
-    if (_index >= 3 && _index < 5) {
-        player_monster_slots[_index].visible = true;
-        player_monster_slots[_index].locked = false;
-        SCR_Board_UpdateWeaponSlotAvailability();
-    }
+/// Open back-row spot _index for the monster in column _owner_slot (openzone). False when it is already open.
+function SCR_Board_OpenBackSlot(_index, _owner_slot) {
+    var _slot = player_monster_slots[_index];
+    if (!_slot.locked) return false;
+    _slot.visible = true;
+    _slot.locked = false;
+    _slot.opened_by = _owner_slot;
+    return true;
 }
 
-function SCR_Board_CloseHiddenSlot(_index) {
-    if (_index < 3 || _index > 4) return;
-
-    var _monster_slot = player_monster_slots[_index];
-    var _weapon_slot = player_weapon_slots[_index];
-
-    if (_weapon_slot.occupied && _weapon_slot.card != undefined) {
-        SCR_Board_RemoveCard(_weapon_slot);
-    }
-    if (_monster_slot.occupied && _monster_slot.card != undefined) {
-        SCR_Board_RemoveCard(_monster_slot);
-    }
-
-    _monster_slot.visible = false;
-    _monster_slot.locked = true;
-    _weapon_slot.visible = false;
-    _weapon_slot.locked = true;
-
+/// Close back-row spot _index again. The monster standing there has already left (battle_CloseBackRowSpotsOf).
+function SCR_Board_CloseBackSlot(_index) {
+    var _slot = player_monster_slots[_index];
+    _slot.visible = false;
+    _slot.locked = true;
+    _slot.opened_by = -1;
     SCR_Board_UpdateWeaponSlotAvailability();
 }
 

@@ -60,12 +60,13 @@ function SCR_Battle_UI_Draw() {
     draw_set_color(c_white);
 }
 
-function battle_GetPreviewPanelLayout() {
-    // far right, right under the battle log (battle_EnemyLog_GetPanelLayout)
+/// Details box: far right under the battle log; _on_left puts it at the far left instead
+/// (used for enemies, who stand on the right, so the box never covers the one you are looking at)
+function battle_GetPreviewPanelLayout(_on_left = false) {
     var _log = battle_EnemyLog_GetPanelLayout();
     var _top = _log.y + _log.h + 8;
     return {
-        x: _log.x,
+        x: _on_left ? 8 : _log.x,
         y: _top,
         w: _log.w,
         h: BATTLE_UI_Y - 64 - _top
@@ -198,6 +199,9 @@ function battle_GetPreviewSummaryLines(_card) {
         var _atk = variable_struct_exists(_card, "attack") ? _card.attack : _card.base_attack;
         array_push(_lines, "Attack: " + string(max(_atk, card_GetSummaryTotalAttack(_card))));
 
+        var _keywords = card_GetKeywordText(_card);
+        if (_keywords != "") array_push(_lines, _keywords);
+
         var _status = status_GetDisplayText(_card);
         if (_status != "") array_push(_lines, _status);
 
@@ -235,22 +239,121 @@ function battle_GetPreviewSummaryLines(_card) {
 }
 
 function battle_GetPreviewAbilityLines(_card) {
-    if (battle_IsEnemyPreviewCard(_card)) {
-        if (status_IsSilenced(_card)) {
-            return ["Silenced — cannot use abilities"];
-        }
+    if (battle_IsEnemyPreviewCard(_card)) return battle_GetEnemyAbilityLines(_card);
+    return SCR_DBD_GetCardAbilityLines(_card);
+}
 
-        var _traits = trait_GetFromMonster(_card);
-        var _lines = [];
-        for (var t = 0; t < array_length(_traits); t++) {
-            if (_traits[t].type == "none") continue;
-            array_push(_lines, SCR_DBD_FormatTraitLine(_traits[t]));
+// ---------------------------------------------------------------------------
+// Enemy abilities in the preview: everything the enemy can do, not just what it does next.
+// Lines starting with "## " are sub-headings (SCR_DBD_DrawPreviewLine).
+// ---------------------------------------------------------------------------
+
+/// One enemy ability as text, e.g. "Self buff ATK +3 for 2 turns", "Summon Dragon Egg (after 2 turns)"
+function battle_FormatEnemyTrait(_trait, _monster) {
+    if (monsterAbility_IsPassiveType(_trait.type)) return "Just attacks";
+
+    var _text;
+    if (_trait.type == "summon_enemy" && _trait.enemy_id >= 0) {
+        var _collection = (_trait.collection != "") ? _trait.collection : _monster.collection;
+        var _def = monster_GetDefinition(_collection, _trait.enemy_id);
+        _text = "Summon " + ((_def != undefined) ? _def.enemyname : "enemy " + string(_trait.enemy_id));
+        if (_trait.summon_to == "queue") _text += " (to queue)";
+    } else {
+        _text = SCR_DBD_FormatTraitLine(_trait);
+    }
+    if (_trait.effect == "buff") _text += " for " + battle_FormatPreviewTurnCount(monsterAbility_GetBuffTurns(_trait));
+    var _delay = monsterAbility_GetDelay(_trait);
+    if (_delay > 0) _text += " (after " + battle_FormatPreviewTurnCount(_delay) + ")";
+    return _text;
+}
+
+/// Raw JSON ability list -> normalized traits ("none" left out)
+function battle_EnemyTraitsFrom(_raw_list) {
+    var _traits = [];
+    if (!is_array(_raw_list)) return _traits;
+    for (var i = 0; i < array_length(_raw_list); i++) {
+        var _t = trait_NormalizeEntry(_raw_list[i]);
+        if (_t.type != "none") array_push(_traits, _t);
+    }
+    return _traits;
+}
+
+/// "Roar  ATK 5: Self buff ATK +3 for 2 turns" for one stance / move profile
+function battle_FormatEnemyProfile(_profile, _index, _monster) {
+    var _text = struct_GetOr(_profile, "name", "#" + string(_index + 1));
+    if (variable_struct_exists(_profile, "attack")) _text += "  ATK " + string(_profile.attack);
+
+    var _traits = battle_EnemyTraitsFrom(struct_GetOr(_profile, "ability", []));
+    var _what = "";
+    for (var i = 0; i < array_length(_traits); i++) {
+        _what += (i > 0 ? ", " : "") + battle_FormatEnemyTrait(_traits[i], _monster);
+    }
+    if (_what != "") _text += ": " + _what;
+    if (struct_GetOr(_profile, "when", "") == "free_slot") _text += " (only while a spot is free)";
+    return _text;
+}
+
+function battle_GetEnemyAbilityLines(_m) {
+    var _lines = [];
+    var _silenced = status_IsSilenced(_m);
+    if (_silenced) array_push(_lines, "## Silenced: no abilities for " + battle_FormatPreviewTurnCount(max(1, _m.silenced_turns)));
+
+    var _has_stances = monster_HasProfiles(_m, "stances");
+    var _has_moves = monster_HasProfiles(_m, "moves");
+
+    if (_has_stances) {
+        array_push(_lines, "## Stances (a new one every enemy turn)");
+        for (var s = 0; s < array_length(_m.stances); s++) {
+            var _st = battle_FormatEnemyProfile(_m.stances[s], s, _m);
+            if (s == _m.stance_index) _st += "  [now]";
+            array_push(_lines, _st);
         }
-        if (array_length(_lines) <= 0) array_push(_lines, "None");
-        return _lines;
     }
 
-    return SCR_DBD_GetCardAbilityLines(_card);
+    if (_has_moves) {
+        array_push(_lines, "## Moves (one picked each turn)");
+        for (var v = 0; v < array_length(_m.moves); v++) {
+            var _mv = battle_FormatEnemyProfile(_m.moves[v], v, _m);
+            if (v == _m.move_index) _mv += "  [current]";
+            array_push(_lines, _mv);
+        }
+    }
+
+    if (!_has_stances && !_has_moves) {
+        // its own list, used one per turn in order (while silenced: the list it gets back)
+        var _raw = (_silenced && is_array(_m.silenced_ability_backup)) ? _m.silenced_ability_backup : _m.ability;
+        var _all = [];
+        if (is_array(_raw)) for (var r = 0; r < array_length(_raw); r++) array_push(_all, trait_NormalizeEntry(_raw[r]));
+        var _useful = array_length(battle_EnemyTraitsFrom(_raw));
+
+        if (_useful <= 0) {
+            if (!variable_struct_exists(_m, "hatch") || !is_struct(_m.hatch)) array_push(_lines, "None");   // eggs list their hatching instead
+        } else {
+            if (array_length(_all) > 1) array_push(_lines, "## One per turn, in order");
+            var _next = (array_length(_all) > 0) ? (_m.ability_index mod array_length(_all)) : -1;
+            for (var a = 0; a < array_length(_all); a++) {
+                var _line = battle_FormatEnemyTrait(_all[a], _m);
+                if (array_length(_all) > 1 && a == _next && !_silenced) _line += "  [next]";
+                array_push(_lines, _line);
+            }
+        }
+    }
+
+    // eggs: what they hatch into
+    if (variable_struct_exists(_m, "hatch") && is_struct(_m.hatch)) {
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        var _turns = struct_GetOr(_m.hatch, "turns", 4);
+        var _age = (_bm != noone) ? _bm.turn_number - struct_GetOr(_m, "spawn_turn", 1) : 0;
+        var _into = "";
+        var _list = struct_GetOr(_m.hatch, "into", []);
+        for (var h = 0; h < array_length(_list); h++) {
+            var _hd = monster_GetDefinition(monster_NormalizeCollectionName(_list[h].collection), _list[h].enemyID);
+            _into += (h > 0 ? " or " : "") + ((_hd != undefined) ? _hd.enemyname : "?");
+        }
+        array_push(_lines, "## Hatches in " + battle_FormatPreviewTurnCount(max(0, _turns - _age)) + " into " + _into);
+    }
+
+    return _lines;
 }
 
 function battle_FindHoveredPreviewCard() {
@@ -310,22 +413,64 @@ function battle_FindHoveredPreviewCard() {
     return battle_FindHandCardAt(mouse_x, mouse_y);
 }
 
-function battle_DrawHoverPreview() {
-    var _card = battle_FindHoveredPreviewCard();
-    if (_card == undefined) return;
+// ---------------------------------------------------------------------------
+// Hover preview scrolling: when the details are taller than the box, the mouse wheel scrolls them
+// (unless the wheel is busy: over the battle log, or in a card picker). Each new card starts at the top.
+// ---------------------------------------------------------------------------
 
-    var _title_color = c_white;
-    if (battle_IsEnemyPreviewCard(_card) && monster_IsElite(_card)) {
-        _title_color = c_red;
+function battle_PreviewScroll_Get() {
+    if (!variable_global_exists("battle_preview_scroll")) global.battle_preview_scroll = { card: undefined, scroll: 0, max_scroll: 0 };
+    return global.battle_preview_scroll;
+}
+
+/// Is the mouse wheel used by something else right now?
+function battle_PreviewWheelBusy() {
+    if (battle_EnemyLog_IsMouseOverPanel()) return true;
+    var _deck = instance_find(OBJ_Deck, 0);
+    if (_deck != noone) {
+        var _open = false;
+        with (_deck) _open = deck_AnyPickerOpen();
+        if (_open) return true;
+    }
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    return _bm != noone && (_bm.monsterAbility_picker_active || _bm.spirit_shuffle_active);
+}
+
+function battle_PreviewScroll_Step() {
+    var _ps = battle_PreviewScroll_Get();
+    if (_ps.card == undefined || _ps.max_scroll <= 0 || battle_PreviewWheelBusy()) return;
+    var _delta = (mouse_wheel_down() - mouse_wheel_up()) * 24;
+    if (_delta != 0) _ps.scroll = clamp(_ps.scroll + _delta, 0, _ps.max_scroll);
+}
+
+function battle_DrawHoverPreview() {
+    var _ps = battle_PreviewScroll_Get();
+    var _card = battle_FindHoveredPreviewCard();
+    if (_card == undefined) {
+        _ps.card = undefined;
+        _ps.scroll = 0;
+        _ps.max_scroll = 0;
+        return;
+    }
+    if (_ps.card != _card) {   // a different card: start at the top
+        _ps.card = _card;
+        _ps.scroll = 0;
     }
 
-    SCR_DBD_DrawCardPreviewPanel(
-        battle_GetPreviewPanelLayout(),
+    var _enemy = battle_IsEnemyPreviewCard(_card);
+    var _title_color = (_enemy && monster_IsElite(_card)) ? c_red : c_white;
+
+    // enemies: summary next to the picture, their (longer) ability list full width below,
+    // and the box on the left side, away from the enemies
+    _ps.max_scroll = SCR_DBD_DrawCardPreviewPanel(
+        battle_GetPreviewPanelLayout(_enemy),
         _card,
         battle_GetPreviewSummaryLines(_card),
         battle_GetPreviewAbilityLines(_card),
         _title_color,
         SCR_DBD_ShouldShowPreviewConditions(_card) ? SCR_DBD_GetCardConditionLines(_card) : undefined,
-        true
+        !_enemy,
+        _ps.scroll
     );
+    _ps.scroll = clamp(_ps.scroll, 0, _ps.max_scroll);
 }

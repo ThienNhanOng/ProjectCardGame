@@ -1,4 +1,7 @@
 /// @desc Battle action log (panel + enemy_battle_log.txt)
+///
+/// The panel shows the newest entry at the top; scroll DOWN (mouse wheel) to read older ones.
+/// global.battle_action_log keeps entries oldest -> newest; only the drawing is reversed.
 
 #macro BATTLE_LOG_LINE_SEP -1
 
@@ -82,10 +85,6 @@ function battle_EnemyLog_IsMouseOverPanel() {
     return point_in_rectangle(mouse_x, mouse_y, _panel.x, _panel.y, _panel.x + _panel.w, _panel.y + _panel.h);
 }
 
-function battle_EnemyLog_IsAtBottom(_metrics) {
-    return (global.battle_action_log_scroll >= _metrics.max_scroll - 1);
-}
-
 function battle_EnemyLog_Step() {
     battle_EnemyLog_EnsureGlobals();
     if (array_length(global.battle_action_log) <= 0) return;
@@ -103,6 +102,7 @@ function battle_EnemyLog_Step() {
     }
     var _delta = 0;
 
+    // newest is at the top: wheel down goes further back in time
     if (mouse_wheel_up()) _delta -= _step;
     if (mouse_wheel_down()) _delta += _step;
 
@@ -114,20 +114,19 @@ function battle_EnemyLog_Step() {
 function battle_EnemyLog_PushAction(_line) {
     battle_EnemyLog_EnsureGlobals();
 
-    var _metrics_before = battle_EnemyLog_GetContentMetrics();
-    var _at_bottom = battle_EnemyLog_IsAtBottom(_metrics_before);
-
     array_push(global.battle_action_log, _line);
     while (array_length(global.battle_action_log) > MONSTER_ABILITY_LOG_MAX) {
         array_delete(global.battle_action_log, 0, 1);
     }
 
-    var _metrics_after = battle_EnemyLog_GetContentMetrics();
-    if (_at_bottom) {
-        global.battle_action_log_scroll = _metrics_after.max_scroll;
-    } else {
-        global.battle_action_log_scroll = clamp(global.battle_action_log_scroll, 0, _metrics_after.max_scroll);
+    // the new entry goes on top. At the top you see it; scrolled down into older entries,
+    // the view stays on what you were reading.
+    var _metrics = battle_EnemyLog_GetContentMetrics();
+    if (global.battle_action_log_scroll > 0) {
+        var _new_h = _metrics.heights[array_length(_metrics.heights) - 1] + _metrics.entry_gap;
+        global.battle_action_log_scroll += _new_h;
     }
+    global.battle_action_log_scroll = clamp(global.battle_action_log_scroll, 0, _metrics.max_scroll);
 }
 
 function battle_EnemyLog_Write(_line) {
@@ -163,7 +162,7 @@ function battle_EnemyLog_DrawScrollBar(_panel, _metrics) {
     var _thumb_ratio = _metrics.content_h / max(_metrics.total_h, 1);
     var _thumb_h = max(16, floor(_track_h * _thumb_ratio));
     var _scroll_ratio = global.battle_action_log_scroll / _metrics.max_scroll;
-    var _thumb_y = _track_top + floor((_track_h - _thumb_h) * (1 - _scroll_ratio));
+    var _thumb_y = _track_top + floor((_track_h - _thumb_h) * _scroll_ratio);
 
     draw_set_color(make_color_rgb(170, 170, 180));
     draw_rectangle(_track_x, _thumb_y, _track_x + 4, _thumb_y + _thumb_h, false);
@@ -176,10 +175,6 @@ function battle_EnemyLog_DrawPanel() {
     var _panel = battle_EnemyLog_GetPanelLayout();
     var _metrics = battle_EnemyLog_GetContentMetrics(_panel);
     global.battle_action_log_scroll = clamp(global.battle_action_log_scroll, 0, _metrics.max_scroll);
-
-    if (battle_EnemyLog_IsAtBottom(_metrics)) {
-        global.battle_action_log_scroll = _metrics.max_scroll;
-    }
 
     draw_set_alpha(0.72);
     draw_set_color(make_color_rgb(28, 28, 32));
@@ -194,7 +189,7 @@ function battle_EnemyLog_DrawPanel() {
 
     var _title = "Battle log";
     if (_metrics.max_scroll > 0) {
-        _title += " (scroll)";
+        _title += " (scroll for older)";
     }
     draw_set_color(c_yellow);
     draw_text(_panel.x + _metrics.pad, _panel.y + _metrics.pad, _title);
@@ -210,8 +205,9 @@ function battle_EnemyLog_DrawPanel() {
     var _cy = _metrics.content_y - global.battle_action_log_scroll;
     var _count = array_length(global.battle_action_log);
 
+    // newest first
     draw_set_color(c_ltgray);
-    for (var i = 0; i < _count; i++) {
+    for (var i = _count - 1; i >= 0; i--) {
         var _text = global.battle_action_log[i];
         var _entry_h = _metrics.heights[i];
 

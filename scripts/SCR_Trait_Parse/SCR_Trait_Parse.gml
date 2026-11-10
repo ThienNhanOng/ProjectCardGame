@@ -123,6 +123,7 @@ function trait_NormalizeEntry(_raw) {
     var _enemy_id = -1;
     var _card_ids = [];
     var _collection = "";
+    var _summon_to = "board";
 
     if (variable_struct_exists(_raw, "delay")) {
         _delay = max(0, floor(_raw.delay));
@@ -147,6 +148,8 @@ function trait_NormalizeEntry(_raw) {
         else if (variable_struct_exists(_raw, "enemy_id")) _enemy_id = floor(_raw.enemy_id);
         else if (variable_struct_exists(_raw, "id")) _enemy_id = floor(_raw.id);
         if (variable_struct_exists(_raw, "collection")) _collection = string(_raw.collection);
+        // "to": "board" (default) = into a free spot now, "queue" = the front of the wave queue
+        if (variable_struct_exists(_raw, "to") && string_lower(string_trim(string(_raw.to))) == "queue") _summon_to = "queue";
         _card_id = -1;
         if (_delay <= 0 && variable_struct_exists(_raw, "turns")) {
             _delay = max(0, floor(_raw.turns));
@@ -206,7 +209,8 @@ function trait_NormalizeEntry(_raw) {
         enemy_id: _enemy_id,
         card_ids: _card_ids,
         hand_filter: _hand_filter,
-        collection: _collection
+        collection: _collection,
+        summon_to: _summon_to
     };
 }
 
@@ -356,8 +360,11 @@ function trait_GetBaseDisplayText(_trait) {
             return "Discard " + string(max(1, _trait.amount)) + " hand card(s)";
         case "discard_extra_deck": return "Discard " + string(max(1, _trait.amount)) + " extra deck card(s)";
         case "summon_enemy":
-            if (_trait.enemy_id >= 0) return "Summon enemy ID " + string(_trait.enemy_id);
-            return "Summon ally";
+            var _where = (_trait.summon_to == "queue") ? " (to queue)" : "";
+            if (_trait.enemy_id >= 0) return "Summon enemy ID " + string(_trait.enemy_id) + _where;
+            return "Summon ally" + _where;
+
+        case "summon": return "Summon " + deck_GetCardName(_trait.card_id);
 
         case "add": return "Add to hand id " + string(_trait.card_id);
 
@@ -572,6 +579,10 @@ function trait_GetTypeRule(_type) {
         case "add_hand_with_cost":
             return { effect: "search_card", target: "none" };
 
+        // player cards: put a monster card (by id) onto a free spot you pick
+        case "summon":
+            return { effect: "summon", target: "free_spot" };
+
         case "openzone":
         case "add_counter":
         case "remove_counter":
@@ -647,9 +658,10 @@ function trait_IsAutoUnitEffect(_trait) {
 // What the player has to click (player cards only — enemy targets come from scr_enemy_ai)
 // ---------------------------------------------------------------------------
 
-/// On-play trait of a monster / weapon / spirit: "enemy", "ally", "any", or "" (no pick).
+/// On-play trait of a monster / weapon / spirit: "enemy", "ally", "any", "spot" (a free board spot), or "" (no pick).
 /// attack / attack_all on a board card are its strike, not an on-play effect; shroud is enemy-only.
 function trait_GetOnPlayPick(_trait) {
+    if (_trait.effect == "summon") return "spot";
     if (_trait.effect == "attack" || _trait.effect == "shroud") return "";
     if (!trait_IsUnitEffect(_trait.effect)) return "";
     return trait_GetSinglePick(_trait.target);
@@ -659,9 +671,10 @@ function trait_OnPlayNeedsTarget(_trait) {
     return trait_GetOnPlayPick(_trait) != "";
 }
 
-/// Action card trait: "attacker" (choose your attacking monster), "ally", "any", "enemy", or "".
+/// Action card trait: "attacker" (choose your attacking monster), "ally", "any", "enemy", "spot", or "".
 /// An action card has no board slot, so "self" means a monster you choose.
 function trait_GetActionPick(_trait) {
+    if (_trait.effect == "summon") return "spot";
     if (_trait.effect == "attack") return "attacker";
     if (_trait.effect == "shroud" || !trait_IsUnitEffect(_trait.effect)) return "";
     if (_trait.target == "self") return "ally";

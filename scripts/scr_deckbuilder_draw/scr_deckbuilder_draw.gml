@@ -150,6 +150,9 @@ function SCR_DBD_DrawDeckInfo() {
     draw_set_halign(fa_center);
     draw_set_valign(fa_top);
     draw_text(room_width - 85, room_height - 88, "READY");
+    draw_set_color(c_ltgray);
+    draw_text(room_width - 85, room_height - 48, "Esc: Menu");
+    draw_set_color(c_white);
     draw_set_halign(fa_left);
 }
 

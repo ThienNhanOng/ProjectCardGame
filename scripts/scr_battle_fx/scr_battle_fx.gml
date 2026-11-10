@@ -4,8 +4,9 @@
 ///   (it snaps to and turns red over a valid enemy).
 /// - Every hit (combat_DamageUnit) plays SPR_FX_Slash on the target and makes it blink for a second,
 ///   while its health bar drains smoothly from the old value to the new one (display only).
-/// - An enemy attack first shoots a dashed arrow to its target; when the arrow arrives the enemy plays its
-///   attack animation, and the slash + blink + health drain land at the animation's strike moment.
+/// - An attacker (enemy, or your monster striking with its weapon / an action card) runs up beside its target,
+///   strikes, and walks back to its spot; the slash + blink + health drain land when the blow does.
+///   Attacks on several targets stop beside the middle of the group and send an arrow to each.
 /// - A unit that dies drops into a pile of bones that fades (SPR_FX_Bones).
 /// - A unit that takes a spot arrives as a dark shadow, either hopping in from its side of the screen
 ///   or dropping straight down from above (picked at random, or fixed with the unit's JSON "arrival":
@@ -32,6 +33,12 @@
 #macro BATTLEFX_HEAD_GAP 24          // room left before the ">" head
 #macro BATTLEFX_AURA_MS 1100         // buff / debuff particle burst
 #macro BATTLEFX_DEBUFF_FALLS true    // debuff particles sink downward (false = they rise like a buff, in red)
+#macro BATTLEFX_DASH_OUT_MS 260      // an attacker runs up to its target...
+#macro BATTLEFX_DASH_BACK_MS 340     // ...and walks back to its spot after the blow
+#macro BATTLEFX_DASH_GAP 85          // it stops this far beside the target (on the side it came from)
+#macro BATTLEFX_DASH_HOP 9           // little hops while it runs (pixels)
+#macro BATTLEFX_PLAYER_STRIKE_MS 90  // your units (no attack animation) land the blow this long after arriving
+#macro BATTLEFX_GHOST_LINGER_MS 260  // a unit killed by a delayed blow stays visible this long after the blow lands
 
 function battlefx_Init() {
     if (!variable_global_exists("battle_fx")) global.battle_fx = [];
@@ -79,7 +86,8 @@ function battlefx_Hit(_side, _slot) {
     if (_pos == undefined) return;
     var _start = current_time + global.battlefx_hit_delay;
 
-    array_push(global.battle_fx, { type: "slash", x: _pos.x, y: _pos.y, start: _start });
+    // the slash art swings the way an enemy hits you; blows on enemies come from your side, so it is mirrored
+    array_push(global.battle_fx, { type: "slash", x: _pos.x, y: _pos.y, start: _start, flip: (_side == SIDE_ENEMY) ? -1 : 1 });
 
     if (_side == SIDE_PLAYER && _slot == UNIT_HERO) {
         var _bm = instance_find(OBJ_BattleManager, 0);
@@ -208,13 +216,123 @@ function battlefx_DrawAura(_fx, _t) {
     draw_set_color(c_white);
 }
 
-/// A unit dies: its bones drop where it stood and fade away
+/// A unit dies: its bones drop where it stood and fade away. When the blow is still on its way
+/// (an attacker running up to it), the unit stays visible as a "ghost" until the blow lands.
 function battlefx_Death(_side, _slot) {
     battlefx_Init();
     var _f = battlefx_UnitFeet(_side, _slot);
     if (_f == undefined) return;
     array_push(global.battle_fx, { type: "bones", x: _f.x, y: _f.y, start: current_time + global.battlefx_hit_delay,
         flip: (_side == SIDE_ENEMY) ? -1 : 1 });
+
+    var _card = unit_Get(_side, _slot);
+    if (global.battlefx_hit_delay > 0 && _card != undefined) {
+        array_push(global.battle_fx, { type: "ghost", side: _side, slot: _slot, card: _card, start: current_time,
+            until: global.battlefx_hit_delay + BATTLEFX_GHOST_LINGER_MS });
+    }
+}
+
+/// Draw a unit that already left the board but whose fatal blow hasn't landed yet
+function battlefx_DrawGhost(_fx) {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return;
+    if (_fx.side == SIDE_ENEMY) {
+        monster_DrawActive(_board.enemy_slots[_fx.slot], _fx.card, false);
+        return;
+    }
+    with (_board) {
+        var _s = player_monster_slots[_fx.slot];
+        SCR_Board_DrawPlayerUnit(_fx.slot, false, _fx.card);
+        SCR_Board_DrawPlayerMonsterOverlay(_s, _s.w, _s.h, _fx.card);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Dash: an attacker runs up beside its target, strikes, and walks back to its spot.
+// Its circle, health bar and name move with it (battlefx_UnitOffset is added wherever it is drawn).
+// ---------------------------------------------------------------------------
+
+/// Where an attack on these targets is delivered from: beside the target, on the side the attacker
+/// comes from (beside the middle of a group for attacks on several). The player is reached at your front row.
+function battlefx_DashDestination(_side, _slot, _targets) {
+    var _home = battlefx_UnitFeet(_side, _slot);
+    if (_home == undefined) return undefined;
+    var _sx = 0;
+    var _sy = 0;
+    var _n = 0;
+    for (var i = 0; i < array_length(_targets); i++) {
+        var _t = _targets[i];
+        var _p = (_t.side == SIDE_PLAYER && _t.slot == UNIT_HERO) ? battle_LayoutPlayerFeet(1) : battlefx_UnitFeet(_t.side, _t.slot);
+        if (_p == undefined) continue;
+        _sx += _p.x;
+        _sy += _p.y;
+        _n++;
+    }
+    if (_n <= 0) return undefined;
+    var _tx = _sx / _n;
+    var _dir = (_home.x >= _tx) ? 1 : -1;
+    return { x: _tx + _dir * BATTLEFX_DASH_GAP, y: _sy / _n };
+}
+
+/// Send a unit to _dest (feet position): it runs there, stays _hold_ms, then walks back
+function battlefx_Dash(_card, _side, _slot, _dest, _hold_ms) {
+    var _home = battlefx_UnitFeet(_side, _slot);
+    if (_card == undefined || _home == undefined || _dest == undefined) return;
+    _card.fx_dash = { start: current_time, dx: _dest.x - _home.x, dy: _dest.y - _home.y, hold: max(0, _hold_ms) };
+}
+
+/// How far a unit is from its own spot right now, { x, y } (0, 0 when it isn't dashing)
+function battlefx_UnitOffset(_card) {
+    if (!is_struct(_card) || !variable_struct_exists(_card, "fx_dash") || _card.fx_dash == undefined) return { x: 0, y: 0 };
+    var _d = _card.fx_dash;
+    var _t = current_time - _d.start;
+    var _back_at = BATTLEFX_DASH_OUT_MS + _d.hold;
+    var _u = 0;      // 0 = at its spot, 1 = beside the target
+    var _hop = 0;
+    if (_t <= 0) {
+        _u = 0;
+    } else if (_t < BATTLEFX_DASH_OUT_MS) {
+        var _p = _t / BATTLEFX_DASH_OUT_MS;
+        _u = 1 - power(1 - _p, 2);                            // quick start, slows as it arrives
+        _hop = abs(sin(_p * pi * 2)) * BATTLEFX_DASH_HOP;
+    } else if (_t < _back_at) {
+        _u = 1;
+    } else if (_t < _back_at + BATTLEFX_DASH_BACK_MS) {
+        var _q = (_t - _back_at) / BATTLEFX_DASH_BACK_MS;
+        _u = 1 - (_q * _q * (3 - 2 * _q));                    // eases off, then settles at its spot
+        _hop = abs(sin(_q * pi * 2)) * BATTLEFX_DASH_HOP;
+    } else {
+        _card.fx_dash = undefined;
+        return { x: 0, y: 0 };
+    }
+    return { x: _d.dx * _u, y: _d.dy * _u - _hop };
+}
+
+function battlefx_IsDashing(_card) {
+    return is_struct(_card) && variable_struct_exists(_card, "fx_dash") && _card.fx_dash != undefined;
+}
+
+/// Arrows from where an attacker stops to each of several targets, shown once it arrives
+function battlefx_GroupArrows(_dest, _targets, _arrive_ms, _land_after_ms) {
+    if (array_length(_targets) <= 1) return;
+    for (var i = 0; i < array_length(_targets); i++) {
+        var _to = battlefx_UnitPos(_targets[i].side, _targets[i].slot);
+        if (_to == undefined) continue;
+        array_push(global.battle_fx, { type: "arrow", x1: _dest.x, y1: _dest.y - 50, x2: _to.x, y2: _to.y,
+            start: current_time + _arrive_ms, land: _land_after_ms });
+    }
+}
+
+/// One of your units attacks these targets: it runs up to them and the blow lands just after it arrives.
+/// Call before the damage is dealt; battlefx_EndDelay() after.
+function battlefx_PlayerAttack(_slot, _targets) {
+    battlefx_Init();
+    var _card = unit_Get(SIDE_PLAYER, _slot);
+    var _dest = battlefx_DashDestination(SIDE_PLAYER, _slot, _targets);
+    if (_card == undefined || _dest == undefined) return;
+    battlefx_Dash(_card, SIDE_PLAYER, _slot, _dest, BATTLEFX_PLAYER_STRIKE_MS + 260);
+    battlefx_GroupArrows(_dest, _targets, BATTLEFX_DASH_OUT_MS, BATTLEFX_PLAYER_STRIKE_MS);
+    global.battlefx_hit_delay = BATTLEFX_DASH_OUT_MS + BATTLEFX_PLAYER_STRIKE_MS;
 }
 
 /// A unit takes a spot: it comes in as a shadow from its own side (yours from the left, enemies from the right),
@@ -288,21 +406,22 @@ function battlefx_DrawArrivalShadow(_card, _spr, _frame, _tx, _ty, _xs, _ys, _yo
 }
 
 /// An enemy attacks these targets:
-///   1. dashed arrows grow to the targets (BATTLEFX_ARROW_GROW)
-///   2. then the enemy's attack animation starts
+///   1. it runs up beside its target (beside the middle of the group for attack-all, with arrows to each)
+///   2. its attack animation plays there
 ///   3. the hits (slash, blink, health drain) land BATTLEFX_STRIKE_MS into that animation
+///   4. it walks back to its spot once the animation is over
+/// Call before the damage is dealt; battlefx_EndDelay() after.
 function battlefx_EnemyAttack(_enemy_slot, _targets) {
     battlefx_Init();
-    var _from = battlefx_UnitPos(SIDE_ENEMY, _enemy_slot);
-    if (_from == undefined) return;
-    var _land = BATTLEFX_ARROW_GROW + BATTLEFX_STRIKE_MS;
-    for (var i = 0; i < array_length(_targets); i++) {
-        var _to = battlefx_UnitPos(_targets[i].side, _targets[i].slot);
-        if (_to == undefined) continue;
-        array_push(global.battle_fx, { type: "arrow", x1: _from.x, y1: _from.y + 20, x2: _to.x, y2: _to.y, start: current_time, land: _land });
-    }
-    monsterAnim_PlayAttack(unit_Get(SIDE_ENEMY, _enemy_slot), BATTLEFX_ARROW_GROW);
-    global.battlefx_hit_delay = _land;
+    var _monster = unit_Get(SIDE_ENEMY, _enemy_slot);
+    var _dest = battlefx_DashDestination(SIDE_ENEMY, _enemy_slot, _targets);
+    if (_monster == undefined || _dest == undefined) return;
+
+    monsterAnim_PlayAttack(_monster, BATTLEFX_DASH_OUT_MS);
+    var _hold = max(monsterAnim_AttackLengthMs(_monster), BATTLEFX_STRIKE_MS + 200);
+    battlefx_Dash(_monster, SIDE_ENEMY, _enemy_slot, _dest, _hold);
+    battlefx_GroupArrows(_dest, _targets, BATTLEFX_DASH_OUT_MS, BATTLEFX_STRIKE_MS);
+    global.battlefx_hit_delay = BATTLEFX_DASH_OUT_MS + BATTLEFX_STRIKE_MS;
 }
 
 function battlefx_EndDelay() {
@@ -421,6 +540,11 @@ function battlefx_Draw() {
                 battlefx_DrawAura(_fx, _t);
                 break;
 
+            case "ghost":
+                if (_t > _fx.until) { array_delete(global.battle_fx, i, 1); continue; }
+                battlefx_DrawGhost(_fx);
+                break;
+
             case "smoke":
                 var _sf = floor(_t / 1000 * BATTLEFX_SMOKE_FPS);
                 if (_sf >= sprite_get_number(SPR_FX_Smoke)) { array_delete(global.battle_fx, i, 1); continue; }
@@ -430,7 +554,7 @@ function battlefx_Draw() {
             case "slash":
                 var _frame = floor(_t / 1000 * BATTLEFX_SLASH_FPS);
                 if (_frame >= sprite_get_number(SPR_FX_Slash)) { array_delete(global.battle_fx, i, 1); continue; }
-                draw_sprite_ext(SPR_FX_Slash, _frame, _fx.x, _fx.y, BATTLEFX_SLASH_SCALE, BATTLEFX_SLASH_SCALE, 0, c_white, 1);
+                draw_sprite_ext(SPR_FX_Slash, _frame, _fx.x, _fx.y, BATTLEFX_SLASH_SCALE * _fx.flip, BATTLEFX_SLASH_SCALE, 0, c_white, 1);
                 break;
         }
     }

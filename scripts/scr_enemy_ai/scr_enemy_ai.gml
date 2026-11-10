@@ -259,9 +259,10 @@ function monsterAbility_ScoreAttackTarget(_slot, _damage) {
     return 40 * (_damage / _hp) + _threat * 4;
 }
 
-/// The player monster an enemy should attack for _damage (-1 when the player has none)
+/// The player monster an enemy should attack for _damage (-1 when the player has none).
+/// Back-row monsters guarded by a frontline are skipped.
 function monsterAbility_PickAttackTarget(_damage) {
-    var _slots = unit_GetAliveSlots(SIDE_PLAYER);
+    var _slots = unit_GetDamageableSlots(SIDE_PLAYER);
     var _best = -1;
     var _best_score = -infinity;
     for (var i = 0; i < array_length(_slots); i++) {

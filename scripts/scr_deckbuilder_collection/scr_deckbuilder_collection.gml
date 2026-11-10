@@ -354,9 +354,11 @@ function SCR_DBD_FormatCardTags(_card) {
     return _text;
 }
 
+/// Battle preview: a monster on the board shows its column attack (monster + weapon + buffs),
+/// plus "ATK buff" when it is buffed. _column is its board column (-1 when it is not on the board).
 function SCR_DBD_AppendAttackBuffSummaryLines(_lines, _card, _column = -1) {
     var _buff = card_GetAttackBuff(_card);
-    if (_buff <= 0) return _lines;
+    if (_buff <= 0 && _column < 0) return _lines;
 
     var _filtered = [];
     for (var i = 0; i < array_length(_lines); i++) {
@@ -367,8 +369,9 @@ function SCR_DBD_AppendAttackBuffSummaryLines(_lines, _card, _column = -1) {
         array_push(_filtered, _line);
     }
 
-    array_push(_filtered, "ATK buff: +" + string(_buff));
-    array_push(_filtered, "Attack: " + string(battle_GetPlayerMonsterSummaryAttack(_card, _column)));
+    if (_buff > 0) array_push(_filtered, "ATK buff: +" + string(_buff));
+    var _total = battle_GetPlayerMonsterSummaryAttack(_card, _column);
+    if (_total > 0) array_push(_filtered, "Attack: " + string(_total));
     return _filtered;
 }
 
@@ -387,14 +390,16 @@ function SCR_DBD_GetCardSummaryLines(_card) {
         if (variable_struct_exists(_card, "health")) {
             array_push(_lines, "HP: " + string(_card.health));
         }
-        if (card_IsSpiritType(_card)) {
-            var _spirit_atk = battle_GetMonsterStrikeAmount(_card);
-            if (_spirit_atk > 0) array_push(_lines, "Attack: " + string(_spirit_atk));
-            if (variable_struct_exists(_card, "owned")) {
-                array_push(_lines, "Owned: " + string(_card.owned));
-            }
+        // the monster's own attack; it adds to its weapon and action cards
+        var _monster_atk = battle_GetMonsterStrikeAmount(_card);
+        if (_monster_atk > 0) array_push(_lines, "Attack: " + string(_monster_atk));
+        if (card_IsSpiritType(_card) && variable_struct_exists(_card, "owned")) {
+            array_push(_lines, "Owned: " + string(_card.owned));
         }
     }
+
+    var _keywords = card_GetKeywordText(_card);
+    if (_keywords != "") array_push(_lines, _keywords);
 
     if (_card.type == "weapon") {
         var _atk = variable_struct_exists(_card, "attack") ? _card.attack : 0;
@@ -555,9 +560,29 @@ function SCR_DBD_ShouldShowPreviewTags(_card) {
     return true;
 }
 
-function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_lines, _title_color = c_white, _condition_lines = undefined, _ability_before_summary = false) {
+/// One preview line. A line starting with "## " is a sub-heading (no bullet, heading colour).
+/// Bulleted lines that wrap keep their text lined up after the bullet. Returns the height it took.
+function SCR_DBD_DrawPreviewLine(_x, _y, _line, _prefix, _color, _line_h, _w) {
+    if (string_copy(_line, 1, 3) == "## ") {
+        var _head = string_delete(_line, 1, 3);
+        draw_set_color(make_color_rgb(240, 200, 120));
+        draw_text_ext(_x, _y + 2, _head, _line_h, _w);
+        return string_height_ext(_head, _line_h, _w) + 2;
+    }
+    draw_set_color(_color);
+    var _indent = (_prefix != "") ? string_width(_prefix) : 0;
+    if (_indent > 0) draw_text(_x, _y, _prefix);
+    draw_text_ext(_x + _indent, _y, _line, _line_h, _w - _indent);
+    return string_height_ext(_line, _line_h, _w - _indent);
+}
+
+/// Card / enemy details box. Everything is clipped to the box; when it is taller than the box,
+/// _scroll (pixels) moves it up and a scroll bar shows on the right.
+/// Returns how far it can scroll (0 when everything fits).
+function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_lines, _title_color = c_white, _condition_lines = undefined, _ability_before_summary = false, _scroll = 0) {
     var _pad = 12;
     var _line_h = 16;
+    var _bar_w = 8;   // room kept for the scroll bar
 
     draw_set_alpha(0.72);
     draw_set_color(make_color_rgb(28, 28, 32));
@@ -567,9 +592,12 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
     draw_set_color(make_color_rgb(150, 150, 160));
     draw_rectangle(_panel.x, _panel.y, _panel.x + _panel.w, _panel.y + _panel.h, true);
 
+    var _prev_scissor = gpu_get_scissor();
+    gpu_set_scissor(_panel.x + 1, _panel.y + 1, _panel.w - 1, _panel.h - 1);
+
     var _cx = _panel.x + _pad;
-    var _cy = _panel.y + _pad;
-    var _inner_w = _panel.w - (_pad * 2);
+    var _cy = _panel.y + _pad - _scroll;
+    var _inner_w = _panel.w - (_pad * 2) - _bar_w;
 
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
@@ -601,11 +629,8 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
     draw_set_color(c_yellow);
     draw_text(_side_x, _side_start_y, _side_title);
     var _side_y = _side_start_y + _line_h + 2;
-    draw_set_color(_side_color);
     for (var s = 0; s < array_length(_side_lines); s++) {
-        var _side_line = _side_prefix + _side_lines[s];
-        draw_text_ext(_side_x, _side_y, _side_line, _line_h, _side_w);
-        _side_y += string_height_ext(_side_line, _line_h, _side_w) + 3;
+        _side_y += SCR_DBD_DrawPreviewLine(_side_x, _side_y, _side_lines[s], _side_prefix, _side_color, _line_h, _side_w) + 3;
     }
 
     _cy = max(_cy + _img_h, _side_y) + 14;
@@ -623,11 +648,8 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
     draw_text(_cx, _cy, _full_title);
     _cy += _line_h + 4;
 
-    draw_set_color(_full_color);
     for (var t = 0; t < array_length(_full_lines); t++) {
-        var _full_line = _full_prefix + _full_lines[t];
-        draw_text_ext(_cx, _cy, _full_line, _line_h, _inner_w);
-        _cy += string_height_ext(_full_line, _line_h, _inner_w) + 4;
+        _cy += SCR_DBD_DrawPreviewLine(_cx, _cy, _full_lines[t], _full_prefix, _full_color, _line_h, _inner_w) + 4;
     }
 
     if (_condition_lines != undefined) {
@@ -648,9 +670,27 @@ function SCR_DBD_DrawCardPreviewPanel(_panel, _card, _summary_lines, _ability_li
         }
     }
 
+    gpu_set_scissor(_prev_scissor);
+
+    // taller than the box: scroll bar on the right edge
+    var _content_h = (_cy + _scroll) - _panel.y + _pad;
+    var _max_scroll = max(0, ceil(_content_h - _panel.h));
+    if (_max_scroll > 0) {
+        var _track_x = _panel.x + _panel.w - _bar_w - 2;
+        var _track_top = _panel.y + 6;
+        var _track_h = _panel.h - 12;
+        var _thumb_h = max(18, floor(_track_h * _panel.h / _content_h));
+        var _thumb_y = _track_top + floor((_track_h - _thumb_h) * clamp(_scroll / _max_scroll, 0, 1));
+        draw_set_color(make_color_rgb(55, 55, 62));
+        draw_rectangle(_track_x, _track_top, _track_x + 4, _track_top + _track_h, false);
+        draw_set_color(make_color_rgb(170, 170, 180));
+        draw_rectangle(_track_x, _thumb_y, _track_x + 4, _thumb_y + _thumb_h, false);
+    }
+
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
     draw_set_color(c_white);
+    return _max_scroll;
 }
 
 function SCR_DBD_DrawHoverPreview() {

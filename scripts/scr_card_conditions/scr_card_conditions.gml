@@ -674,7 +674,7 @@ function conditions_summon_Step() {
     if (!mouse_check_button_pressed(mb_left)) return;
 
     if (conditions_summon_mode == "pick_slot") {
-        var _slot = conditions_GetMonsterSlotAt(mouse_x, mouse_y);
+        var _slot = conditions_GetMonsterSlotAt(mouse_x, mouse_y, false);
         if (_slot >= 0) {
             if (conditions_CompleteSummonOnSlot(_slot)) battle_SkipFollowUpInputThisFrame();
         }
@@ -682,7 +682,7 @@ function conditions_summon_Step() {
     }
 
     if (conditions_summon_mode == "sacrifice_monster" || conditions_summon_mode == "sacrifice_tag" || conditions_summon_mode == "sacrifice_id") {
-        var _sac_slot = conditions_GetMonsterSlotAt(mouse_x, mouse_y);
+        var _sac_slot = conditions_GetMonsterSlotAt(mouse_x, mouse_y, true);
         if (_sac_slot >= 0) {
             if (conditions_TryPickSacrificeSlot(_sac_slot)) {
                 battle_SkipFollowUpInputThisFrame();
@@ -714,19 +714,14 @@ function conditions_summon_Step() {
     }
 }
 
-function conditions_GetMonsterSlotAt(_mx, _my) {
+/// Your spot under a point: _occupied = the top-most unit there (sacrifices), else an empty spot (placing)
+function conditions_GetMonsterSlotAt(_mx, _my, _occupied) {
     var _board = instance_find(OBJ_BoardManager, 0);
     if (_board == noone) return -1;
 
-    for (var i = 0; i < array_length(_board.player_monster_slots); i++) {
-        var _slot = _board.player_monster_slots[i];
-        if (!_slot.visible) continue;
-        if (_mx >= _slot.x && _mx <= _slot.x + _slot.w &&
-            _my >= _slot.y && _my <= _slot.y + _slot.h) {
-            return i;
-        }
-    }
-    return -1;
+    var _slot = -1;
+    with (_board) _slot = SCR_Board_MonsterSlotAt(_mx, _my, _occupied);
+    return _slot;
 }
 
 function conditions_summon_Draw() {

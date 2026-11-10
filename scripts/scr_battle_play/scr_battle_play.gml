@@ -8,7 +8,8 @@
 // Card placed on the board
 // ---------------------------------------------------------------------------
 
-function battle_NotifyCardPlaced(_slot, _card) {
+/// _defer_on_play: a monster summoned by another card plays its abilities after that card is done
+function battle_NotifyCardPlaced(_slot, _card, _defer_on_play = false) {
     if (_slot == undefined || _card == undefined) return;
 
     var _bm = instance_find(OBJ_BattleManager, 0);
@@ -18,7 +19,12 @@ function battle_NotifyCardPlaced(_slot, _card) {
         switch (_slot.type) {
             case "monster":
                 battle_InitBoardMonsterLifespan(_card);
-                battle_OnBoardCardPlayed("monster", _slot.index, _card);
+                if (_defer_on_play) {
+                    battle_EnsureCardHealth(_card);
+                    array_push(battle_deferred_on_play, { slot: _slot.index, card: _card });
+                } else {
+                    battle_OnBoardCardPlayed("monster", _slot.index, _card);
+                }
                 break;
             case "action":
                 battle_OnActionCardPlayed(_card);
@@ -62,6 +68,19 @@ function battle_GetBoardSourceCard(_kind, _slot_index) {
     return _slot.card;
 }
 
+/// Monsters summoned by another card (summon): they count as played once that card's play is done.
+/// Runs from the battle Step while nothing is being targeted. True when one ran.
+function battle_RunDeferredOnPlay() {
+    if (array_length(battle_deferred_on_play) <= 0) return false;
+
+    var _next = battle_deferred_on_play[0];
+    array_delete(battle_deferred_on_play, 0, 1);
+    if (unit_Get(SIDE_PLAYER, _next.slot) != _next.card) return false;   // it already left the board
+
+    battle_OnBoardCardPlayed("monster", _next.slot, _next.card);
+    return true;
+}
+
 function battle_BeginOnPlayTargeting(_kind, _slot_index, _start_trait_index = 0) {
     var _card = battle_GetBoardSourceCard(_kind, _slot_index);
     if (_card == undefined) return;
@@ -69,6 +88,7 @@ function battle_BeginOnPlayTargeting(_kind, _slot_index, _start_trait_index = 0)
     var _traits = trait_GetFromCard(_card);
     for (var i = _start_trait_index; i < array_length(_traits); i++) {
         if (!trait_OnPlayNeedsTarget(_traits[i])) continue;
+        if (trait_GetOnPlayPick(_traits[i]) == "spot" && !battle_CanSummon(_traits[i])) continue;   // nowhere to summon
 
         pending_trait_source = _kind + "_on_play";
         if (_kind == "weapon") pending_weapon_slot = _slot_index;
@@ -193,7 +213,40 @@ function battle_PendingAttackerCanAttack() {
     return _attacker != undefined && !status_IsShrouded(_attacker);
 }
 
-/// Action attack / attack_all: damage = trait amount + the attacking monster's attack buff.
+/// Damage of the attack action card your monster in _column is about to use (for its ATK label), or -1:
+///   - an action attack is choosing its attacker: every monster that could attack shows it
+///   - the attacker is chosen: only that monster
+///   - you are dragging an attack action card onto this monster
+function battle_GetPreviewActionAttack(_column) {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    if (_bm != noone && _bm.pending_trait_source == "action") {
+        var _amount = -1;
+        with (_bm) {
+            var _info = battle_GetPendingTraitInfo();
+            if (_info != undefined && _info.trait.effect == "attack") {
+                if (target_mode == "pick_player_monster" && !battle_IsPlayerMonsterSlotShrouded(_column)) _amount = _info.trait.amount;
+                if (target_mode == "pick_enemy" && pending_player_slot == _column) _amount = _info.trait.amount;
+            }
+        }
+        if (_amount >= 0) return _amount;
+    }
+
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board != noone && _board.is_dragging && _board.drag_card != undefined && _board.drag_card.type == "action") {
+        var _target = undefined;
+        with (_board) _target = SCR_Board_GetDropTarget(mouse_x, mouse_y, drag_card);
+        if (_target != undefined && _target.monster == _column) {
+            var _traits = trait_GetFromCard(_board.drag_card);
+            for (var i = 0; i < array_length(_traits); i++) {
+                if (_traits[i].effect == "attack") return _traits[i].amount;
+            }
+        }
+    }
+    return -1;
+}
+
+/// Action attack / attack_all: damage = the action's amount + the attacking monster's attack
+/// + its weapon's attack + its attack buffs (battle_ColumnActionStrikeTotal).
 /// _type "attack" hits _targets; "attack_all" hits every enemy.
 function battle_ExecuteActionAttack(_type, _targets = []) {
     if (!battle_CanUseActionTrait(pending_action_trait_index)) return false;
@@ -202,10 +255,12 @@ function battle_ExecuteActionAttack(_type, _targets = []) {
     var _info = battle_GetPendingTraitInfo();
     if (_info == undefined || _info.trait.type != _type) return false;
 
-    var _attacker = unit_Get(SIDE_PLAYER, pending_player_slot);
-    var _total = _info.trait.amount + card_GetAttackBuff(_attacker);
+    var _total = battle_ColumnActionStrikeTotal(battle_GetColumnStrikeParts(pending_player_slot), _info.trait.amount);
     if (_type == "attack_all") _targets = targets_All(SIDE_ENEMY);
-    if (!card_Damage(_info.source, _targets, _total)) return false;
+    battlefx_PlayerAttack(pending_player_slot, _targets);   // the attacking monster runs up; the blow lands when it arrives
+    var _hit = card_Damage(_info.source, _targets, _total);
+    battlefx_EndDelay();
+    if (!_hit) return false;
 
     battle_ConsumeActionTrait(_info.index);
     return true;
@@ -215,10 +270,11 @@ function battle_ExecuteActionAttack(_type, _targets = []) {
 // Target modes
 // ---------------------------------------------------------------------------
 
-/// Target mode for a pick ("ally", "any", "enemy", "attacker"). The named modes keep their
+/// Target mode for a pick ("ally", "any", "enemy", "attacker", "spot"). The named modes keep their
 /// own on-screen prompts; any other effect uses the generic pick_*_effect modes.
 function battle_GetPickMode(_pick, _type) {
     switch (_pick) {
+        case "spot": return "pick_free_spot";
         case "attacker": return "pick_player_monster";
         case "ally":
             if (_type == "heal") return "pick_player_heal";
@@ -361,6 +417,7 @@ function battle_TargetingContinueAfterAction(_last_trait_index) {
 
         if (!trait_ActionNeedsTargeting(_trait)) continue;
         if (trait_ActionNeedsOwnMonster(_trait) && unit_Count(SIDE_PLAYER) <= 0) continue;
+        if (trait_GetActionPick(_trait) == "spot" && !battle_CanSummon(_trait)) continue;   // nowhere to summon
         if (trait_GetActionPick(_trait) == "any" && !battle_HasAnyBuffTarget()) continue;
 
         battle_BeginActionTargeting(i, _trait);

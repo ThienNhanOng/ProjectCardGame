@@ -42,7 +42,7 @@ function SCR_Battle_Init() {
     trait_pending_add_cost_entries = [];
     trait_chain_deck_id_costs = {};
 
-    battle_InitZoneOwners();
+    battle_deferred_on_play = [];   // summoned monsters waiting to play their abilities: { slot, card }
 
     battle_PrepareBoardCards();
 
@@ -85,6 +85,7 @@ function SCR_Battle_Step() {
     if (battle_IsPlayerDefeated()) return;
 
     battle_EnemyLog_Step();
+    battle_PreviewScroll_Step();
 
     var _bm = instance_find(OBJ_BattleManager, 0);
     var _deck = instance_find(OBJ_Deck, 0);
@@ -118,6 +119,8 @@ function SCR_Battle_Step() {
     if (worldmap_IsBattleWon()) return;   // battle over: no more card play / end turn
 
     if (battle_IsPlayerPhase()) {
+        // a monster summoned by another card plays its abilities once that card is done
+        if (!battle_IsTargeting() && battle_RunDeferredOnPlay()) return;
         if (!battle_ConsumeSkipFollowUpInput()) {
             SCR_Battle_Targeting_Step();
             if (!battle_IsTargeting()) {

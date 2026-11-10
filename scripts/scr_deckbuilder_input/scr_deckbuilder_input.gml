@@ -1,5 +1,15 @@
 /// @desc OBJ_DeckBuilder Step — clicks, scrolling, READY button
 
+/// Esc: the home screen (save / load / exit). Runs before the search box, so an Esc that closes
+/// the search box doesn't also open the menu. The deck as it is now is kept.
+/// Returns true when it left the room (skip the rest of the step).
+function SCR_DBS_HandleMenuKey() {
+    if (search_focused || !keyboard_check_pressed(vk_escape)) return false;
+    player_deck_PersistSelectedDeck(id);
+    save_OpenHomeMenu();
+    return true;
+}
+
 function SCR_DBS_ApplyCollectionFilters() {
     current_page = 0;
     SCR_DBC_LoadPage();

@@ -156,7 +156,8 @@ Test sets (`MonsterTestset`, `TestActionset`, `TestWeaponset`) remain in the pro
 
 | `costs` | Any playable card | Array of cost entries (resources + tributes combined). See [Ability — card cost & tributes](#ability--card-cost--tributes) |
 
-| `attack` | Weapon, spirit | Weapon strike value; spirit innate single-target strike (optional) |
+| `attack` | Monster, weapon, spirit | Monster / spirit: its own attack (default `0`). Weapon: its strike value. See [Damage](#damage) |
+| `keywords` | Monster, spirit, enemy | Passive keywords, e.g. `["frontline"]`. See [Keywords](#keywords) |
 
 | `equip` | Weapon | `true` for equippable weapons |
 
@@ -600,6 +601,8 @@ Omit the `conditions` entry (or use `"ability": []`) for a spirit with no summon
 
 **Spirit combat:** Spirits can strike without a weapon (`attack` field or an `attack` trait). Click the spirit or its column to attack. If a weapon is in the same column, weapon attack is **added** to the spirit strike, plus any `attack_buff` on the monster. `attack_all` on spirit or weapon uses the same stacking rules.
 
+**Monster combat:** an ordinary monster can only attack with a **weapon** equipped or through an **action card**, even when it has an `attack` value. Its `attack` is then added to the damage — see [Damage](#damage).
+
 
 
 ---
@@ -658,25 +661,32 @@ Weapons sit in the weapon slot below a monster in the same column.
 
 
 
-### Column attack total (monsters in battle)
+### Damage
 
+| Attack | Damage |
+|--------|--------|
+| Weapon strike (click the column) | monster `attack` + weapon `attack` + attack buffs |
+| Action card `attack` / `attack_all` | action `amount` + monster `attack` + weapon `attack` (if equipped) + attack buffs |
+| Spirit strike (no weapon needed) | spirit `attack` + weapon `attack` (if equipped) + attack buffs |
 
+Who can attack:
 
-When a buffed player monster is on the board, preview **Summary** shows:
+- An ordinary monster needs a **weapon** (column strike) or an **action card**. Its own `attack` does nothing by itself.
+- Extra-deck **spirits** can strike from their column without a weapon.
 
+Example: a monster with `"attack": 3`, a 3-attack weapon and a +2 buff strikes for **8**; with Basic Strike (4) it hits for **12**.
 
+On the board, a monster preview **Summary** shows its column strike (and the buff when it has one):
 
 ```
 
 ATK buff: +2
 
-Attack: 7
+Attack: 8
 
 ```
 
-
-
-`Attack` is the full column strike: **spirit/monster base strike + equipped weapon + attack buff**.
+`ATK` under the card on the field shows once the column can strike (weapon equipped, or a spirit).
 
 
 
@@ -893,6 +903,7 @@ wear off after `turns`, and enemy `destroy` removes `amount` random monsters.
 
 | `damage` | Direct damage to the units its target rule picks — usable on play, by action cards and by enemies (unlike `attack`, which is a monster's strike) | `{ "type": "damage", "amount": 2, "target": "all_enemies" }` | `scr_card_effects` |
 
+| `summon` | Put a monster card (by id) onto a **free spot you pick**. See [Summoning (player)](#summoning-player) | `{ "type": "summon", "id": 6 }` | `scr_card_effects` |
 | `add` | Add card id to **hand** | `{ "type": "add", "id": 7 }` | `scr_card_effects` |
 
 | `add_deck` | Add card id to **main deck** | `{ "type": "add_deck", "id": 1 }` | `scr_card_effects` |
@@ -907,7 +918,7 @@ wear off after `turns`, and enemy `destroy` removes `amount` random monsters.
 
 | `add_hand_with_cost` | Tag search → pick card → **hand** + apply cost | `{ "type": "add_hand_with_cost", "cost": 3 }` | `scr_card_search_picker` |
 
-| `openzone` | Unlock hidden monster slots 3–4 while source is on board | `{ "type": "openzone", "amount": 1 }` | `scr_card_effects` |
+| `openzone` | Open closed back-row spots (3 and 4) while the source is on board. `amount` 1 or 2 = how many. When the source leaves, its spots close and whoever stands there leaves too | `{ "type": "openzone", "amount": 1 }` | `scr_card_resources` |
 
 | `add_counter` | +current resources this turn | `{ "type": "add_counter", "amount": 2 }` | `scr_trait_execute` |
 
@@ -920,6 +931,44 @@ wear off after `turns`, and enemy `destroy` removes `amount` random monsters.
 | `none` | No ability (enemies) | `{ "type": "none" }` | — |
 
 
+
+### Summoning (player)
+
+A monster (or a weapon / action card) can summon another monster straight onto your board:
+
+```json
+"ability": [
+  { "type": "summon", "id": 6 },
+  { "type": "summon", "id": 6 }
+]
+```
+
+- `id` is a card in the card pool; it must be a `monster` card (spirits only come from the extra deck). It doesn't need to be in your deck or collection, so it works for tokens.
+- One entry = one monster. List it twice to summon two.
+- When it resolves, the free spots light up ("Summon here") and you click one. Back-row spots count once `openzone` has opened them. Esc / right-click skips the rest of the card's abilities, like other picks.
+- With no free spot the summon is skipped.
+- The summoned monster counts as **played**: it gets the normal board lifespan, and its own on-play abilities (add, openzone, another summon, …) run **after** the summoning card has finished. It costs nothing.
+
+Enemies summon with `summon_enemy` instead (see [Summoning (`summon_enemy`)](#summoning-summon_enemy)).
+
+### Keywords
+
+Keywords are passive rules on a card or an enemy. They sit on the **card root**, not in `ability`, so silence does not remove them.
+
+```json
+"keywords": ["frontline"]
+```
+
+The shorthand `"frontline": true` / `"tag_in": true` works too. Spelling is forgiving (`"Tag-in"` = `tag_in`).
+
+| Keyword | Who | What it does |
+|---------|-----|--------------|
+| `frontline` | Player monsters, spirits, enemies | While it stands, every unit in the rows **behind** it (further from the other side) takes no damage (attacks, `attack_all`, `damage`), and those units can't be picked for damage. Units in its own row and in front of it are not covered. Destroy, silence and shroud are not blocked. Once it dies, the rows behind can be hit again |
+| `tag_in` | Enemies | When it is next in the wave queue and a spot is free, it jumps in **at once** instead of waiting for the enemy turn |
+
+Rows: your spots **0–2** are the front row (3 in a line), **3–4** the back row (2, opened by `openzone`, further left). Enemies have three rows, counted from the one facing you: **5–7** first row (3, summons only), **3–4** second row (2), **0–2** third row (3, furthest back). The enemies stand well back, leaving the middle of the field open. Positions are in `scripts/scr_battle_layout` (`battle_LayoutPlayerFeet`, `battle_LayoutEnemyFeet`): everyone stands on the grass (y ≥ 300), units may overlap, and the one under the mouse is drawn on top, slightly bigger.
+
+Keywords show above the unit's name on the field and in the hover preview.
 
 ### Ability — card cost & tributes
 
@@ -1328,6 +1377,29 @@ During summon the player clicks matching hand cards to discard them. This step c
 | `icon` | Optional — still picture for the hover preview (e.g. `"SPR_GoblinIcon"`); falls back to `sprite`, then the placeholder |
 
 | `arrival` | Optional — how it enters a spot: `"side"` (hops in from the side), `"drop"` (falls from above). Leave it out for a random pick each time. Works on cards too |
+| `keywords` | Optional — e.g. `["frontline"]`, `["tag_in"]`. See [Keywords](#keywords) |
+
+### Wave queue & reinforcements
+
+- Enemy spots: **third row 0–2** (furthest back, 0 is the middle), **second row 3–4**, **first row 5–7** (nearest you). The wave only uses the first `active_slots` spots, so the back row fills first, then the second row. The first row is kept for summons.
+- The battle starts with every wave spot filled from the `wave` list, in order (wave[0] → spot 0, …).
+- When an enemy dies, its spot **stays empty**. The next enemy in the queue jumps in at the **start of the next enemy turn** and acts in that turn.
+- Exception: an enemy with the `tag_in` keyword jumps into the free spot **at once** when it is next in the queue.
+- The battle is won only when the queue is empty and no enemy is left.
+
+### Summoning (`summon_enemy`)
+
+```json
+{ "type": "summon_enemy", "enemyID": 3, "to": "board" }
+{ "type": "summon_enemy", "enemyID": 3, "to": "queue", "collection": "enemyCollection01" }
+```
+
+| `to` | Where the summoned enemy goes |
+|------|-------------------------------|
+| `"board"` (default) | Straight onto the field: a free **first-row** spot (in front, kept for summons), else a free wave spot. When every spot is taken it goes to the front of the queue instead |
+| `"queue"` | The front of the wave queue: it jumps in at the next enemy turn (at once if it has `tag_in`) |
+
+`collection` defaults to the summoner's own collection.
 
 
 
@@ -1415,7 +1487,7 @@ Defines which enemies spawn and how many enemy slots are active.
 
 | `battle` | Battle id label (debug / UI) |
 
-| `active_slots` | How many enemy slots are visible (max 5) |
+| `active_slots` | How many wave spots the battle uses (1–5): the back row's 3 first, then the second row's 2. The first row (3 more, nearest you) is only for summons |
 
 | `wave` | Spawn queue — each entry references a loaded monster set |
 
@@ -1502,6 +1574,31 @@ New status effects (poison, burn, regen …): add a case to each switch in **`sc
 ---
 
 
+
+## Home screen, saves and accounts
+
+The game opens on **Room_home** (`scripts/scr_home_menu`): Play, Quick Save, Quick Load, Save and Exit, Exit, plus an account switcher. On the world map (**Esc** or the **Menu** button) and in the deck builder (**Esc**, with the deck you are building kept) it opens again, and Play then says **Continue**. A save made before the deck is ready (fewer than 8 cards, or no map reached yet) loads back into the deck builder.
+
+| Button | What it does |
+|--------|--------------|
+| Play | No game running: pick a slot — load a saved one, or start a new game in an empty slot 2–4 |
+| Continue | Back into the running game |
+| Quick Save | Saves into the slot you are playing (from the autosave: the first empty manual slot, else slot 2) |
+| Quick Load | Loads the account's newest save |
+| Save and Exit | Quick Save, then closes the game |
+| Exit | Closes the game without saving |
+
+**Slots:** slot 1 is the **autosave** (written every time you arrive on a world map: after a battle, after the deck builder, on a new map); slots 2–4 are manual. A save holds the card collection, main + extra deck, max health and world map progress (map, cleared fights, rewards taken, where you stand, side branches).
+
+**Where saves live** (`scripts/scr_save_system`): GameMaker's save folder for the game (`%LOCALAPPDATA%\ProjectCardGame` on Windows). Nothing ships with the game; each account's folder is created the first time it is used:
+
+```
+saves/accounts.json              last used account
+saves/<account>/profile.json
+saves/<account>/slot1.json ... slot4.json
+```
+
+**Accounts:** `player` (normal), `testaccountsave` (saves normally in its own folder), `testaccountnosave` (never writes anything — every Play / Quick Load starts from the very beginning). Switch with the button next to the account name.
 
 ## Load order at game start
 

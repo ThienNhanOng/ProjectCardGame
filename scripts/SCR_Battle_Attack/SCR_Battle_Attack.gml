@@ -1,5 +1,7 @@
 /// @desc Player column attacks — a monster column (monster + weapon below it) strikes once per turn
-/// (weapons can grant more strikes). Runs on OBJ_BattleManager. Damage goes through card_Damage.
+/// (weapons can grant more strikes). Damage = monster attack + weapon attack + buffs (scr_combat).
+/// Only armed columns strike: a weapon is equipped, or the monster is an extra-deck spirit.
+/// Runs on OBJ_BattleManager. Damage goes through card_Damage.
 
 function battle_GetColumnAttackRecursion(_column) {
     var _board = instance_find(OBJ_BoardManager, 0);
@@ -41,7 +43,9 @@ function battle_CanColumnAttack(_column) {
     if (_monster == undefined) return false;
     if (status_IsShrouded(_monster)) return false;
 
+    // a monster needs a weapon to strike from its column (action cards are separate); spirits don't
     var _parts = battle_GetColumnStrikeParts(_column);
+    if (!_parts.armed) return false;
     if (_parts.weapon_attack_all > 0 || _parts.monster_attack_all > 0) return true;
     return _parts.monster_strike + _parts.weapon_strike > 0;
 }
@@ -78,7 +82,10 @@ function battle_ColumnAttackAll(_column, _amount) {
     if (!battle_CanColumnAttack(_column)) return false;
     if (_amount <= 0) return false;
 
-    var _ok = card_Damage(effect_Source(SIDE_PLAYER, _column), targets_All(SIDE_ENEMY), _amount);
+    var _targets = targets_All(SIDE_ENEMY);
+    battlefx_PlayerAttack(_column, _targets);   // runs up to the group; the blows land when it arrives
+    var _ok = card_Damage(effect_Source(SIDE_PLAYER, _column), _targets, _amount);
+    battlefx_EndDelay();
     if (_ok) battle_ConsumeColumnAttack(_column);
     return _ok;
 }
@@ -90,32 +97,20 @@ function battle_ColumnAttack(_column, _enemy_slot) {
     var _amount = battle_ColumnSingleStrikeTotal(battle_GetColumnStrikeParts(_column));
     if (_amount <= 0) return false;
 
-    var _ok = card_Damage(effect_Source(SIDE_PLAYER, _column), targets_Single(SIDE_ENEMY, _enemy_slot), _amount);
+    var _targets = targets_Single(SIDE_ENEMY, _enemy_slot);
+    battlefx_PlayerAttack(_column, _targets);   // runs up to the enemy; the blow lands when it arrives
+    var _ok = card_Damage(effect_Source(SIDE_PLAYER, _column), _targets, _amount);
+    battlefx_EndDelay();
     if (_ok) battle_ConsumeColumnAttack(_column);
     return _ok;
 }
 
-/// Column (monster or weapon card) under the mouse that can attack, or -1
+/// Column under the mouse that can attack, or -1. The weapon sits on its monster's card, so this is
+/// the top-most unit under the point (units can overlap) — when that one can't attack, nothing does.
 function battle_GetAttackColumnAt(_mx, _my) {
-    var _board = instance_find(OBJ_BoardManager, 0);
-    if (_board == noone) return -1;
-
-    for (var i = 0; i < array_length(_board.player_weapon_slots); i++) {
-        if (!unit_IsAlive(SIDE_PLAYER, i)) continue;
-        if (!battle_CanColumnAttack(i)) continue;
-
-        var _weapon_slot = _board.player_weapon_slots[i];
-        var _monster_slot = _board.player_monster_slots[i];
-
-        if (_weapon_slot.visible && _weapon_slot.occupied && _weapon_slot.card != undefined
-            && point_in_rectangle(_mx, _my, _weapon_slot.x, _weapon_slot.y, _weapon_slot.x + _weapon_slot.w, _weapon_slot.y + _weapon_slot.h)) {
-            return i;
-        }
-        if (point_in_rectangle(_mx, _my, _monster_slot.x, _monster_slot.y, _monster_slot.x + _monster_slot.w, _monster_slot.y + _monster_slot.h)) {
-            return i;
-        }
-    }
-    return -1;
+    var _column = unit_GetSlotAt(SIDE_PLAYER, _mx, _my);
+    if (_column < 0 || !battle_CanColumnAttack(_column)) return -1;
+    return _column;
 }
 
 function SCR_Battle_WeaponInput_Step() {

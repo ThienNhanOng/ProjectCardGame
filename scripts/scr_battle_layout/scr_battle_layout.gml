@@ -1,16 +1,19 @@
 /// @desc Battle screen layout: your side on the left, enemies on the right, a fixed bar at the bottom.
 ///
 ///   ┌──────────────────────────────── battlefield (background sprite) ───────────────────────────┐
-///   │  back  front                                                   front    back  (enemies)     │
-///   │  [3]   [0]                                                           goblin                 │
-///   │        [1]                     preview / prompts                     goblin                 │
-///   │  [4]   [2]                                                           goblin                 │
+///   │                         sky: prompts                                          battle log    │
+///   │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ y = 300: everyone stands below ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ │
+///   │        back front                               1st (summons)  2nd   3rd                    │
+///   │              [0]                                    [6]               [1]                    │
+///   │         [3]  [1]   (open middle, action card)       [5]        [3]    [0]                    │
+///   │         [4]  [2]                                    [7]        [4]    [2]                    │
 ///   │  ♥ health bar ──────────                                           ◆◆◆◆◆ mana              │
 ///   ├──────────────────────────────── bottom bar (never moves) ──────────────────────────────────┤
 ///   │  turn          │              hand              │  deck  extra   [ END TURN ]                │
 ///   └────────────────────────────────────────────────────────────────────────────────────────────┘
+///   (exact spots: battle_LayoutPlayerFeet / battle_LayoutEnemyFeet)
 ///
-/// Monster slots 0-2 are the front column, 3-4 the back column (the hidden zones abilities unlock).
+/// Your monster slots 0-2 are the front row, 3-4 the back row (closed until openzone opens them).
 /// Weapon slot i sits on monster slot i: weapons are dropped on the monster and show as a chip on its card.
 /// The battlefield background comes from (first found): the battle's "background" in its battleset JSON,
 /// the map JSON's "battle_background", or SPR_BattleBG_GrassPlains.
@@ -20,27 +23,67 @@
 #macro BATTLE_CARD_H 122
 #macro BATTLE_DEFAULT_BACKGROUND "SPR_BattleBG_GrassPlains"
 
-/// Centre of each of your monster spots
-function battle_LayoutPlayerSlotCentre(_index) {
-    switch (_index) {
-        case 0: return { x: 380, y: 106 };
-        case 1: return { x: 380, y: 268 };
-        case 2: return { x: 380, y: 430 };
-        case 3: return { x: 195, y: 186 };
-        case 4: return { x: 195, y: 350 };
-    }
-    return { x: 380, y: 268 };
+/// Your spots 0-2 are the front row; 3-4 are the back row (closed until openzone opens them)
+#macro PLAYER_FRONT_ROW_SLOTS 3
+
+/// Enemy spots (numbers stay the same, only where they stand matters):
+///   0-2  third row, furthest back — the wave fills these first
+///   3-4  second row — the wave fills these next
+///   5-7  first row, nearest you — kept for summons only (hidden until something is summoned there)
+#macro ENEMY_WAVE_SLOTS 5
+#macro ENEMY_SLOT_COUNT 8
+
+/// Row of a spot counted from the front (0 = the row facing the other side, higher = further back).
+/// You: 0-2 -> 0, 3-4 -> 1. Enemies: 5-7 (summons) -> 0, 3-4 -> 1, 0-2 -> 2.
+function battle_LayoutRow(_side, _index) {
+    if (_side == SIDE_PLAYER) return (_index < PLAYER_FRONT_ROW_SLOTS) ? 0 : 1;
+    if (_index >= ENEMY_WAVE_SLOTS) return 0;
+    if (_index >= 3) return 1;
+    return 2;
 }
 
-/// Where an enemy stands (feet) in each enemy spot
+// ---------------------------------------------------------------------------
+// Unit spots. Every unit stands on the grass: feet at y >= 315, so the highest pedestal's top is
+// right at y ~300. Lower on screen = nearer; units may overlap and are drawn far to near, with the
+// one under the mouse drawn last (unit_GetDepthOrder in scr_card_targeting).
+// Rows are straight lines facing the other side; each row stands in the gaps of the row next to it.
+// The enemies stand well back, leaving the middle of the field open.
+// ---------------------------------------------------------------------------
+
+#macro UNIT_HOVER_SCALE 1.1   // the unit under the mouse is drawn this much bigger, on top of the others
+
+/// Where your unit in spot _index stands (feet)
+function battle_LayoutPlayerFeet(_index) {
+    switch (_index) {
+        case 0: return { x: 440, y: 315 };   // front row
+        case 1: return { x: 440, y: 393 };
+        case 2: return { x: 440, y: 472 };
+        case 3: return { x: 250, y: 354 };   // back row
+        case 4: return { x: 250, y: 433 };
+    }
+    return { x: 440, y: 393 };
+}
+
+/// Centre of your card spot (the card's bottom edge is 10px below the feet)
+function battle_LayoutPlayerSlotCentre(_index) {
+    var _f = battle_LayoutPlayerFeet(_index);
+    return { x: _f.x, y: _f.y - (BATTLE_CARD_H / 2 - 10) };
+}
+
+/// Where an enemy stands (feet) in each enemy spot. The wave fills spots in number order, so the
+/// middle of the back row comes first; a lone enemy stands in its centre.
 function battle_LayoutEnemyFeet(_index) {
     switch (_index) {
-        // front column (0, 2) and back column (1), mirroring your side
-        case 0: return { x: 890, y: 196 };
-        case 1: return { x: 1085, y: 322 };
-        case 2: return { x: 890, y: 452 };
+        case 0: return { x: 1030, y: 390 };   // third row (back): the wave's first 3
+        case 1: return { x: 1030, y: 315 };
+        case 2: return { x: 1030, y: 465 };
+        case 3: return { x: 915, y: 352 };    // second row: the wave's next 2
+        case 4: return { x: 915, y: 428 };
+        case 5: return { x: 800, y: 390 };    // first row (front): summons only
+        case 6: return { x: 800, y: 315 };
+        case 7: return { x: 800, y: 465 };
     }
-    return { x: 890, y: 322 };
+    return { x: 915, y: 390 };
 }
 
 // ---------------------------------------------------------------------------
@@ -97,7 +140,10 @@ function battle_DrawEnemyPedestals() {
         var _slot = _board.enemy_slots[i];
         if (!_slot.visible) continue;
         var _f = battle_LayoutEnemyFeet(i);
-        battle_DrawPedestal(_f.x, _f.y, (_slot.occupied && _slot.card != undefined) ? 1 : 0.5, 1);
+        var _here = _slot.occupied && _slot.card != undefined;
+        // while it runs up to attack, its circle goes with it
+        var _o = _here ? battlefx_UnitOffset(_slot.card) : { x: 0, y: 0 };
+        battle_DrawPedestal(_f.x + _o.x, _f.y + _o.y, _here ? 1 : 0.5, 1);
     }
 }
 

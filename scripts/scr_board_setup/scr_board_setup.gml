@@ -26,8 +26,9 @@ function SCR_Board_EnemySlots() {
     enemy_y = 60;
     enemy_slot_spacing = 75;
 
+    // 0-2 back row, 3-4 second row (the wave), 5-7 first row nearest you (summons only) — scr_battle_layout
     enemy_slots = [];
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < ENEMY_SLOT_COUNT; i++) {
         // the slot box ends at the enemy's feet (scr_battle_layout)
         var _feet = battle_LayoutEnemyFeet(i);
         var _x = _feet.x - board_card_w / 2;
@@ -53,10 +54,11 @@ function SCR_Board_EnemySlots() {
 /// @description Define all slot positions
 function SCR_Board_DefineMonsterSlots() {
     var _slots = [];
-    // front column 0-2 (open), back column 3-4 (hidden zones, unlocked by abilities) — scr_battle_layout
+    // front row 0-2 (open), back row 3-4 (closed until openzone opens them) — scr_battle_layout
     for (var i = 0; i < 5; i++) {
         var _c = battle_LayoutPlayerSlotCentre(i);
-        _slots[i] = SCR_SlotFactory_CreateMonsterSlot(i, _c.x - BATTLE_CARD_W / 2, _c.y - BATTLE_CARD_H / 2, i < 3, i >= 3);
+        var _back = i >= PLAYER_FRONT_ROW_SLOTS;
+        _slots[i] = SCR_SlotFactory_CreateMonsterSlot(i, _c.x - BATTLE_CARD_W / 2, _c.y - BATTLE_CARD_H / 2, !_back, _back);
         _slots[i].w = BATTLE_CARD_W;
         _slots[i].h = BATTLE_CARD_H;
     }
@@ -65,10 +67,11 @@ function SCR_Board_DefineMonsterSlots() {
 
 function SCR_Board_DefineWeaponSlots() {
     var _slots = [];
-    // weapon slot i sits on monster slot i: you drop the weapon on the monster
+    // weapon slot i sits on monster slot i: you drop the weapon on the monster.
+    // Hidden until a monster stands there (SCR_Board_UpdateWeaponSlotAvailability).
     for (var i = 0; i < 5; i++) {
         var _c = battle_LayoutPlayerSlotCentre(i);
-        _slots[i] = SCR_SlotFactory_CreateWeaponSlot(i, _c.x - BATTLE_CARD_W / 2, _c.y - BATTLE_CARD_H / 2, i < 3, i >= 3);
+        _slots[i] = SCR_SlotFactory_CreateWeaponSlot(i, _c.x - BATTLE_CARD_W / 2, _c.y - BATTLE_CARD_H / 2, false, true);
         _slots[i].w = BATTLE_CARD_W;
         _slots[i].h = BATTLE_CARD_H;
     }
@@ -76,8 +79,9 @@ function SCR_Board_DefineWeaponSlots() {
 }
 
 function SCR_Board_DefineActionSlot() {
-    // only shows while an action card is resolving; you drop actions on a monster
-    return SCR_SlotFactory_CreateActionSlot(604, 390);
+    // only shows while an action card is resolving; you drop actions on a monster.
+    // It sits low in the open middle of the field, its bottom edge at y 525 (just above the hand).
+    return SCR_SlotFactory_CreateActionSlot(590, 525 - 101);
 }
 
 function SCR_SlotFactory_CreateMonsterSlot(_index, _x, _y, _visible, _locked) {
@@ -92,7 +96,8 @@ function SCR_SlotFactory_CreateMonsterSlot(_index, _x, _y, _visible, _locked) {
         w        : 73,
         h        : 101,
         visible  : _visible,
-        locked   : _locked,  // ← CRITICAL
+        locked   : _locked,  // closed back-row spot: no cards can go here
+        opened_by: -1,       // back row: the column whose openzone opened this spot (-1 = closed / front row)
         hovered  : false,
         sprite   : SPR_MonsterSlot
     };

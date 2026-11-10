@@ -294,6 +294,12 @@ function worldmap_NodePlayerStep(_inst) {
         return;
     }
 
+    // Esc: the home screen (save / load / exit)
+    if (keyboard_check_pressed(vk_escape)) {
+        save_OpenHomeMenu();
+        return;
+    }
+
     // WASD / arrow keys
     var _dx = (keyboard_check_pressed(ord("D")) || keyboard_check_pressed(vk_right))
         - (keyboard_check_pressed(ord("A")) || keyboard_check_pressed(vk_left));
@@ -308,7 +314,7 @@ function worldmap_NodePlayerStep(_inst) {
     }
 
     // mouse: clicking a node that would start something asks first; done nodes are just travelled to
-    if (mouse_check_button_pressed(mb_left) && !worldmap_IsMouseOverCollectionButton()) {
+    if (mouse_check_button_pressed(mb_left) && !worldmap_IsMouseOverCollectionButton() && !worldmap_IsMouseOverMenuButton()) {
         var _clicked = worldmap_NodeAtPoint(mouse_x, mouse_y, true);
         if (_clicked < 0) return;
         if (worldmap_NodeClickWouldStart(_clicked)) {

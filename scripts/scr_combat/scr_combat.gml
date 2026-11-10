@@ -8,9 +8,10 @@
 // ---------------------------------------------------------------------------
 
 /// Deal damage to one unit (or to the player when _slot is UNIT_HERO on the player side).
+/// Back-row units guarded by a frontline take nothing (scr_card_targeting).
 /// Player monsters that die pass leftover damage to the player (spirits never overflow).
-/// Enemy monsters that die are replaced from the wave queue.
 function combat_DamageUnit(_side, _slot, _amount) {
+    if (unit_IsGuarded(_side, _slot)) return false;
     if (_amount > 0) battlefx_Hit(_side, _slot);   // sword swing + blink on the target
 
     if (_side == SIDE_PLAYER && _slot == UNIT_HERO) {
@@ -44,7 +45,8 @@ function combat_DamageUnit(_side, _slot, _amount) {
     return true;
 }
 
-/// Remove a unit from the board (death / destroy / sacrifice / expiry).
+/// Remove a unit from the board (death / destroy / sacrifice / expiry / its back-row spot closing).
+/// An enemy's spot stays empty until the next enemy turn, unless the next enemy in the queue has tag_in.
 function combat_RemoveUnit(_side, _slot) {
     var _card = unit_Get(_side, _slot);
     if (_card == undefined) return false;
@@ -57,14 +59,17 @@ function combat_RemoveUnit(_side, _slot) {
         var _eslot = _board.enemy_slots[_slot];
         _eslot.occupied = false;
         _eslot.card = undefined;
-        global.battlefx_spawn_delay = BATTLEFX_REPLACE_DELAY;   // the next enemy waits for the bones to land
+        global.battlefx_spawn_delay = BATTLEFX_REPLACE_DELAY + global.battlefx_hit_delay;   // a tag_in enemy waits for the blow and the bones
         with (_mm) {
-            monster_SpawnIntoSlot(_board, _slot);
+            monster_OnSlotEmptied(_board, _slot);
+            monster_TagInFreeSlots(_board, _slot);
             monster_CheckVictory(_board);
         }
         global.battlefx_spawn_delay = -1;
         return true;
     }
+
+    battle_CloseBackRowSpotsOf(_slot);   // back-row spots this monster opened close, and whoever stands there leaves
 
     var _monster_slot = _board.player_monster_slots[_slot];
 
@@ -79,7 +84,6 @@ function combat_RemoveUnit(_side, _slot) {
     var _bm = instance_find(OBJ_BattleManager, 0);
     if (_bm != noone) {
         with (_bm) {
-            battle_CloseZonesOwnedByMonster(_slot);
             battle_ClearResourceEffectsFromSlot(_slot);
             if (_slot == pending_player_slot) battle_CancelTargeting();
             if (_slot < array_length(weapon_attacks_used)) {
@@ -127,28 +131,25 @@ function card_GetAttackBuff(_card) {
     return max(0, floor(_card.attack_buff));
 }
 
+/// Attack of a card on its own: enemies their attack (buffs included), weapons their strike,
+/// your monsters their own attack + buffs (no weapon — see battle_GetPlayerMonsterSummaryAttack for the column)
 function card_GetSummaryTotalAttack(_card) {
     if (_card == undefined) return 0;
 
-    if (variable_struct_exists(_card, "attack")) {
-        return max(0, floor(_card.attack));
-    }
-
-    if (variable_struct_exists(_card, "base_attack")) {
+    if (variable_struct_exists(_card, "base_attack")) {   // enemy
+        if (variable_struct_exists(_card, "attack")) return max(0, floor(_card.attack));
         return max(0, floor(_card.base_attack)) + card_GetAttackBuff(_card);
     }
 
-    if (card_IsSpiritType(_card)) {
-        return battle_GetMonsterStrikeAmount(_card);
-    }
-
-    return card_GetAttackBuff(_card);
+    if (_card.type == "weapon") return weapon_GetAttackAmount(_card);
+    return battle_GetMonsterStrikeAmount(_card);
 }
 
+/// ATK number shown on the battlefield. Your monsters show their column strike (monster + weapon + buffs).
 function card_GetBoardAttackDisplay(_card, _column = -1) {
     if (_card == undefined) return 0;
 
-    if (variable_struct_exists(_card, "base_attack")) {
+    if (variable_struct_exists(_card, "base_attack")) {   // enemy
         var _total = max(0, floor(_card.base_attack)) + card_GetAttackBuff(_card);
         if (variable_struct_exists(_card, "attack")) {
             _total = max(_total, max(0, floor(_card.attack)));
@@ -156,15 +157,7 @@ function card_GetBoardAttackDisplay(_card, _column = -1) {
         return _total;
     }
 
-    if (card_IsSpiritType(_card) && _column >= 0) {
-        return battle_GetPlayerMonsterSummaryAttack(_card, _column);
-    }
-
-    if (card_IsSpiritType(_card)) {
-        return battle_GetMonsterStrikeAmount(_card);
-    }
-
-    return card_GetSummaryTotalAttack(_card);
+    return battle_GetPlayerMonsterSummaryAttack(_card, _column);
 }
 
 function card_DrawAttackGainBadge(_x, _y, _w, _h, _amount) {
@@ -187,27 +180,23 @@ function card_GetTraitAmount(_card, _type) {
     return 0;
 }
 
+/// Your monster's own attack including buffs (no weapon)
 function battle_GetMonsterStrikeAmount(_card) {
-    if (_card == undefined || !card_IsSpiritType(_card)) return 0;
+    if (_card == undefined) return 0;
     return battle_GetMonsterBaseStrikeAmount(_card) + card_GetAttackBuff(_card);
 }
 
+/// Your monster's own attack without buffs: its JSON "attack" (default 0), or else an "attack" trait (spirits).
+/// card.attack holds the JSON attack plus every buff (card_GainAttack), so the buffs are taken back off.
 function battle_GetMonsterBaseStrikeAmount(_card) {
-    if (_card == undefined || !card_IsSpiritType(_card)) return 0;
+    if (_card == undefined) return 0;
 
-    var _buff = card_GetAttackBuff(_card);
-    if (variable_struct_exists(_card, "attack") && real(_card.attack) > _buff) {
-        return max(0, floor(real(_card.attack) - _buff));
+    var _base = 0;
+    if (variable_struct_exists(_card, "attack")) {
+        _base = floor(real(_card.attack)) - card_GetAttackBuff(_card);
     }
-
-    var _trait_attack = card_GetTraitAmount(_card, "attack");
-    if (_trait_attack > 0) return _trait_attack;
-
-    if (variable_struct_exists(_card, "attack") && real(_card.attack) > 0) {
-        return max(0, floor(real(_card.attack)));
-    }
-
-    return 0;
+    if (_base <= 0) _base = card_GetTraitAmount(_card, "attack");
+    return max(0, _base);
 }
 
 function battle_GetPlayerMonsterSummaryAttack(_card, _column = -1) {
@@ -224,6 +213,11 @@ function battle_FindPlayerMonsterColumn(_card) {
 
 // ---------------------------------------------------------------------------
 // Player columns (monster + weapon below it)
+//
+// Damage of an attack = the monster's attack + its weapon's attack + attack buffs
+//                       (+ the action card's amount when an action card makes the attack).
+// A monster can only attack with a weapon equipped or through an action card;
+// extra-deck spirits can also strike on their own.
 // ---------------------------------------------------------------------------
 
 function battle_GetColumnStrikeParts(_column) {
@@ -233,7 +227,8 @@ function battle_GetColumnStrikeParts(_column) {
         monster_attack_all: 0,
         weapon_attack_all: 0,
         buff: 0,
-        has_weapon: false
+        has_weapon: false,
+        armed: false          // may strike from the column: a weapon is equipped, or the monster is a spirit
     };
 
     var _board = instance_find(OBJ_BoardManager, 0);
@@ -255,11 +250,18 @@ function battle_GetColumnStrikeParts(_column) {
         _parts.weapon_attack_all = card_GetTraitAmount(_weapon_slot.card, "attack_all");
     }
 
+    _parts.armed = _parts.has_weapon || card_IsSpiritType(_monster_slot.card);
     return _parts;
 }
 
+/// Weapon / spirit strike: monster attack + weapon attack + buffs
 function battle_ColumnSingleStrikeTotal(_parts) {
     return _parts.monster_strike + _parts.weapon_strike + _parts.buff;
+}
+
+/// Action card attack: the action's amount + monster attack + weapon attack + buffs
+function battle_ColumnActionStrikeTotal(_parts, _action_amount) {
+    return max(0, _action_amount) + battle_ColumnSingleStrikeTotal(_parts);
 }
 
 function battle_ColumnWeaponAttackAllTotal(_parts) {

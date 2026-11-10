@@ -6,7 +6,8 @@
 ///   attack_all  = the next N attacks hit every player monster (charges)
 ///   buffs       = timed (wear off after "turns")
 ///   destroy     = "amount" random player monsters
-///   discard_hand / discard_extra_deck / add_deck / summon_enemy
+///   summon_enemy = "to": "board" (a free spot now) or "queue" (the front of the wave queue)
+///   discard_hand / discard_extra_deck / add_deck
 
 /// Use an ability now and write it to the battle log
 function monsterAbility_ActivateTrait(_slot_index, _monster, _trait) {
@@ -70,10 +71,15 @@ function monsterAbility_RunEffect(_slot_index, _monster, _trait) {
             return monsterAbility_AddCardsToPlayerDeck(_src, _monster, _trait);
 
         case "summon_enemy":
+            // "to": "board" (default) = into a free spot now; "queue" = waits in the wave queue
             var _entry = monsterAbility_BuildQueueEntry(_monster, _trait);
             if (_entry == undefined) return false;
-            if (!monster_QueueInsertFront(_entry)) return false;
+            var _went = monster_Summon(_entry, _trait.summon_to);
+            if (_went == "") return false;
             monsterAbility_LogActivated(_monster, _trait);
+            if (_went == "queue" && _trait.summon_to == "board") {
+                battle_EnemyLog_Action("No room on the field: it waits in the queue.");
+            }
             return true;
     }
 

@@ -65,12 +65,12 @@ function monster_GetSlotLayout(_slot) {
     var _card_h = _slot.h;
     var _cx = _slot.x + _card_w / 2;
     var _cy = _slot.y + _card_h / 2 + 12;
-    var _stats_pad = 24;   // below the pedestal
+    var _stats_pad = 18;   // below the pedestal (kept tight: the nearest enemies stand just above the bottom bar)
     var _health_h = 8;
     var _health_pad_x = 4;
     var _health_y = _slot.y + _card_h + _stats_pad;
-    var _atk_y = _health_y + _health_h + 16;
-    var _status_y = _atk_y + 16;
+    var _atk_y = _health_y + _health_h / 2;          // ATK sits right of the health bar (left-aligned, centred on it)
+    var _status_y = _health_y + _health_h + 6;       // status under the bar
 
     return {
         cx: _cx,
@@ -85,7 +85,8 @@ function monster_GetSlotLayout(_slot) {
         stats_cx: _slot.x + _health_pad_x + (_card_w - _health_pad_x * 2) / 2,
         atk_y: _atk_y,
         status_y: _status_y,
-        full_bottom: _status_y + 16
+        full_bottom: _status_y + 16,
+        scale: 1                       // draw size multiplier (the hovered enemy pops out bigger)
     };
 }
 
@@ -166,6 +167,13 @@ function monsterAnim_PlayAttack(_monster, _delay_ms = 0) {
     _monster.anim_attack_pick = (_fixed >= 0 && _fixed < _count) ? _fixed : irandom(_count - 1);
 }
 
+/// How long the attack animation picked by monsterAnim_PlayAttack lasts (ms); 0 when it has none
+function monsterAnim_AttackLengthMs(_monster) {
+    var _set = monsterAnim_GetSpriteSet(_monster);
+    if (_set == undefined || variable_struct_exists(_set, "stages")) return 0;
+    return sprite_get_number(monsterAnim_AttackSprite(_monster, _set)) / MONSTER_ANIM_ATTACK_FPS * 1000;
+}
+
 function monsterAnim_IsAttacking(_monster, _set) {
     if (!variable_struct_exists(_monster, "anim_attack_start")) return false;
     var _len_ms = sprite_get_number(monsterAnim_AttackSprite(_monster, _set)) / MONSTER_ANIM_ATTACK_FPS * 1000;
@@ -175,6 +183,8 @@ function monsterAnim_IsAttacking(_monster, _set) {
 
 function monsterAnim_DrawSpriteBody(_slot, _monster, _layout) {
     if (_layout == undefined) _layout = monster_GetSlotLayout(_slot);
+    var _pop = struct_GetOr(_layout, "scale", 1);   // > 1 while the enemy is under the mouse
+    var _sc = MONSTER_ANIM_SCALE * _pop;
 
     var _set = monsterAnim_GetSpriteSet(_monster);
     if (_set != undefined && variable_struct_exists(_set, "stages")) {
@@ -188,7 +198,7 @@ function monsterAnim_DrawSpriteBody(_slot, _monster, _layout) {
             var _st = current_time - _monster.anim_attack_start;
             if (_st >= 0 && _st < 600) _rot = 9 * sin(_st / 35) * (1 - _st / 600);
         }
-        draw_sprite_ext(_set.idle, _stage, _layout.cx, _layout.sprite_y + _layout.card_h * 0.58 - 5, MONSTER_ANIM_SCALE * MONSTER_FACING, MONSTER_ANIM_SCALE, _rot, c_white, battlefx_BlinkAlpha(_monster));
+        draw_sprite_ext(_set.idle, _stage, _layout.cx, _layout.sprite_y + _layout.card_h * 0.58 - 5, _sc * MONSTER_FACING, _sc, _rot, c_white, battlefx_BlinkAlpha(_monster));
         return;
     }
     if (_set != undefined) {
@@ -203,12 +213,12 @@ function monsterAnim_DrawSpriteBody(_slot, _monster, _layout) {
             _frame = floor((current_time / 1000 + _monster.anim_phase) * MONSTER_ANIM_IDLE_FPS);
         }
         _frame = _frame mod sprite_get_number(_spr);
-        draw_sprite_ext(_spr, _frame, _layout.cx, _layout.sprite_y + _layout.card_h * 0.58 - 5, MONSTER_ANIM_SCALE * MONSTER_FACING, MONSTER_ANIM_SCALE, 0, c_white, battlefx_BlinkAlpha(_monster));
+        draw_sprite_ext(_spr, _frame, _layout.cx, _layout.sprite_y + _layout.card_h * 0.58 - 5, _sc * MONSTER_FACING, _sc, 0, c_white, battlefx_BlinkAlpha(_monster));
         return;
     }
 
     var _static = SCR_Monster_ResolveSprite(_monster);
-    draw_sprite_ext(_static, 0, _layout.cx, _layout.sprite_y, 1, 1, 0, c_white, battlefx_BlinkAlpha(_monster));
+    draw_sprite_ext(_static, 0, _layout.cx, _layout.sprite_y, _pop, _pop, 0, c_white, battlefx_BlinkAlpha(_monster));
 }
 
 function monsterAnim_Default_Draw(_slot, _monster, _layout) {

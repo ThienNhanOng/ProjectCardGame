@@ -7,6 +7,7 @@ function SCR_WorldMapController_Init() {
     worldmap_ApplyPendingPlayerSpawn();
     dialog_Init();
     dialog_TryRunPendingPost();
+    save_Autosave();   // slot 1: every time you arrive on a map (after a battle, the deck builder, a new map)
 }
 
 function SCR_WorldMapController_Step() {
@@ -20,6 +21,7 @@ function SCR_WorldMapController_Step() {
 
     worldmap_RefreshAllMarkers();
     worldmap_HandleCollectionButton();
+    worldmap_HandleMenuButton();
 }
 
 function SCR_WorldMapController_DrawHUD() {
@@ -33,6 +35,7 @@ function SCR_WorldMapController_DrawHUD() {
     debug_DrawWorldMapInfo(_gw, _gh);
     worldmap_DrawMapDebugInfo(_gh);
     worldmap_DrawCollectionButton();
+    worldmap_DrawMenuButton();
     worldmap_NodeDrawHint();
     worldmap_NodeDrawConfirm();   // "Are you sure you want to go here?" on top of everything
 }

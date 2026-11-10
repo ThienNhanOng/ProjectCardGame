@@ -62,7 +62,8 @@ function monster_BuildDefinition(_collection, _src) {
         level: _src.level,
         enemyhealthvalue: _src.enemyhealthvalue,
         enemyattackvalue: _src.enemyattackvalue,
-        enemyability: _src.enemyability
+        enemyability: _src.enemyability,
+        keywords: keyword_ListFrom(_src)   // "frontline", "tag_in" (scr_card_data)
     };
     var _fields = MONSTER_OPTIONAL_FIELDS;
     for (var i = 0; i < array_length(_fields); i++) {
@@ -218,6 +219,7 @@ function monster_BuildInstance(_def) {
         alive: true,
         animation: struct_GetOr(_def, "animation", ""),
         elite: struct_GetOr(_def, "elite", false),
+        keywords: struct_GetOr(_def, "keywords", []),        // "frontline", "tag_in"
         arrival: struct_GetOr(_def, "arrival", ""),       // "side" / "drop" / "" = random
         hatch: struct_GetOr(_def, "hatch", undefined),    // { turns, into: [{collection, enemyID}] }
         stances: struct_GetOr(_def, "stances", undefined),   // [profile]: one held at a time, swapped each enemy turn

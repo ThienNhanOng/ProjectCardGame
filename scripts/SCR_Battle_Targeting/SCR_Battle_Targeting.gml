@@ -10,6 +10,7 @@
 ///   pick_enemy_silence    enemy to silence
 ///   pick_player_effect / pick_any_effect / pick_enemy_effect
 ///                         target for any other single-target trait (e.g. "damage", or JSON "target")
+///   pick_free_spot        an empty, open monster spot of yours to summon into
 
 function battle_IsTargeting() {
     return target_mode != "none";
@@ -39,6 +40,13 @@ function SCR_Battle_Targeting_Step() {
 
     if (!mouse_check_button_pressed(mb_left)) return;
 
+    if (target_mode == "pick_free_spot") {
+        var _spot = -1;
+        with (instance_find(OBJ_BoardManager, 0)) _spot = SCR_Board_MonsterSlotAt(mouse_x, mouse_y, false);
+        if (_spot >= 0) battle_TargetingClickFreeSpot(_spot);
+        return;
+    }
+
     var _player_slot = unit_GetSlotAt(SIDE_PLAYER, mouse_x, mouse_y);
     if (_player_slot >= 0 && battle_TargetingAcceptsPlayerSlot()) {
         battle_TargetingClickPlayerSlot(_player_slot);
@@ -61,10 +69,25 @@ function battle_TargetingAcceptsPlayerSlot() {
         || target_mode == "pick_any_effect";
 }
 
+/// Does the current pick deal damage? (weapon strikes, action attacks, "damage" effects)
+/// Units guarded by a frontline can't be picked for those.
+function battle_TargetingDealsDamage() {
+    if (target_mode == "pick_enemy") return true;
+    if (target_mode == "pick_player_monster") return false;   // choosing the attacker, not the victim
+    var _info = battle_GetPendingTraitInfo();
+    return _info != undefined && (_info.trait.effect == "damage" || _info.trait.effect == "attack");
+}
+
+/// Can the unit in _slot be picked by the current target mode? (frontline guard check)
+function battle_TargetingCanPick(_side, _slot) {
+    return !(battle_TargetingDealsDamage() && unit_IsGuarded(_side, _slot));
+}
+
 /// The player clicked their monster in _slot while targeting
 function battle_TargetingClickPlayerSlot(_slot) {
     if (!battle_IsPlayerPhase() || !battle_IsTargeting()) return;
     if (!unit_IsAlive(SIDE_PLAYER, _slot)) return;
+    if (!battle_TargetingCanPick(SIDE_PLAYER, _slot)) return;
 
     switch (target_mode) {
         case "pick_player_monster":
@@ -91,10 +114,24 @@ function battle_TargetingClickPlayerSlot(_slot) {
     }
 }
 
+/// The player clicked an empty spot of theirs while a summon waits for one
+function battle_TargetingClickFreeSpot(_spot) {
+    if (!battle_IsPlayerPhase() || target_mode != "pick_free_spot") return;
+    if (!battle_IsFreeMonsterSpot(_spot)) return;
+    battle_ResolvePendingTrait(targets_Single(SIDE_PLAYER, _spot));
+}
+
+/// True while a summon waits for the player to click a free spot
+function battle_IsPickingSummonSpot() {
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    return _bm != noone && _bm.target_mode == "pick_free_spot";
+}
+
 /// The player clicked the enemy in _slot while targeting
 function battle_TargetingClickEnemySlot(_slot) {
     if (!battle_IsPlayerPhase() || !battle_IsTargeting()) return;
     if (!unit_IsAlive(SIDE_ENEMY, _slot)) return;
+    if (!battle_TargetingCanPick(SIDE_ENEMY, _slot)) return;   // behind a frontline
 
     switch (target_mode) {
         case "pick_any_buff":
@@ -137,10 +174,10 @@ function battle_FindPlayerCardAt(_mx, _my, _include_hand) {
         // a weapon shows as a chip on its monster's card
         _found = SCR_Board_WeaponChipAt(_mx, _my);
 
-        for (var m = 0; m < array_length(player_monster_slots) && _found == undefined; m++) {
-            var _mslot = player_monster_slots[m];
-            if (!_mslot.visible || !_mslot.occupied || _mslot.card == undefined) continue;
-            if (SCR_Board_IsSlotMouseOver(_mslot)) _found = _mslot.card;
+        // the top-most of your units under the point (they can overlap)
+        if (_found == undefined) {
+            var _unit = unit_GetSlotAt(SIDE_PLAYER, _mx, _my);
+            if (_unit >= 0) _found = player_monster_slots[_unit].card;
         }
 
         if (_found == undefined && action_slot.visible && action_slot.occupied && action_slot.card != undefined
@@ -226,6 +263,12 @@ function SCR_Battle_Targeting_Draw() {
             battle_TargetingDrawEnemyHighlights(_board, c_purple);
             break;
 
+        case "pick_free_spot":   // the free spots themselves light up in SCR_Board_DrawEmptyZones
+            var _summon_info = battle_GetPendingTraitInfo();
+            var _summon_name = (_summon_info != undefined) ? deck_GetCardName(_summon_info.trait.card_id) : "a monster";
+            draw_text(room_width / 2, 8, "Choose a free spot to summon " + _summon_name);
+            break;
+
         case "pick_enemy":
             draw_text(room_width / 2, 8, (pending_trait_source == "weapon")
                 ? "Choose an enemy to attack with your weapon"
@@ -259,6 +302,7 @@ function battle_TargetingDrawPlayerHighlights(_board, _color, _skip_shrouded) {
         var _slot = _board.player_monster_slots[i];
         if (!_slot.visible || !_slot.occupied || _slot.card == undefined) continue;
         if (_skip_shrouded && battle_IsPlayerMonsterSlotShrouded(i)) continue;
+        if (!battle_TargetingCanPick(SIDE_PLAYER, i)) continue;
         draw_rectangle(_slot.x, _slot.y, _slot.x + _slot.w, _slot.y + _slot.h, true);
     }
 }
@@ -270,9 +314,10 @@ function battle_TargetingDrawEnemyHighlights(_board, _color) {
     // a pulsing ring on each target's pedestal; the one under the mouse is bold
     var _hover = unit_GetSlotAt(SIDE_ENEMY, mouse_x, mouse_y);
     draw_set_color(_color);
-    for (var j = 0; j < _mm.active_slot_count; j++) {
+    for (var j = 0; j < array_length(_board.enemy_slots); j++) {
         var _eslot = _board.enemy_slots[j];
         if (!_eslot.visible || !_eslot.occupied) continue;
+        if (!battle_TargetingCanPick(SIDE_ENEMY, j)) continue;   // guarded by a frontline: not a target
         var _f = battle_LayoutEnemyFeet(j);
         var _bold = (j == _hover);
         draw_set_alpha(_bold ? 1 : 0.45 + 0.35 * sin(current_time / 170));

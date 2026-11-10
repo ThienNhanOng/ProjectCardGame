@@ -76,6 +76,56 @@ function card_IsAstral(_card_or_id) {
 }
 
 // ---------------------------------------------------------------------------
+// Keywords — passive rules on a player card or an enemy, set in its JSON:
+//   "keywords": ["frontline", "tag_in"]      (shorthand: "frontline": true)
+//   frontline  while it stands in the front row, its side's back row takes no damage
+//   tag_in     (enemies waiting in the wave queue) jumps into a free spot at once,
+//              instead of waiting for the next enemy turn
+// ---------------------------------------------------------------------------
+
+#macro CARD_KEYWORDS ["frontline", "tag_in"]
+
+/// Keyword list for a JSON entry: its "keywords" (array or one string) plus any known keyword set to true.
+/// Lower case, "-" and spaces become "_" ("Tag-in" -> "tag_in").
+function keyword_ListFrom(_src) {
+    var _list = [];
+    if (!is_struct(_src)) return _list;
+
+    if (variable_struct_exists(_src, "keywords")) {
+        var _raw = is_array(_src.keywords) ? _src.keywords : [_src.keywords];
+        for (var i = 0; i < array_length(_raw); i++) {
+            var _kw = string_lower(string_trim(string(_raw[i])));
+            _kw = string_replace_all(string_replace_all(_kw, "-", "_"), " ", "_");
+            if (_kw != "" && !array_contains(_list, _kw)) array_push(_list, _kw);
+        }
+    }
+
+    var _known = CARD_KEYWORDS;
+    for (var k = 0; k < array_length(_known); k++) {
+        if (array_contains(_list, _known[k]) || !variable_struct_exists(_src, _known[k])) continue;
+        if (_src[$ _known[k]] == true) array_push(_list, _known[k]);
+    }
+    return _list;
+}
+
+function card_HasKeyword(_card, _keyword) {
+    if (!is_struct(_card) || !variable_struct_exists(_card, "keywords") || !is_array(_card.keywords)) return false;
+    return array_contains(_card.keywords, _keyword);
+}
+
+/// "Frontline, Tag in" for previews ("" when the card has none)
+function card_GetKeywordText(_card) {
+    if (!is_struct(_card) || !variable_struct_exists(_card, "keywords") || !is_array(_card.keywords)) return "";
+    var _txt = "";
+    for (var i = 0; i < array_length(_card.keywords); i++) {
+        var _word = string_replace_all(_card.keywords[i], "_", " ");
+        if (_txt != "") _txt += ", ";
+        _txt += string_upper(string_char_at(_word, 1)) + string_delete(_word, 1, 1);
+    }
+    return _txt;
+}
+
+// ---------------------------------------------------------------------------
 // Card database
 // ---------------------------------------------------------------------------
 
@@ -156,6 +206,7 @@ function card_NormalizeDefinition(_raw) {
 
     var _base_hp = variable_struct_exists(_raw, "health") ? _raw.health : 10;
     _card.base_health = _base_hp;
+    _card.keywords = keyword_ListFrom(_raw);
 
     if (_card.type == "weapon") {
         weapon_EnsureAttackData(_card);

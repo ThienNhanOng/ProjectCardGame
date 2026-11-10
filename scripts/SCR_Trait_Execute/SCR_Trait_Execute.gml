@@ -68,6 +68,10 @@ function trait_Execute(_trait, _ctx) {
         case "search_card":
             if (_trait.type == "add_hand_with_cost" && _trait.apply_cost <= 0) return false;
             return deck_TagPicker_Begin(_trait);
+
+        case "summon":   // the chosen target is the free spot the player picked
+            if (array_length(_ctx.targets) <= 0) return false;
+            return card_SummonToSpot(_src, _ctx.targets[0].slot, _trait.card_id);
     }
 
     switch (_trait.type) {

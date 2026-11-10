@@ -173,6 +173,13 @@ function battle_BeginEnemyTurn() {
     }
 
     battle_EnemyLog_Write("--- Enemy phase ---");
+
+    // enemies waiting in the queue jump into empty spots now, and take part in this turn
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_mm != noone) {
+        with (_mm) monster_ReinforceAtEnemyTurn();
+    }
+
     battle_EnemyTurn_QueueDelay();
 }
 
@@ -209,7 +216,7 @@ function battle_EnemyTurn_FindNextSlot(_start_index) {
     var _mm = instance_find(OBJ_MonsterManager, 0);
     if (_board == noone || _mm == noone) return -1;
 
-    for (var i = _start_index; i < _mm.active_slot_count; i++) {
+    for (var i = _start_index; i < unit_GetSlotCount(SIDE_ENEMY); i++) {   // the wave's back row first, summons last
         if (unit_Get(SIDE_ENEMY, i) != undefined) return i;
     }
     return -1;

@@ -26,7 +26,7 @@ function SCR_Monster_Init() {
     }
 
     battle_name = _config.battle;
-    active_slot_count = _config.active_slots;
+    active_slot_count = clamp(floor(_config.active_slots), 1, ENEMY_WAVE_SLOTS);   // wave spots this battle uses: the back row first, then the second row
 
     battle_EnemyLog_Init();
 
@@ -45,6 +45,7 @@ function SCR_Monster_Init() {
     var _living = monster_CountLivingActive(_board);
 }
 
+/// Wave spots in use are shown; the rest (and the summon-only first row) stay hidden until used
 function monster_ApplyActiveSlotLayout(_board) {
     for (var i = 0; i < array_length(_board.enemy_slots); i++) {
         var _slot = _board.enemy_slots[i];
@@ -58,18 +59,31 @@ function monster_ApplyActiveSlotLayout(_board) {
     }
 }
 
-function monster_SpawnIntoSlot(_board, _slot_index) {
-    if (_slot_index >= active_slot_count) return false;
-    if (array_length(monster_queue) <= 0) return false;
+// ---------------------------------------------------------------------------
+// Entering the board
+//
+// Wave spots: the first active_slot_count spots (0-2 back row, then 3-4 second row).
+// The battle starts with every wave spot filled from the wave queue. After that, an enemy that dies
+// leaves its spot empty: the next enemy in the queue jumps in at the start of the next enemy turn
+// (monster_ReinforceAtEnemyTurn), unless it has the "tag_in" keyword — then it takes the spot at once.
+// Summon spots: 5-7, the first row (nearest the player). Only summon_enemy puts enemies there.
+// ---------------------------------------------------------------------------
 
-    var _entry = monster_queue[0];
-    array_delete(monster_queue, 0, 1);
+function monster_IsSummonSlot(_slot_index) {
+    return _slot_index >= ENEMY_WAVE_SLOTS && _slot_index < ENEMY_SLOT_COUNT;
+}
+
+/// Can an enemy stand in this spot this battle? (a wave spot in use, or a summon spot)
+function monster_IsUsableSlot(_slot_index) {
+    return (_slot_index >= 0 && _slot_index < active_slot_count) || monster_IsSummonSlot(_slot_index);
+}
+
+/// Put a new enemy built from a wave entry into spot _slot_index. Returns the enemy, or undefined.
+function monster_SpawnEntryIntoSlot(_board, _slot_index, _entry) {
+    if (!monster_IsUsableSlot(_slot_index)) return undefined;
 
     var _monster = monster_CreateInstance(_entry);
-    if (_monster == undefined) {
-        array_insert(monster_queue, 0, _entry);
-        return false;
-    }
+    if (_monster == undefined) return undefined;
 
     var _slot = _board.enemy_slots[_slot_index];
     _slot.occupied = true;
@@ -78,18 +92,95 @@ function monster_SpawnIntoSlot(_board, _slot_index) {
     var _bm_turn = instance_find(OBJ_BattleManager, 0);
     _monster.spawn_turn = (_bm_turn != noone && variable_instance_exists(_bm_turn, "turn_number")) ? _bm_turn.turn_number : 1;   // stage sprites count turns from here
     battlefx_Arrive(_monster, SIDE_ENEMY, _slot_index, battlefx_SpawnDelay(_slot_index));   // hops in from the right
-
-    return true;
+    return _monster;
 }
 
-function monster_FillActiveSlots(_board) {
+/// The next enemy in the wave queue takes spot _slot_index. Returns the enemy, or undefined.
+function monster_SpawnIntoSlot(_board, _slot_index) {
+    if (array_length(monster_queue) <= 0) return undefined;
+
+    var _entry = monster_queue[0];
+    var _monster = monster_SpawnEntryIntoSlot(_board, _slot_index, _entry);
+    if (_monster != undefined) array_delete(monster_queue, 0, 1);
+    return _monster;
+}
+
+function monster_IsSlotFree(_board, _slot_index) {
+    var _slot = _board.enemy_slots[_slot_index];
+    return !(_slot.occupied && _slot.card != undefined && _slot.card.alive);
+}
+
+/// First empty wave spot (_prefer first when it is a free wave spot), or -1
+function monster_FindFreeSlot(_board, _prefer = -1) {
+    if (_prefer >= 0 && _prefer < active_slot_count && monster_IsSlotFree(_board, _prefer)) return _prefer;
     for (var i = 0; i < active_slot_count; i++) {
-        var _slot = _board.enemy_slots[i];
-        if (_slot.occupied && _slot.card != undefined && _slot.card.alive) continue;
-        if (!monster_SpawnIntoSlot(_board, i)) break;
+        if (monster_IsSlotFree(_board, i)) return i;
+    }
+    return -1;
+}
+
+/// First empty summon spot (first row), or -1
+function monster_FindFreeSummonSlot(_board) {
+    for (var i = ENEMY_WAVE_SLOTS; i < ENEMY_SLOT_COUNT; i++) {
+        if (monster_IsSlotFree(_board, i)) return i;
+    }
+    return -1;
+}
+
+/// Is there anywhere a summoned enemy could stand right now? (used by "when": "free_slot")
+function monster_HasFreeSummonSpot() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    if (_board == noone || _mm == noone) return false;
+    var _free = -1;
+    with (_mm) {
+        _free = monster_FindFreeSummonSlot(_board);
+        if (_free < 0) _free = monster_FindFreeSlot(_board);
+    }
+    return _free >= 0;
+}
+
+/// An enemy left spot _slot_index: an empty summon spot hides its pedestal again
+function monster_OnSlotEmptied(_board, _slot_index) {
+    if (monster_IsSummonSlot(_slot_index)) _board.enemy_slots[_slot_index].visible = false;
+}
+
+/// Fill every empty spot from the wave queue (battle start). _announce logs each arrival.
+function monster_FillActiveSlots(_board, _announce = false) {
+    for (var i = 0; i < active_slot_count; i++) {
+        if (!monster_IsSlotFree(_board, i)) continue;
+        var _monster = monster_SpawnIntoSlot(_board, i);
+        if (_monster == undefined) break;
+        if (_announce) battle_EnemyLog_Action(_monster.name + " jumps in.");
     }
 
     monster_CheckVictory(_board);
+}
+
+/// Start of the enemy turn: queued enemies jump into the empty spots
+function monster_ReinforceAtEnemyTurn() {
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone) return;
+    monster_FillActiveSlots(_board, true);
+}
+
+/// Does the next enemy in the wave queue have tag_in?
+function monster_QueueFrontHasTagIn() {
+    if (array_length(monster_queue) <= 0) return false;
+    var _def = monster_GetDefinition(monster_queue[0].collection, monster_queue[0].enemyID);
+    return _def != undefined && array_contains(struct_GetOr(_def, "keywords", []), "tag_in");
+}
+
+/// tag_in: while the next queued enemy has tag_in and a spot is free, it jumps in right away
+/// (_prefer: the spot that just emptied)
+function monster_TagInFreeSlots(_board, _prefer = -1) {
+    while (monster_QueueFrontHasTagIn()) {
+        var _free = monster_FindFreeSlot(_board, _prefer);
+        if (_free < 0) break;
+        var _monster = monster_SpawnIntoSlot(_board, _free);
+        if (_monster == undefined) break;
+        battle_EnemyLog_Action(_monster.name + " tags in!");
+    }
 }
 
 function monster_CheckVictory(_board) {
@@ -98,7 +189,7 @@ function monster_CheckVictory(_board) {
         return;
     }
 
-    for (var i = 0; i < active_slot_count; i++) {
+    for (var i = 0; i < array_length(_board.enemy_slots); i++) {   // summoned enemies count too
         var _slot = _board.enemy_slots[i];
         if (_slot.occupied && _slot.card != undefined && _slot.card.alive) {
             battle_won = false;
@@ -184,10 +275,10 @@ function monster_ApplyProfile(_m, _p) {
 }
 
 /// Can this profile be picked right now? Optional "when":
-///   "free_slot"   only while an enemy spot is empty (e.g. laying an egg / summoning)
+///   "free_slot"   only while a summoned enemy would have a spot (e.g. laying an egg / summoning)
 function monster_ProfileUsable(_p) {
     switch (struct_GetOr(_p, "when", "")) {
-        case "free_slot": return unit_Count(SIDE_ENEMY) < unit_GetSlotCount(SIDE_ENEMY);
+        case "free_slot": return monster_HasFreeSummonSpot();
     }
     return true;
 }
@@ -264,6 +355,7 @@ function monster_GetQueueCount() {
     return array_length(monster_queue);
 }
 
+/// Put a wave entry at the front of the queue: it jumps in at the next enemy turn (at once with tag_in)
 function monster_QueueInsertFront(_entry) {
     if (_entry == undefined) return false;
 
@@ -280,17 +372,42 @@ function monster_QueueInsertFront(_entry) {
         array_insert(monster_queue, 0, _entry);
 
         if (_board != noone) {
-            monster_FillActiveSlots(_board);
+            monster_TagInFreeSlots(_board);
+            monster_CheckVictory(_board);
         }
-
     }
 
     return true;
 }
 
+/// summon_enemy. _to "board": straight onto the field — a free first-row (summon) spot, else a free wave spot,
+///                              else the front of the queue.
+///               _to "queue": to the front of the queue (it jumps in at the next enemy turn, or at once with tag_in).
+/// Returns where it went: "board", "queue", or "" when it failed.
+function monster_Summon(_entry, _to) {
+    if (_entry == undefined) return "";
+
+    var _mm = instance_find(OBJ_MonsterManager, 0);
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_mm == noone || _board == noone) return "";
+
+    if (_to == "board") {
+        // the first row is kept for summons; when it is full, a free wave spot
+        var _placed = undefined;
+        with (_mm) {
+            var _free = monster_FindFreeSummonSlot(_board);
+            if (_free < 0) _free = monster_FindFreeSlot(_board);
+            if (_free >= 0) _placed = monster_SpawnEntryIntoSlot(_board, _free, _entry);
+        }
+        if (_placed != undefined) return "board";
+    }
+
+    return monster_QueueInsertFront(_entry) ? "queue" : "";
+}
+
 function monster_CountLivingActive(_board) {
     var _count = 0;
-    for (var i = 0; i < active_slot_count; i++) {
+    for (var i = 0; i < array_length(_board.enemy_slots); i++) {
         var _slot = _board.enemy_slots[i];
         if (_slot.occupied && _slot.card != undefined && _slot.card.alive) {
             _count++;

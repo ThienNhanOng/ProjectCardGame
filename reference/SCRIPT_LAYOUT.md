@@ -4,7 +4,9 @@
 
 ```
 scripts/
-├── Core/            scr_data_json (data_ReadJsonFile), scr_debug, scr_room_goto
+├── Core/            scr_data_json (data_ReadJsonFile), scr_debug, scr_room_goto,
+│                    scr_save_system (accounts, 4 slots, autosave, quick save / load),
+│                    scr_home_menu (Room_home / OBJ_HomeMenu: the home screen)
 ├── Data/            scr_card_data       card DB loading, definitions, runtime copies, card_Is*Type / card_HasAnyTag / card_IsAstral
 │                    scr_monster_data    enemy DB loading, monster_CreateInstance
 │                    scr_player_collection  owned cards, rewards

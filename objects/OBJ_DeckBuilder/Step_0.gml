@@ -1,3 +1,4 @@
+if (SCR_DBS_HandleMenuKey()) exit;   // Esc: home screen
 global.mouse_left_pressed = mouse_check_button_pressed(mb_left);
 click_processed = false;
 SCR_DBS_HandleCollectionToolbar();

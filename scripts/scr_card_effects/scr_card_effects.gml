@@ -154,6 +154,23 @@ function card_AddCard(_source, _zone, _card_id) {
     return _added;
 }
 
+/// summon — put a new copy of monster card _card_id onto your board in spot _spot (free and open).
+/// It counts as played (normal board lifespan), and its on-play abilities run once the card that
+/// summoned it has finished (battle_RunDeferredOnPlay). Monster cards only: spirits come from the extra deck.
+function card_SummonToSpot(_source, _spot, _card_id) {
+    if (_source.side != SIDE_PLAYER || _card_id <= 0) return false;
+
+    var _board = instance_find(OBJ_BoardManager, 0);
+    if (_board == noone || !battle_IsFreeMonsterSpot(_spot)) return false;
+
+    var _card = deck_CreateRuntimeCard(_card_id);
+    if (_card == undefined || _card.type != "monster") return false;
+
+    var _placed = false;
+    with (_board) _placed = SCR_Board_PlaceCard(player_monster_slots[_spot], _card, true);
+    return _placed;
+}
+
 /// Zone a card-adding trait type puts its card into
 function trait_GetAddCardZone(_type) {
     switch (_type) {
