@@ -228,7 +228,7 @@ function battlefx_Death(_side, _slot) {
     var _card = unit_Get(_side, _slot);
     if (global.battlefx_hit_delay > 0 && _card != undefined) {
         array_push(global.battle_fx, { type: "ghost", side: _side, slot: _slot, card: _card, start: current_time,
-            until: global.battlefx_hit_delay + BATTLEFX_GHOST_LINGER_MS });
+            life_ms: global.battlefx_hit_delay + BATTLEFX_GHOST_LINGER_MS });
     }
 }
 
@@ -541,7 +541,7 @@ function battlefx_Draw() {
                 break;
 
             case "ghost":
-                if (_t > _fx.until) { array_delete(global.battle_fx, i, 1); continue; }
+                if (_t > _fx.life_ms) { array_delete(global.battle_fx, i, 1); continue; }
                 battlefx_DrawGhost(_fx);
                 break;
 

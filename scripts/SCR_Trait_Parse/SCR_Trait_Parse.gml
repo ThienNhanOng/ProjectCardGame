@@ -96,8 +96,9 @@ function trait_NormalizeEntry(_raw) {
     var _repeat = false;
     var _recursion = 1;
 
+    // "repeat" is a GML keyword, so the field is always read/written with [$ "repeat"]
     if (variable_struct_exists(_raw, "repeat")) {
-        _repeat = _raw.repeat;
+        _repeat = _raw[$ "repeat"];
     }
 
     if (variable_struct_exists(_raw, "recursion")) {
@@ -190,13 +191,12 @@ function trait_NormalizeEntry(_raw) {
     if (_rule.effect == "attack" && _target != "all_enemies") _target = "single_enemy";
     _type = trait_CanonicalType(_rule.effect, _target, _type);
 
-    return {
+    var _trait = {
         type: _type,
         effect: _rule.effect,
         target: _target,
         amount: _amount,
         card_id: _card_id,
-        repeat: _repeat,
         recursion: _recursion,
         uses_per_turn: _uses,
         tags: _tags,
@@ -212,11 +212,13 @@ function trait_NormalizeEntry(_raw) {
         collection: _collection,
         summon_to: _summon_to
     };
+    _trait[$ "repeat"] = _repeat;
+    return _trait;
 }
 
 function trait_IsRepeatable(_trait) {
     if (_trait == undefined) return false;
-    return variable_struct_exists(_trait, "repeat") && _trait.repeat;
+    return variable_struct_exists(_trait, "repeat") && _trait[$ "repeat"];
 }
 
 function trait_GetRecursionLimit(_trait) {
@@ -272,7 +274,8 @@ function trait_GetFromCard(_card) {
 
         && variable_struct_exists(_card, "action")) {
 
-        var _legacy = { type: string(_card.action), amount: 0, repeat: true, recursion: 1 };
+        var _legacy = { type: string(_card.action), amount: 0, recursion: 1 };
+        _legacy[$ "repeat"] = true;
 
         if (_legacy.type == "heal" && variable_struct_exists(_card, "heal_value")) {
 

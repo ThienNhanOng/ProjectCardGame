@@ -338,24 +338,26 @@ function weapon_EnsureAttackData(_card) {
     for (var j = 0; j < array_length(_card.ability); j++) {
         if (_card.ability[j].type != "attack") continue;
         _card.ability[j].amount = _card.attack;
+        // "repeat" is a GML keyword, so the field is read/written with [$ "repeat"]
         if (!variable_struct_exists(_card.ability[j], "repeat")) {
-            _card.ability[j].repeat = (_card.attackRecursion > 0);
+            _card.ability[j][$ "repeat"] = (_card.attackRecursion > 0);
         }
         if (!variable_struct_exists(_card.ability[j], "recursion")) {
             _card.ability[j].recursion = max(1, _card.attackRecursion);
         }
-        _card.ability[j].uses_per_turn = _card.ability[j].repeat ? _card.ability[j].recursion : 0;
+        _card.ability[j].uses_per_turn = _card.ability[j][$ "repeat"] ? _card.ability[j].recursion : 0;
         _found = true;
         break;
     }
 
     if (!_found) {
-        array_push(_card.ability, {
+        var _attack = {
             type: "attack",
             amount: _card.attack,
-            repeat: (_card.attackRecursion > 0),
             recursion: max(1, _card.attackRecursion),
             uses_per_turn: (_card.attackRecursion > 0) ? max(1, _card.attackRecursion) : 0
-        });
+        };
+        _attack[$ "repeat"] = (_card.attackRecursion > 0);
+        array_push(_card.ability, _attack);
     }
 }
