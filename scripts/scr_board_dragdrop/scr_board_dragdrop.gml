@@ -69,36 +69,60 @@ function SCR_DragDrop_Step() {
         
         if (mouse_check_button_released(mb_left)) {
             var _target = SCR_Board_GetDropTarget(_mx, _my, drag_card);
-            var _slot = (_target != undefined) ? _target.slot : undefined;
-            
-            if (_slot != undefined) {
-                if (!variable_struct_exists(_slot, "locked")) {
-                    _slot.locked = false;
-                }
-                if (!_slot.occupied && !_slot.locked) {
-                    if (!card_CanAffordAllCosts(drag_card, drag_hand_index)) {
-                    } else if (SCR_Board_PlaceCard(_slot, drag_card)) {
-                        card_PayAllCosts(drag_card, drag_hand_index);
-                        var _hand = instance_find(OBJ_Hand, 0);
-                        if (_hand != noone) {
-                            var _index = drag_hand_index;
-                            with (_hand) {
-                                hand_RemoveCard(_index);
-                            }
-                        }
-                        // an action dropped on a monster: that monster is the one that acts
-                        if (_slot.type == "action" && _target.monster >= 0 && _bm != noone) {
-                            var _actor = _target.monster;
-                            with (_bm) {
-                                if (target_mode == "pick_player_monster") battle_TargetingClickPlayerSlot(_actor);
-                            }
-                        }
-                    }
-                }
-            }
+            if (_target != undefined) SCR_Board_PlayCardFromHand(_target, drag_card, drag_hand_index);
             SCR_DragDrop_Cancel();
         }
     }
+}
+
+/// Play a hand card onto a drop target { slot, monster }. The cost is paid first; if the card cannot be
+/// placed it is refunded. An action card keeps its receipt so cancelling it unused refunds the cost.
+/// Returns true when the card was played.
+function SCR_Board_PlayCardFromHand(_target, _card, _hand_index) {
+    if (_target == undefined || _card == undefined) return false;
+    var _slot = _target.slot;
+    if (_slot == undefined) return false;
+    if (!variable_struct_exists(_slot, "locked")) _slot.locked = false;
+    if (_slot.occupied || _slot.locked) return false;
+
+    if (!card_CanAffordAllCosts(_card, _hand_index)) {
+        battle_EnemyLog_Write("Can't play " + _card.name + ": its cost isn't met.");
+        return false;
+    }
+
+    var _bm = instance_find(OBJ_BattleManager, 0);
+    global.card_last_payment = undefined;
+    if (!card_PayAllCosts(_card, _hand_index)) return false;
+    var _receipt = global.card_last_payment;
+
+    // the card leaves the hand, found by reference (paying tributes may have shifted the hand)
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand != noone) {
+        with (_hand) {
+            var _index = hand_IndexOf(_card);
+            if (_index >= 0) hand_RemoveCard(_index);
+        }
+    }
+
+    if (_slot.type == "action" && _bm != noone) {
+        with (_bm) action_payment = _receipt;
+    }
+
+    if (!SCR_Board_PlaceCard(_slot, _card)) {
+        card_RefundPayment(_receipt);
+        if (_hand != noone) with (_hand) hand_AddCard(_card);
+        if (_bm != noone) with (_bm) action_payment = undefined;
+        return false;
+    }
+
+    // an action dropped on a monster: that monster is the one that acts
+    if (_slot.type == "action" && _target.monster >= 0 && _bm != noone) {
+        var _actor = _target.monster;
+        with (_bm) {
+            if (target_mode == "pick_player_monster") battle_TargetingClickPlayerSlot(_actor);
+        }
+    }
+    return true;
 }
 
 function SCR_DragDrop_Draw() {

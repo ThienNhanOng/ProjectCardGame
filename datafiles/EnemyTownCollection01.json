@@ -1,0 +1,8 @@
+{
+  "collection": "enemytowncollection1",
+  "enemy": [
+    {"enemyID": 1, "enemyname": "Sly Thief", "type": "monster", "tag": ["Human", "Thief"], "sprite": "SPR_Thief", "level": 2, "enemyhealthvalue": 9, "enemyattackvalue": 4, "enemyability": [{"type": "discard_hand", "value": 1, "delay": 2}]},
+    {"enemyID": 2, "enemyname": "Travelling Merchant", "type": "monster", "tag": ["Human", "Merchant"], "sprite": "SPR_Merchant", "level": 2, "enemyhealthvalue": 12, "enemyattackvalue": 3, "enemyability": [{"type": "buff", "value": 2, "turns": 2}]},
+    {"enemyID": 3, "enemyname": "Fan Dancer", "type": "monster", "tag": ["Human", "Dancer"], "sprite": "SPR_FanDancer", "level": 3, "enemyhealthvalue": 16, "enemyattackvalue": 5, "enemyability": [], "elite": true, "moves": [{"name": "Fan Glide", "anim": 1, "attack": 5, "ability": []}, {"name": "Tornado", "anim": 2, "attack": 3, "ability": [{"type": "attack_all", "value": 1}]}, {"name": "Spin Dance", "anim": 3, "attack": 0, "ability": [{"type": "silence", "value": 1}]}]}
+  ]
+}

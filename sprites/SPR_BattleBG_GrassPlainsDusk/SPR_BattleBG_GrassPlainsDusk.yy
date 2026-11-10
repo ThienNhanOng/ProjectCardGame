@@ -26,7 +26,7 @@
   "origin":0,
   "parent":{
     "name":"Battlefields",
-    "path":"folders/sprites/Battlefields.yy",
+    "path":"folders/sprites/WorldMap/Battlefields.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

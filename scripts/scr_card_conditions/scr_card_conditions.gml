@@ -12,6 +12,7 @@ function conditions_summon_Reset() {
     conditions_summon_picked_hand = [];
     conditions_summon_pick_count = 0;
     conditions_summon_prompt = "";
+    conditions_summon_paid = false;   // a sacrifice / discard / weapon was already given up
 }
 
 function conditions_summon_IsActive() {
@@ -464,6 +465,7 @@ function conditions_AutoDestroyWeapons(_amount) {
 
         with (_board) SCR_Board_RemoveCard(_slot);
         _destroyed++;
+        conditions_summon_paid = true;
     }
     return _destroyed >= _amount;
 }
@@ -536,6 +538,7 @@ function conditions_GetDiscardRequiredType() {
 }
 
 function conditions_ExecuteSacrifices() {
+    conditions_summon_paid = true;
     for (var i = 0; i < array_length(conditions_summon_picked_slots); i++) {
         combat_RemoveUnit(SIDE_PLAYER, conditions_summon_picked_slots[i]);
     }
@@ -643,6 +646,7 @@ function conditions_TryPickDiscardHand(_index) {
     if (_hand == noone) return false;
 
     with (_hand) hand_RemoveCard(_index);
+    conditions_summon_paid = true;
     conditions_summon_pick_count++;
 
     if (conditions_summon_pick_count < conditions_summon_current.amount) return true;
@@ -652,7 +656,9 @@ function conditions_TryPickDiscardHand(_index) {
     return true;
 }
 
+/// Cancelling is only allowed before any cost is paid (otherwise the sacrifices would be lost for nothing)
 function conditions_summon_CanCancel() {
+    if (conditions_summon_paid) return false;
     return conditions_summon_mode != "discard_hand" && conditions_summon_mode != "discard_tag";
 }
 
@@ -670,10 +676,7 @@ function conditions_summon_Step() {
     if (conditions_summon_mode == "pick_slot") {
         var _slot = conditions_GetMonsterSlotAt(mouse_x, mouse_y);
         if (_slot >= 0) {
-            if (conditions_CompleteSummonOnSlot(_slot)) {
-                battle_SkipFollowUpInputThisFrame();
-            } else {
-            }
+            if (conditions_CompleteSummonOnSlot(_slot)) battle_SkipFollowUpInputThisFrame();
         }
         return;
     }

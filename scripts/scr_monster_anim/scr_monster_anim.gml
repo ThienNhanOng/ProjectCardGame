@@ -106,6 +106,9 @@ function SCR_Monster_ResolveSprite(_monster) {
     if (variable_struct_exists(_monster, "sprite_name")) {
         var _spr_idx = asset_get_index(_monster.sprite_name);
         if (_spr_idx != -1) return _spr_idx;
+        // animated enemies without an icon: their idle (or stage) sprite
+        var _set = monsterAnim_GetSpriteSet(_monster);
+        if (_set != undefined) return _set.idle;
     }
 
     return SPR_Monsterplaceholder;
@@ -119,27 +122,53 @@ function SCR_Monster_ResolveSprite(_monster) {
 
 #macro MONSTER_ANIM_IDLE_FPS 12
 #macro MONSTER_ANIM_ATTACK_FPS 24
-#macro MONSTER_ANIM_SCALE 0.95
-#macro MONSTER_FACING -1           // character sprites face right; enemies stand on the right, so they are mirrored to face left    // draw size of animated enemies (1 = full sprite size)
+#macro MONSTER_ANIM_SCALE 0.95     // draw size of animated enemies (1 = full sprite size)
+#macro MONSTER_FACING -1           // character sprites face right; enemies stand on the right, so they are mirrored to face left
 
 /// { idle, attack } sprites for this monster, or undefined if it has no animated set
 function monsterAnim_GetSpriteSet(_monster) {
     if (_monster == undefined || !variable_struct_exists(_monster, "sprite_name")) return undefined;
     var _idle = asset_get_index(_monster.sprite_name + "_Idle");
-    if (_idle == -1) return undefined;
+    if (_idle == -1) {
+        // "<sprite>_Stages": one frame per turn on the field (an egg that cracks a bit more each turn)
+        var _stages = asset_get_index(_monster.sprite_name + "_Stages");
+        if (_stages != -1) return { idle: _stages, attack: _stages, stages: true };
+        return undefined;
+    }
+    // attack sprites: <sprite>_Attack, then optional <sprite>_Attack2 .. _Attack9 (one is picked per attack)
+    var _attacks = [];
     var _attack = asset_get_index(_monster.sprite_name + "_Attack");
-    return { idle: _idle, attack: (_attack != -1) ? _attack : _idle };
+    if (_attack != -1) array_push(_attacks, _attack);
+    for (var k = 2; k <= 9; k++) {
+        var _more = asset_get_index(_monster.sprite_name + "_Attack" + string(k));
+        if (_more == -1) break;
+        array_push(_attacks, _more);
+    }
+    if (array_length(_attacks) == 0) array_push(_attacks, _idle);
+    return { idle: _idle, attack: _attacks[0], attacks: _attacks };
+}
+
+/// The attack sprite chosen for this monster's current attack
+function monsterAnim_AttackSprite(_monster, _set) {
+    if (!variable_struct_exists(_set, "attacks")) return _set.attack;
+    var _pick = variable_struct_exists(_monster, "anim_attack_pick") ? _monster.anim_attack_pick : 0;
+    if (_pick < 0 || _pick >= array_length(_set.attacks)) _pick = 0;
+    return _set.attacks[_pick];
 }
 
 /// Play the attack animation once (enemy attacks or uses an ability); _delay_ms starts it later
 function monsterAnim_PlayAttack(_monster, _delay_ms = 0) {
     if (_monster == undefined) return;
     _monster.anim_attack_start = current_time + _delay_ms;
+    var _set = monsterAnim_GetSpriteSet(_monster);
+    var _count = (_set != undefined && variable_struct_exists(_set, "attacks")) ? array_length(_set.attacks) : 1;
+    var _fixed = struct_GetOr(_monster, "anim_attack_fixed", -1);   // set by the current move / stance
+    _monster.anim_attack_pick = (_fixed >= 0 && _fixed < _count) ? _fixed : irandom(_count - 1);
 }
 
 function monsterAnim_IsAttacking(_monster, _set) {
     if (!variable_struct_exists(_monster, "anim_attack_start")) return false;
-    var _len_ms = sprite_get_number(_set.attack) / MONSTER_ANIM_ATTACK_FPS * 1000;
+    var _len_ms = sprite_get_number(monsterAnim_AttackSprite(_monster, _set)) / MONSTER_ANIM_ATTACK_FPS * 1000;
     var _t = current_time - _monster.anim_attack_start;
     return _t >= 0 && _t < _len_ms;   // before its start time it keeps idling
 }
@@ -148,13 +177,27 @@ function monsterAnim_DrawSpriteBody(_slot, _monster, _layout) {
     if (_layout == undefined) _layout = monster_GetSlotLayout(_slot);
 
     var _set = monsterAnim_GetSpriteSet(_monster);
+    if (_set != undefined && variable_struct_exists(_set, "stages")) {
+        // one stage per turn on the field; a gentle wobble, and a hard shake when it acts
+        var _turns = 0;
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone && variable_struct_exists(_monster, "spawn_turn")) _turns = _bm.turn_number - _monster.spawn_turn;
+        var _stage = clamp(_turns, 0, sprite_get_number(_set.idle) - 1);
+        var _rot = 2 * sin(current_time / 300);
+        if (variable_struct_exists(_monster, "anim_attack_start")) {
+            var _st = current_time - _monster.anim_attack_start;
+            if (_st >= 0 && _st < 600) _rot = 9 * sin(_st / 35) * (1 - _st / 600);
+        }
+        draw_sprite_ext(_set.idle, _stage, _layout.cx, _layout.sprite_y + _layout.card_h * 0.58 - 5, MONSTER_ANIM_SCALE * MONSTER_FACING, MONSTER_ANIM_SCALE, _rot, c_white, battlefx_BlinkAlpha(_monster));
+        return;
+    }
     if (_set != undefined) {
         // each monster idles slightly out of step with the others
         if (!variable_struct_exists(_monster, "anim_phase")) _monster.anim_phase = random(1);
         var _spr = _set.idle;
         var _frame = 0;
         if (monsterAnim_IsAttacking(_monster, _set)) {
-            _spr = _set.attack;
+            _spr = monsterAnim_AttackSprite(_monster, _set);
             _frame = floor((current_time - _monster.anim_attack_start) / 1000 * MONSTER_ANIM_ATTACK_FPS);
         } else {
             _frame = floor((current_time / 1000 + _monster.anim_phase) * MONSTER_ANIM_IDLE_FPS);

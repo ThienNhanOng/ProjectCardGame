@@ -11,6 +11,7 @@ function SCR_Battle_Init() {
 
     action_trait_uses = [];
     action_card_used = false;
+    action_payment = undefined;   // what the action card in the action slot cost (refunded if it is cancelled unused)
 
     target_mode = "none";
 

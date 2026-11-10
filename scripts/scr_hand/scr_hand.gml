@@ -31,6 +31,14 @@ function hand_RemoveCard(_index) {
     return _card;
 }
 
+/// Index of this exact card struct in the hand, or -1
+function hand_IndexOf(_card) {
+    for (var i = 0; i < hand_Count; i++) {
+        if (hand[i] == _card) return i;
+    }
+    return -1;
+}
+
 function hand_GetCard(_index) {
     if (_index >= 0 && _index < hand_Count) return hand[_index];
     return undefined;

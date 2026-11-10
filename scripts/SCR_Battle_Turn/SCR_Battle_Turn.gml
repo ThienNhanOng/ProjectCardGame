@@ -178,6 +178,8 @@ function battle_BeginEnemyTurn() {
 
 function battle_CompleteEnemyTurn() {
     status_TickAllTimedAttackBuffs();
+    monster_HatchReady();   // eggs that are ready hatch now
+    monster_StanceSwapAll();   // stance users change stance
 
     var _bm = instance_find(OBJ_BattleManager, 0);
     if (_bm != noone) {
@@ -217,6 +219,7 @@ function battle_EnemyTurn_RunCurrentStep(_slot_index, _monster) {
     switch (enemy_turn_step_index) {
         case 0:
             monsterAbility_InitState(_monster);
+            monster_ChooseMove(_monster);   // multi-move enemies pick this turn's attack
             if (!status_IsSilenced(_monster)) {
                 monsterAbility_LogCountdown(_slot_index, _monster);
             }

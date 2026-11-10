@@ -216,7 +216,12 @@ function card_PayAllCosts(_card, _playing_hand_index = -1) {
         }
     }
 
-    if (!battle_SpendResources(card_GetResourceCostTotal(_card))) return false;
+    var _resources = card_GetResourceCostTotal(_card);
+    if (!battle_SpendResources(_resources)) return false;
+
+    // receipt: what this play cost, so a cancelled play can be refunded (card_RefundPayment)
+    var _receipt = { resources: max(0, _resources), tributes: [] };
+    global.card_last_payment = _receipt;
 
     var _hand = instance_find(OBJ_Hand, 0);
     if (_hand != noone) {
@@ -226,7 +231,8 @@ function card_PayAllCosts(_card, _playing_hand_index = -1) {
                 for (var r = 1; r < array_length(_tribute_indices); r++) {
                     if (_tribute_indices[r] > _max_idx) _max_idx = _tribute_indices[r];
                 }
-                hand_RemoveCard(_max_idx);
+                var _tribute = hand_RemoveCard(_max_idx);
+                if (_tribute != undefined) array_push(_receipt.tributes, _tribute);
                 for (var d = array_length(_tribute_indices) - 1; d >= 0; d--) {
                     if (_tribute_indices[d] == _max_idx) {
                         array_delete(_tribute_indices, d, 1);
@@ -237,6 +243,21 @@ function card_PayAllCosts(_card, _playing_hand_index = -1) {
     }
 
     return true;
+}
+
+/// Undo a payment receipt from card_PayAllCosts: resources come back, tributes return to the hand
+function card_RefundPayment(_receipt) {
+    if (_receipt == undefined) return;
+    if (_receipt.resources > 0) {
+        var _bm = instance_find(OBJ_BattleManager, 0);
+        if (_bm != noone) with (_bm) player_resources += _receipt.resources;
+    }
+    var _hand = instance_find(OBJ_Hand, 0);
+    if (_hand == noone) return;
+    var _tributes = _receipt.tributes;
+    with (_hand) {
+        for (var i = 0; i < array_length(_tributes); i++) hand_AddCard(_tributes[i]);
+    }
 }
 
 function card_AppendCostEntry(_card, _entry) {

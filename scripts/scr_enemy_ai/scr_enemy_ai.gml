@@ -217,7 +217,7 @@ function monsterAbility_PickTargets(_slot_index, _monster, _trait) {
             return (_ally < 0) ? [] : targets_Single(SIDE_ENEMY, _ally);
 
         case "single_enemy":
-            var _victim = monsterAbility_PickPlayerTarget();
+            var _victim = monsterAbility_PickPlayerTarget(_trait, _monster);
             return (_victim < 0) ? [] : targets_Single(SIDE_PLAYER, _victim);
 
         case "all_allies":
@@ -229,9 +229,88 @@ function monsterAbility_PickTargets(_slot_index, _monster, _trait) {
     return [];
 }
 
-/// Hostile single-target abilities (shroud / silence / destroy) pick a random player monster
-function monsterAbility_PickPlayerTarget() {
-    return unit_PickRandom(SIDE_PLAYER);
+// ---------------------------------------------------------------------------
+// Choosing which player monster to hit
+// ---------------------------------------------------------------------------
+
+#macro AI_TARGET_JITTER 12        // random 0..N added to each score so the AI is not perfectly predictable
+
+/// How dangerous a player monster is (its attack, less if it cannot attack right now / is about to leave)
+function monsterAbility_ThreatOf(_card, _slot) {
+    var _atk = max(0, battle_GetPlayerMonsterSummaryAttack(_card, _slot));
+    if (status_IsShrouded(_card)) _atk *= 0.3;                          // cannot attack anyway
+    if (variable_struct_exists(_card, "board_expire") && _card.board_expire
+        && variable_struct_exists(_card, "board_turns_left") && _card.board_turns_left == 1) _atk *= 0.5;   // leaving soon
+    return _atk;
+}
+
+/// Score for hitting this player monster with _damage: a kill beats everything (more for strong monsters and
+/// for overflow damage that spills onto the player); otherwise chip the biggest threat.
+function monsterAbility_ScoreAttackTarget(_slot, _damage) {
+    var _card = unit_Get(SIDE_PLAYER, _slot);
+    if (_card == undefined) return -infinity;
+    battle_EnsureCardHealth(_card);
+    var _hp = max(1, _card.health);
+    var _threat = monsterAbility_ThreatOf(_card, _slot);
+    if (_damage >= _hp) {
+        var _overflow = card_IsSpiritType(_card) ? 0 : (_damage - _hp);
+        return 100 + _threat * 6 + _overflow * 3;
+    }
+    return 40 * (_damage / _hp) + _threat * 4;
+}
+
+/// The player monster an enemy should attack for _damage (-1 when the player has none)
+function monsterAbility_PickAttackTarget(_damage) {
+    var _slots = unit_GetAliveSlots(SIDE_PLAYER);
+    var _best = -1;
+    var _best_score = -infinity;
+    for (var i = 0; i < array_length(_slots); i++) {
+        var _score = monsterAbility_ScoreAttackTarget(_slots[i], _damage) + random(AI_TARGET_JITTER);
+        if (_score > _best_score) {
+            _best_score = _score;
+            _best = _slots[i];
+        }
+    }
+    return _best;
+}
+
+/// Hostile single-target abilities: destroy / silence / shroud the most dangerous monster,
+/// damage effects use the attack scoring, anything else picks at random.
+function monsterAbility_PickPlayerTarget(_trait = undefined, _monster = undefined) {
+    var _slots = unit_GetAliveSlots(SIDE_PLAYER);
+    if (array_length(_slots) <= 0) return -1;
+    var _effect = (_trait != undefined && variable_struct_exists(_trait, "effect")) ? _trait.effect : "";
+    if (_effect == "damage") return monsterAbility_PickAttackTarget(max(0, _trait.amount));
+
+    var _best = -1;
+    var _best_score = -infinity;
+    for (var i = 0; i < array_length(_slots); i++) {
+        var _card = unit_Get(SIDE_PLAYER, _slots[i]);
+        battle_EnsureCardHealth(_card);
+        var _score;
+        switch (_effect) {
+            case "destroy":
+                _score = monsterAbility_ThreatOf(_card, _slots[i]) * 3 + _card.health;
+                break;
+            case "silence":
+                _score = array_length(trait_GetFromCard(_card)) * 10 + monsterAbility_ThreatOf(_card, _slots[i]) * 2;
+                if (status_IsSilenced(_card)) _score -= 1000;           // already silenced
+                break;
+            case "shroud":
+                _score = monsterAbility_ThreatOf(_card, _slots[i]) * 3;
+                if (status_IsShrouded(_card)) _score -= 1000;           // already cannot attack
+                break;
+            default:
+                _score = 0;
+                break;
+        }
+        _score += random(AI_TARGET_JITTER);
+        if (_score > _best_score) {
+            _best_score = _score;
+            _best = _slots[i];
+        }
+    }
+    return _best;
 }
 
 function monsterAbility_GetCardIdPool(_trait) {

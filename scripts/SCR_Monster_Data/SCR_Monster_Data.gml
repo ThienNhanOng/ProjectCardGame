@@ -39,30 +39,36 @@ function load_MonsterSet(_filename) {
 
     var _new_enemies = _set.enemy;
     for (var i = 0; i < array_length(_new_enemies); i++) {
-        var _src = _new_enemies[i];
-        var _entry = {
-            collection: _set.collection,
-            enemyID: _src.enemyID,
-            enemyname: _src.enemyname,
-            type: _src.type,
-            tag: _src.tag,
-            sprite: _src.sprite,
-            level: _src.level,
-            enemyhealthvalue: _src.enemyhealthvalue,
-            enemyattackvalue: _src.enemyattackvalue,
-            enemyability: _src.enemyability
-        };
-        if (variable_struct_exists(_src, "animation")) {
-            _entry.animation = _src.animation;
-        }
-        if (variable_struct_exists(_src, "icon")) _entry.icon = _src.icon;
-        if (variable_struct_exists(_src, "arrival")) _entry.arrival = _src.arrival;
-        if (variable_struct_exists(_src, "elite")) {
-            _entry.elite = _src.elite;
-        }
-        array_push(global.monster_DB.enemies, _entry);
+        array_push(global.monster_DB.enemies, monster_BuildDefinition(_set.collection, _new_enemies[i]));
     }
 
+}
+
+/// Optional enemy JSON fields, copied as-is when present:
+///   animation  scripted draw    icon     hover portrait sprite     arrival  "side" / "drop"
+///   hatch      { turns, into }  stances  [profile] swapped each turn   moves  [profile] picked each turn
+///   elite      bool
+#macro MONSTER_OPTIONAL_FIELDS ["animation", "icon", "arrival", "hatch", "stances", "moves", "elite"]
+
+/// One enemy definition from its JSON entry (shared by every loader)
+function monster_BuildDefinition(_collection, _src) {
+    var _entry = {
+        collection: _collection,
+        enemyID: _src.enemyID,
+        enemyname: _src.enemyname,
+        type: _src.type,
+        tag: _src.tag,
+        sprite: _src.sprite,
+        level: _src.level,
+        enemyhealthvalue: _src.enemyhealthvalue,
+        enemyattackvalue: _src.enemyattackvalue,
+        enemyability: _src.enemyability
+    };
+    var _fields = MONSTER_OPTIONAL_FIELDS;
+    for (var i = 0; i < array_length(_fields); i++) {
+        if (variable_struct_exists(_src, _fields[i])) variable_struct_set(_entry, _fields[i], variable_struct_get(_src, _fields[i]));
+    }
+    return _entry;
 }
 
 function load_MixedContent(_filename) {
@@ -88,24 +94,7 @@ function load_MixedContent(_filename) {
 
     if (variable_struct_exists(_data, "enemy") && is_array(_data.enemy)) {
         for (var j = 0; j < array_length(_data.enemy); j++) {
-            var _src = _data.enemy[j];
-            var _entry = {
-                collection: _data.collection,
-                enemyID: _src.enemyID,
-                enemyname: _src.enemyname,
-                type: _src.type,
-                tag: _src.tag,
-                sprite: _src.sprite,
-                level: _src.level,
-                enemyhealthvalue: _src.enemyhealthvalue,
-                enemyattackvalue: _src.enemyattackvalue,
-                enemyability: _src.enemyability
-            };
-            if (variable_struct_exists(_src, "animation")) _entry.animation = _src.animation;
-            if (variable_struct_exists(_src, "icon")) _entry.icon = _src.icon;
-            if (variable_struct_exists(_src, "arrival")) _entry.arrival = _src.arrival;
-            if (variable_struct_exists(_src, "elite")) _entry.elite = _src.elite;
-            array_push(global.monster_DB.enemies, _entry);
+            array_push(global.monster_DB.enemies, monster_BuildDefinition(_data.collection, _data.enemy[j]));
             _enemy_count++;
         }
     }
@@ -136,6 +125,10 @@ function SCR_LoadAllMonsters() {
     global.monster_DB.enemies = [];
 
     load_MonsterSet("EnemyCollection01.json");
+    load_MonsterSet("EnemyForestCollection01.json");      // collection "enemyforestcollection1"
+    load_MonsterSet("EnemyUndeadCollection01.json");      // collection "enemyundeadcollection1"
+    load_MonsterSet("EnemySamuraiCollection01.json");      // collection "enemysamuraicollection1"
+    load_MonsterSet("EnemyTownCollection01.json");      // collection "enemytowncollection1"
     load_MonsterSet("AbilityTestMonsters.json");
 
     if (array_length(global.monster_DB.enemies) <= 0) {
@@ -201,6 +194,13 @@ function monster_CreateInstance(_wave_entry) {
     var _def = monster_GetDefinition(_collection, _enemy_id);
     if (_def == undefined) return undefined;
 
+    var _inst = monster_BuildInstance(_def);
+    // stance users start in their first stance
+    if (monster_HasProfiles(_inst, "stances")) monster_ApplyStance(_inst, 0, false);
+    return _inst;
+}
+
+function monster_BuildInstance(_def) {
     return {
         id: _def.enemyID,
         collection: _def.collection,
@@ -208,7 +208,7 @@ function monster_CreateInstance(_wave_entry) {
         type: _def.type,
         tag: _def.tag,
         sprite_name: _def.sprite,
-        icon_name: variable_struct_exists(_def, "icon") ? _def.icon : "",
+        icon_name: struct_GetOr(_def, "icon", ""),
         level: _def.level,
         max_health: _def.enemyhealthvalue,
         health: _def.enemyhealthvalue,
@@ -216,9 +216,17 @@ function monster_CreateInstance(_wave_entry) {
         attack: _def.enemyattackvalue,
         ability: status_CloneAbilityArray(_def.enemyability),
         alive: true,
-        animation: variable_struct_exists(_def, "animation") ? _def.animation : "",
-        elite: variable_struct_exists(_def, "elite") && _def.elite,
-        arrival: variable_struct_exists(_def, "arrival") ? _def.arrival : "",   // "side" / "drop" / "" = random
+        animation: struct_GetOr(_def, "animation", ""),
+        elite: struct_GetOr(_def, "elite", false),
+        arrival: struct_GetOr(_def, "arrival", ""),       // "side" / "drop" / "" = random
+        hatch: struct_GetOr(_def, "hatch", undefined),    // { turns, into: [{collection, enemyID}] }
+        stances: struct_GetOr(_def, "stances", undefined),   // [profile]: one held at a time, swapped each enemy turn
+        stance_index: -1,
+        stance_name: "",
+        moves: struct_GetOr(_def, "moves", undefined),       // [profile]: one picked at the start of each of its turns
+        move_index: -1,
+        move_name: "",
+        anim_attack_fixed: -1,                               // attack animation the current move/stance plays (-1 = random)
         status_effects: [],
         silenced_turns: 0,
         silenced_ability_backup: undefined,

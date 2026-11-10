@@ -30,6 +30,8 @@
 #macro BATTLEFX_START_STAGGER 220   // enemies at the start of a battle arrive one after another
 #macro BATTLEFX_BAR_SPACING 18       // one "|" per this many pixels of distance
 #macro BATTLEFX_HEAD_GAP 24          // room left before the ">" head
+#macro BATTLEFX_AURA_MS 1100         // buff / debuff particle burst
+#macro BATTLEFX_DEBUFF_FALLS true    // debuff particles sink downward (false = they rise like a buff, in red)
 
 function battlefx_Init() {
     if (!variable_global_exists("battle_fx")) global.battle_fx = [];
@@ -104,6 +106,108 @@ function battlefx_UnitFeet(_side, _slot) {
     return { x: _b.x + _b.w / 2, y: _b.y + _b.h - 10 };
 }
 
+/// Buff / debuff burst on a unit. _kind: "buff" (yellow: attack up, heal) or "debuff" (red: silence, shroud, ...)
+function battlefx_Aura(_side, _slot, _kind) {
+    battlefx_Init();
+    if (battlefx_UnitFeet(_side, _slot) == undefined) return;
+    array_push(global.battle_fx, { type: "aura", side: _side, slot: _slot, kind: _kind,
+        start: current_time + global.battlefx_hit_delay, seed: random(1000) });
+}
+
+/// Same for every target in a targets list (from targets_Single / targets_All...)
+function battlefx_AuraTargets(_targets, _kind) {
+    for (var i = 0; i < array_length(_targets); i++) battlefx_Aura(_targets[i].side, _targets[i].slot, _kind);
+}
+
+function battlefx_Rand(_k, _seed) {
+    return frac(abs(sin(_k * 12.9898 + _seed * 78.233) * 43758.5453));
+}
+
+/// four-point twinkle
+function battlefx_DrawTwinkle(_x, _y, _r) {
+    var _w = _r * 0.22;
+    draw_triangle(_x - _r, _y, _x, _y - _w, _x, _y + _w, false);
+    draw_triangle(_x + _r, _y, _x, _y - _w, _x, _y + _w, false);
+    draw_triangle(_x, _y - _r, _x - _w, _y, _x + _w, _y, false);
+    draw_triangle(_x, _y + _r, _x - _w, _y, _x + _w, _y, false);
+}
+
+function battlefx_DrawAura(_fx, _t) {
+    var _f = battlefx_UnitFeet(_fx.side, _fx.slot);
+    if (_f == undefined) return;
+    var _buff = (_fx.kind == "buff");
+    var _col = _buff ? make_color_rgb(255, 196, 30) : make_color_rgb(232, 24, 24);
+    var _core = _buff ? make_color_rgb(255, 246, 170) : make_color_rgb(255, 120, 110);
+    var _rise = _buff || !BATTLEFX_DEBUFF_FALLS;
+    var _u = _t / BATTLEFX_AURA_MS;
+    var _h = (_fx.side == SIDE_ENEMY) ? 104 : 92;
+
+    // buffs glow (additive); red would vanish into the grass that way, so debuffs are drawn solid
+    if (_buff) gpu_set_blendmode(bm_add);
+
+    // soft column of light and a ring pulsing out at the feet
+    draw_set_color(_col);
+    draw_set_alpha(0.16 * sin(_u * pi));
+    draw_ellipse(_f.x - 26, _f.y - _h, _f.x + 26, _f.y + 4, false);
+    var _rr = 26 + 30 * _u;
+    draw_set_alpha(0.6 * (1 - _u));
+    draw_ellipse(_f.x - _rr, _f.y - _rr * 0.26, _f.x + _rr, _f.y + _rr * 0.26, true);
+    draw_ellipse(_f.x - _rr + 2, _f.y - _rr * 0.26 + 1, _f.x + _rr - 2, _f.y + _rr * 0.26 - 1, true);
+
+    // particles streaming up (buff) or sinking down (debuff), each with a short tail
+    for (var k = 0; k < 18; k++) {
+        var _r1 = battlefx_Rand(k + 1, _fx.seed);
+        var _r2 = battlefx_Rand(k + 31, _fx.seed);
+        var _p = (_u - _r1 * 0.45) / 0.55;
+        if (_p <= 0 || _p >= 1) continue;
+        var _dist = _p * _h * (0.75 + _r2 * 0.45);
+        var _px = _f.x + (_r2 - 0.5) * 58 + sin(_p * 6 + k) * 3;
+        var _py = _rise ? (_f.y - 4 - _dist) : (_f.y - _h - 8 + _dist);
+        var _s = 1.8 + _r1 * 2.4;
+        var _tail = _rise ? 8 : -8;
+        draw_set_alpha(sin(_p * pi));
+        draw_set_color(_col);
+        draw_line_width(_px, _py, _px, _py + _tail, _s);
+        draw_set_color(_core);
+        draw_circle(_px, _py, _s * 0.55, false);
+    }
+
+    // twinkles popping around the body
+    for (var k2 = 0; k2 < 6; k2++) {
+        var _q = (_u - k2 * 0.1) / 0.35;
+        if (_q <= 0 || _q >= 1) continue;
+        var _sx = _f.x + (battlefx_Rand(k2 + 61, _fx.seed) - 0.5) * 64;
+        var _sy = _f.y - _h * (0.25 + 0.7 * battlefx_Rand(k2 + 91, _fx.seed));
+        var _sr = 11 * sin(_q * pi);
+        draw_set_alpha(1);
+        draw_set_color(_col);
+        battlefx_DrawTwinkle(_sx, _sy, _sr);
+        draw_set_color(_core);
+        battlefx_DrawTwinkle(_sx, _sy, _sr * 0.5);
+    }
+
+    // two chevrons over the head: up for a buff, down for a debuff
+    var _ca = sin(min(1, _u * 1.6) * pi);
+    if (_ca > 0) {
+        var _dir = _rise ? -1 : 1;
+        var _cy = _f.y - _h - 14 + _dir * 10 * _u;
+        for (var c = 0; c < 2; c++) {
+            var _yy = _cy + c * 7 * -_dir;
+            draw_set_alpha(_ca * (1 - c * 0.35));
+            draw_set_color(c_black);
+            draw_line_width(_f.x - 8, _yy - _dir * 5, _f.x, _yy, 4);
+            draw_line_width(_f.x, _yy, _f.x + 8, _yy - _dir * 5, 4);
+            draw_set_color(_col);
+            draw_line_width(_f.x - 8, _yy - _dir * 5, _f.x, _yy, 2.4);
+            draw_line_width(_f.x, _yy, _f.x + 8, _yy - _dir * 5, 2.4);
+        }
+    }
+
+    gpu_set_blendmode(bm_normal);
+    draw_set_alpha(1);
+    draw_set_color(c_white);
+}
+
 /// A unit dies: its bones drop where it stood and fade away
 function battlefx_Death(_side, _slot) {
     battlefx_Init();
@@ -126,6 +230,18 @@ function battlefx_Arrive(_card, _side, _slot, _delay_ms) {
     if (variable_struct_exists(_card, "arrival") && (_card.arrival == "side" || _card.arrival == "drop")) _card.fx_arrive_style = _card.arrival;
     else _card.fx_arrive_style = (random(1) < BATTLEFX_DROP_CHANCE) ? "drop" : "side";
     array_push(global.battle_fx, { type: "smoke", x: _f.x, y: _f.y, start: _card.fx_arrive_start + BATTLEFX_RUN_MS });
+}
+
+/// An egg hatches in place: shell pieces fly off, smoke, and the hatchling is revealed (no run-in)
+function battlefx_Hatch(_card, _slot) {
+    battlefx_Init();
+    var _f = battlefx_UnitFeet(SIDE_ENEMY, _slot);
+    if (_f == undefined) return;
+    _card.fx_arrive_style = "hatch";
+    _card.fx_arrive_start = current_time - BATTLEFX_RUN_MS;   // already "arrived": straight into the smoke
+    _card.fx_arrive_from = _f.x;
+    array_push(global.battle_fx, { type: "smoke", x: _f.x, y: _f.y, start: current_time });
+    array_push(global.battle_fx, { type: "shell", x: _f.x, y: _f.y - 32, start: current_time });
 }
 
 /// Delay for an enemy entering slot _slot: after a death it waits for the bones, at the start they come in turn
@@ -276,6 +392,33 @@ function battlefx_Draw() {
                 var _bf = min(sprite_get_number(SPR_FX_Bones) - 1, floor(_t / 1000 * BATTLEFX_BONES_FPS));
                 var _ba = (_t < _land + BATTLEFX_BONES_HOLD) ? 1 : 1 - (_t - _land - BATTLEFX_BONES_HOLD) / BATTLEFX_BONES_FADE;
                 draw_sprite_ext(SPR_FX_Bones, _bf, _fx.x, _fx.y, BATTLEFX_BONES_SCALE * _fx.flip, BATTLEFX_BONES_SCALE, 0, c_white, _ba);
+                break;
+
+            case "shell":
+                // egg shell pieces flying out and falling
+                if (_t > 700) { array_delete(global.battle_fx, i, 1); continue; }
+                var _u = _t / 700;
+                draw_set_alpha(1 - _u * _u);
+                for (var k = 0; k < 8; k++) {
+                    var _ang = k * 45 + 20;
+                    var _px = _fx.x + lengthdir_x(10 + 46 * _u, _ang);
+                    var _py = _fx.y + lengthdir_y(10 + 30 * _u, _ang) + 60 * _u * _u;
+                    var _r = 5 - k mod 3;
+                    var _rot = _u * 400 + k * 40;
+                    draw_set_color(make_color_rgb(226, 210, 186));
+                    draw_triangle(_px + lengthdir_x(_r, _rot), _py + lengthdir_y(_r, _rot), _px + lengthdir_x(_r, _rot + 130), _py + lengthdir_y(_r, _rot + 130),
+                        _px + lengthdir_x(_r, _rot + 240), _py + lengthdir_y(_r, _rot + 240), false);
+                    draw_set_color(make_color_rgb(60, 44, 34));
+                    draw_triangle(_px + lengthdir_x(_r, _rot), _py + lengthdir_y(_r, _rot), _px + lengthdir_x(_r, _rot + 130), _py + lengthdir_y(_r, _rot + 130),
+                        _px + lengthdir_x(_r, _rot + 240), _py + lengthdir_y(_r, _rot + 240), true);
+                }
+                draw_set_alpha(1);
+                draw_set_color(c_white);
+                break;
+
+            case "aura":
+                if (_t > BATTLEFX_AURA_MS) { array_delete(global.battle_fx, i, 1); continue; }
+                battlefx_DrawAura(_fx, _t);
                 break;
 
             case "smoke":

@@ -330,10 +330,11 @@ function battle_OnActionCardPlayed(_card) {
     for (var a = 0; a < array_length(_traits); a++) {
         if (!trait_ActionIsAuto(_traits[a])) continue;
 
+        // an automatic effect (draw, add, ...) already happened: the card can no longer be taken back
         if (trait_IsRepeatable(_traits[a])) {
-            battle_ExecuteActionTraitInstant(a);
+            if (battle_ExecuteActionTraitInstant(a)) action_card_used = true;
         } else {
-            trait_ExecuteOnPlay(_traits[a], -1);
+            if (trait_ExecuteOnPlay(_traits[a], -1)) action_card_used = true;
         }
     }
 
@@ -417,6 +418,11 @@ function battle_AbortActionCardPlay() {
         with (_hand) hand_AddCard(_removed);
     }
 
+    // nothing was used: give back the resources and tribute cards it cost
+    card_RefundPayment(action_payment);
+    action_payment = undefined;
+    battle_EnemyLog_Write(_removed.name + " returned to hand (cost refunded).");
+
     action_trait_uses = [];
     trait_ChainFinish();
     return true;
@@ -449,4 +455,5 @@ function battle_FinishActionCard() {
 
     action_trait_uses = [];
     action_card_used = false;
+    action_payment = undefined;
 }

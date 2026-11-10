@@ -98,7 +98,7 @@ function monsterAbility_RunEffect(_slot_index, _monster, _trait) {
         var _count = max(1, _trait.amount);
         for (var n = 0; n < _count; n++) {
             if (battle_IsPlayerDefeated()) break;
-            var _target = monsterAbility_PickPlayerTarget();
+            var _target = monsterAbility_PickPlayerTarget(_trait, _monster);
             if (_target < 0) break;
             if (trait_Execute(_trait, trait_CreateContext(_src, targets_Single(SIDE_PLAYER, _target)))) _destroyed++;
         }
@@ -151,7 +151,7 @@ function monsterAbility_PerformAttack(_slot_index, _monster) {
         return _hit_all;
     }
 
-    var _player_target = unit_PickRandom(SIDE_PLAYER);
+    var _player_target = monsterAbility_PickAttackTarget(_damage);
     var _targets = targets_AttackDefender(SIDE_PLAYER, _player_target);
     if (_damage > 0) battlefx_EnemyAttack(_slot_index, _targets);   // arrow, then the attack animation, then the hit
     var _hit = card_Damage(_src, _targets, _damage);

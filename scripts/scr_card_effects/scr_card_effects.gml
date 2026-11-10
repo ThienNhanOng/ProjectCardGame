@@ -34,6 +34,7 @@ function card_Heal(_source, _targets, _amount) {
         if (_unit == undefined) continue;
         battle_EnsureCardHealth(_unit);
         _unit.health = min(_unit.max_health, _unit.health + _amount);
+        battlefx_Aura(_targets[i].side, _targets[i].slot, "buff");
         _healed = true;
     }
     return _healed;
@@ -56,6 +57,7 @@ function card_BuffAttack(_source, _targets, _amount) {
         var _unit = unit_Get(_targets[i].side, _targets[i].slot);
         if (_unit == undefined) continue;
         card_GainAttack(_unit, _amount);
+        battlefx_Aura(_targets[i].side, _targets[i].slot, "buff");
         _buffed = true;
     }
     return _buffed;
@@ -77,6 +79,7 @@ function card_Silence(_source, _targets, _turns) {
             continue;
         }
         if (!status_Apply(_unit, STATUS_SILENCE, _turns)) continue;
+        battlefx_Aura(_side, _slot, "debuff");
         battle_StatusLog_Silence(_side, _slot, _unit.name, _unit.silenced_turns);
         _done = true;
     }
@@ -92,6 +95,7 @@ function card_Shroud(_source, _targets, _turns) {
         var _unit = unit_Get(_targets[i].side, _targets[i].slot);
         if (_unit == undefined) continue;
         if (!status_Apply(_unit, STATUS_SHROUD, _turns)) continue;
+        battlefx_Aura(_targets[i].side, _targets[i].slot, "debuff");
         battle_StatusLog_Shroud(_targets[i].slot, _unit.name, _unit.shrouded_turns);
         _done = true;
     }
