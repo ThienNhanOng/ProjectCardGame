@@ -314,7 +314,7 @@ function worldmap_NodePlayerStep(_inst) {
     }
 
     // mouse: clicking a node that would start something asks first; done nodes are just travelled to
-    if (mouse_check_button_pressed(mb_left) && !worldmap_IsMouseOverCollectionButton() && !worldmap_IsMouseOverMenuButton()) {
+    if (mouse_check_button_pressed(mb_left) && !worldmap_IsMouseOverCollectionButton()) {
         var _clicked = worldmap_NodeAtPoint(mouse_x, mouse_y, true);
         if (_clicked < 0) return;
         if (worldmap_NodeClickWouldStart(_clicked)) {

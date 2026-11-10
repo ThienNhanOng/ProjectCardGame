@@ -301,38 +301,6 @@ function worldmap_IsMouseOverCollectionButton() {
     return _mx >= _bounds.x1 && _mx <= _bounds.x2 && _my >= _bounds.y1 && _my <= _bounds.y2;
 }
 
-// ---------------------------------------------------------------------------
-// Menu button (above Collection) and Esc: the home screen — save, load, exit (scr_save_system)
-// ---------------------------------------------------------------------------
-
-function worldmap_GetMenuButtonBounds() {
-    var _b = worldmap_GetCollectionButtonBounds();
-    var _h = _b.y2 - _b.y1;
-    return { x1: _b.x1, y1: _b.y1 - _h - 10, x2: _b.x2, y2: _b.y1 - 10 };
-}
-
-function worldmap_IsMouseOverMenuButton() {
-    var _b = worldmap_GetMenuButtonBounds();
-    return point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), _b.x1, _b.y1, _b.x2, _b.y2);
-}
-
-function worldmap_DrawMenuButton() {
-    var _b = worldmap_GetMenuButtonBounds();
-    draw_set_color(worldmap_IsMouseOverMenuButton() ? c_aqua : make_color_rgb(40, 90, 140));
-    draw_rectangle(_b.x1, _b.y1, _b.x2, _b.y2, false);
-    draw_set_color(c_white);
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_middle);
-    draw_text((_b.x1 + _b.x2) * 0.5, (_b.y1 + _b.y2) * 0.5, "Menu (Esc)");
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-}
-
-function worldmap_HandleMenuButton() {
-    if (dialog_IsActive() || global.worldmap.node_confirm >= 0) return;
-    if (mouse_check_button_pressed(mb_left) && worldmap_IsMouseOverMenuButton()) save_OpenHomeMenu();
-}
-
 function worldmap_OpenCollection() {
     worldmap_InitGlobals();
     global.worldmap.collection_return_room = room;

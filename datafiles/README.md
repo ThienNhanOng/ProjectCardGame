@@ -1577,7 +1577,7 @@ New status effects (poison, burn, regen …): add a case to each switch in **`sc
 
 ## Home screen, saves and accounts
 
-The game opens on **Room_home** (`scripts/scr_home_menu`): Play, Quick Save, Quick Load, Save and Exit, Exit, plus an account switcher. On the world map (**Esc** or the **Menu** button) and in the deck builder (**Esc**, with the deck you are building kept) it opens again, and Play then says **Continue**. A save made before the deck is ready (fewer than 8 cards, or no map reached yet) loads back into the deck builder.
+The game opens on **Room_home** (`scripts/scr_home_menu`): Play, Quick Save, Quick Load, Save and Exit, Exit, plus an account switcher. On the world map (**Esc**) and in the deck builder (**Esc**, with the deck you are building kept) it opens again, and Play then says **Continue**. A save made before the deck is ready (fewer than 8 cards, or no map reached yet) loads back into the deck builder.
 
 | Button | What it does |
 |--------|--------------|
