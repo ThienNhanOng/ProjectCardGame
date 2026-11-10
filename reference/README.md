@@ -26,7 +26,7 @@ This folder documents the **engine and tools** used to build the game. Actual ga
 | A brand-new trait type (new GML effect) | [../datafiles/README.md](../datafiles/README.md#adding-a-new-trait-type) |
 | A keyword (`frontline`, `tag_in`) | [../datafiles/README.md](../datafiles/README.md#keywords) |
 | Card costs, tributes, resources | [../datafiles/README.md](../datafiles/README.md#ability--card-cost--tributes) |
-| An enemy (stats, moves, stances, summons) | [../datafiles/README.md](../datafiles/README.md#enemies-monstersetjson) |
+| An enemy (stats, moves, stances, summons) | [../datafiles/README.md](../datafiles/README.md#enemies-datafilesenemies) |
 | An animated enemy sprite | [../datafiles/README.md](../datafiles/README.md#animated-enemies) |
 | A battle (enemy wave, how many spots) | [../datafiles/README.md](../datafiles/README.md#battles-battlesets) |
 | A battle background (and where the ground must be) | [../datafiles/README.md](../datafiles/README.md#battle-backgrounds-and-where-units-stand) |

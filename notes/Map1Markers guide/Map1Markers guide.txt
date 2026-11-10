@@ -36,7 +36,7 @@ Flow when the player presses E at a marker:
         ↓
   Grasslands_Battleset01_starter.json  (waves / enemy IDs)
         ↓
-  EnemyCollection01.json  (enemy stats, abilities, animation)
+  enemies/animatedcreatures.json  (enemy stats, abilities, animation)
         ↓
   Room_battle
         ↓
@@ -236,7 +236,7 @@ Each battle lists waves of enemies by collection + enemyID:
   }
 
   battle01–battle08  = fight definitions (waves)
-  enemyID            = must match an entry in EnemyCollection01.json
+  enemyID            = must match an entry in that collection in enemies/animatedcreatures.json
 
 To point a marker at a fight, set marker_battle to "battle01" (or any battle id
 in the battleset file named in marker_battleset).
@@ -275,9 +275,10 @@ Monsters are defined separately from battles and markers.
 
 Step A — Define the enemy (stats, name, abilities)
 
-  File: datafiles/EnemyCollection01.json
+  File: datafiles/enemies/animatedcreatures.json  (every enemy, one block per area)
 
-  Add a new entry under "enemy" with a unique enemyID:
+  Add a new entry under the "enemyCollection01" block's "enemy" list with a unique enemyID
+  (next free one: 15). // comments are fine in this file:
 
   {
     "enemyID": 15,
@@ -307,14 +308,14 @@ Step B — Use the enemy in a battle
 
 Step C — Included Files (if new JSON file)
 
-  If you create a NEW collection file (not EnemyCollection01.json):
-  1. Put the file in datafiles/
+  If you create a NEW enemy file (instead of adding to enemies/animatedcreatures.json):
+  1. Put the file in datafiles/enemies/
   2. GameMaker → Included Files → add the JSON
   3. Open scripts/scr_monster_data/scr_monster_data.gml
   4. In SCR_LoadAllMonsters(), add:
-       load_MonsterSet("YourNewCollection.json");
+       load_MonsterSet("enemies/YourNewFile.json");
 
-  For edits inside EnemyCollection01.json only — no loader change needed.
+  For edits inside enemies/animatedcreatures.json only — no loader change needed.
   Reload / restart the game so OBJ_GameController runs SCR_LoadAllMonsters() again.
 
 Step D — New battleset file (optional)

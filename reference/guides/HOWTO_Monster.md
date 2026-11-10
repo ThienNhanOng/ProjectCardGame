@@ -25,7 +25,7 @@ Spawn enemy waves from battleset JSON, animate attacks, run `enemyability` trait
 
 ## Dependencies
 
-- `EnemyCollection01.json` (monster_DB)
+- `datafiles/enemies/animatedcreatures.json`: every enemy, all areas (global.monster_DB)
 - `Grasslands_Battleset01_starter.json` (wave definitions)
 - `scr_battle_turn`
 

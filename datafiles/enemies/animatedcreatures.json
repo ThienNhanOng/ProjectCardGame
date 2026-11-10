@@ -1,0 +1,965 @@
+// ================================================================================================
+//  ANIMATED CREATURES: every example enemy in the game, in one file.
+//
+//  Layout:   "collections": [ { "collection": <name>, "enemy": [ <enemy>, ... ] }, ... ]
+//  A battle picks an enemy by collection + enemyID, e.g. in a battleset wave:
+//      { "collection": "enemyCollection01", "enemyID": 4 }
+//  so keep collection names as they are, and keep enemyIDs unique inside a collection.
+//
+//  Add an enemy:      copy one inside the right collection; give it a new enemyID (highest + 1).
+//  Order inside a collection doesn't matter: enemies are grouped by family, found by enemyID.
+//  Add a new area:    add another { "collection": ..., "enemy": [...] } block below.
+//  Every field:       datafiles/README.md -> Enemies.
+//  Comments:          // works on its own line or after a value (the game strips them).
+//  Summary lines:     #id Name | HP | ATK | Lv  -  what it does each turn
+// ================================================================================================
+{
+  "collections": [
+
+    // ============================================================================================
+    //  GRASSLANDS: goblins and bandits
+    //  Collection "enemyCollection01"  (14 enemies, was EnemyCollection01.json)
+    //  Used by: Map 1 and Map 2 (Grasslands_Battleset01_starter.json, battle01-battle08).
+    //  Old collection names enemySet_01..03, enemyGoblins_01 and enemyOrcs_01 also point here.
+    // ============================================================================================
+    {
+      "collection": "enemyCollection01",
+      "enemy": [
+        // --- Goblins ---
+        // #1 Goblin Raider | HP 6 | ATK 6 | Lv 1  -  plain attacks
+        {
+          "enemyID": 1,
+          "enemyname": "Goblin Raider",
+          "type": "monster",
+          "tag": ["Goblin", "Set1"],
+          "sprite": "SPR_GoblinDagger",
+          "icon": "SPR_GoblinIcon",
+          "animation": "GoblinSoldier",
+          "level": 1,
+          "enemyhealthvalue": 6,
+          "enemyattackvalue": 6,
+          "enemyability": []
+        },
+        // #2 Goblin Berserker | HP 6 | ATK 6 | Lv 1  -  attack_all 3
+        {
+          "enemyID": 2,
+          "enemyname": "Goblin Berserker",
+          "type": "monster",
+          "tag": ["Goblin", "Set1"],
+          "sprite": "SPR_GoblinClub",
+          "icon": "SPR_GoblinIcon",
+          "animation": "GoblinSoldier",
+          "level": 1,
+          "enemyhealthvalue": 6,
+          "enemyattackvalue": 6,
+          "enemyability": [{ "type": "attack_all", "value": 3 }]
+        },
+        // #3 Goblin Shaman | HP 15 | ATK 0 | Lv 1  -  heal 5
+        {
+          "enemyID": 3,
+          "enemyname": "Goblin Shaman",
+          "type": "monster",
+          "tag": ["Goblin", "Set1"],
+          "sprite": "SPR_GoblinStaff",
+          "icon": "SPR_GoblinIcon",
+          "animation": "GoblinMage",
+          "level": 1,
+          "enemyhealthvalue": 15,
+          "enemyattackvalue": 0,
+          "enemyability": [{ "type": "heal", "value": 5 }]
+        },
+        // #4 Goblin Chief | HP 20 | ATK 8 | Lv 1  -  self_buff 3
+        {
+          "enemyID": 4,
+          "enemyname": "Goblin Chief",
+          "type": "monster",
+          "tag": ["Goblin", "Set1"],
+          "sprite": "SPR_GoblinBrute",
+          "icon": "SPR_GoblinIcon",
+          "animation": "GoblinCommander",
+          "level": 1,
+          "enemyhealthvalue": 20,
+          "enemyattackvalue": 8,
+          "enemyability": [{ "type": "self_buff", "value": 3 }]
+        },
+        // #5 Goblin Commander | HP 15 | ATK 5 | Lv 1  -  buff 2
+        {
+          "enemyID": 5,
+          "enemyname": "Goblin Commander",
+          "type": "monster",
+          "tag": ["Goblin", "Set1"],
+          "sprite": "SPR_GoblinArcher",
+          "icon": "SPR_GoblinIcon",
+          "animation": "GoblinCommander",
+          "level": 1,
+          "enemyhealthvalue": 15,
+          "enemyattackvalue": 5,
+          "enemyability": [{ "type": "buff", "value": 2 }]
+        },
+        // #6 Goblin Lord | HP 20 | ATK 20 | Lv 1 | ELITE  -  destroy 1
+        {
+          "enemyID": 6,
+          "enemyname": "Goblin Lord",
+          "type": "monster",
+          "tag": ["Goblin", "Set1"],
+          "sprite": "SPR_GoblinBrute",
+          "icon": "SPR_GoblinIcon",
+          "animation": "GoblinCommander",
+          "level": 1,
+          "enemyhealthvalue": 20,
+          "enemyattackvalue": 20,
+          "enemyability": [{ "type": "destroy", "value": 1 }],
+          "elite": true
+        },
+
+        // --- Bandits ---
+        // #7 Bandit Scout | HP 10 | ATK 5 | Lv 1  -  plain attacks
+        {
+          "enemyID": 7,
+          "enemyname": "Bandit Scout",
+          "type": "monster",
+          "tag": ["Bandit", "Set2"],
+          "sprite": "SPR_Monsterplaceholder",
+          "level": 1,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 5,
+          "enemyability": []
+        },
+        // #8 Bandit Leader | HP 30 | ATK 10 | Lv 1  -  plain attacks
+        {
+          "enemyID": 8,
+          "enemyname": "Bandit Leader",
+          "type": "monster",
+          "tag": ["Bandit", "Set2"],
+          "sprite": "SPR_Monsterplaceholder",
+          "level": 1,
+          "enemyhealthvalue": 30,
+          "enemyattackvalue": 10,
+          "enemyability": []
+        },
+        // #9 Bandit Saboteur | HP 10 | ATK 5 | Lv 1  -  discard_monster 1
+        {
+          "enemyID": 9,
+          "enemyname": "Bandit Saboteur",
+          "type": "monster",
+          "tag": ["Bandit", "Set2"],
+          "sprite": "SPR_Monsterplaceholder",
+          "level": 1,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 5,
+          "enemyability": [{ "type": "discard_monster", "value": 1 }]
+        },
+        // #10 Bandit Saboteur (Action) | HP 10 | ATK 5 | Lv 1  -  discard_action 1
+        {
+          "enemyID": 10,
+          "enemyname": "Bandit Saboteur (Action)",
+          "type": "monster",
+          "tag": ["Bandit", "Set2"],
+          "sprite": "SPR_Monsterplaceholder",
+          "level": 1,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 5,
+          "enemyability": [{ "type": "discard_action", "value": 1 }]
+        },
+        // #11 Bandit Saboteur (Weapon) | HP 10 | ATK 5 | Lv 1  -  discard_weapon 1
+        {
+          "enemyID": 11,
+          "enemyname": "Bandit Saboteur (Weapon)",
+          "type": "monster",
+          "tag": ["Bandit", "Set2"],
+          "sprite": "SPR_Monsterplaceholder",
+          "level": 1,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 5,
+          "enemyability": [{ "type": "discard_weapon", "value": 1 }]
+        },
+        // #12 Bandit Saboteur (Spirit) | HP 10 | ATK 5 | Lv 1  -  discard_spirit 1
+        {
+          "enemyID": 12,
+          "enemyname": "Bandit Saboteur (Spirit)",
+          "type": "monster",
+          "tag": ["Bandit", "Set2"],
+          "sprite": "SPR_Monsterplaceholder",
+          "level": 1,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 5,
+          "enemyability": [{ "type": "discard_spirit", "value": 1 }]
+        },
+        // #13 Bandit Commander | HP 30 | ATK 1 | Lv 1  -  buff 3
+        {
+          "enemyID": 13,
+          "enemyname": "Bandit Commander",
+          "type": "monster",
+          "tag": ["Bandit", "Set2"],
+          "sprite": "SPR_Monsterplaceholder",
+          "level": 1,
+          "enemyhealthvalue": 30,
+          "enemyattackvalue": 1,
+          "enemyability": [{ "type": "buff", "value": 3 }]
+        },
+        // #14 Bandit Medic | HP 30 | ATK 0 | Lv 1  -  heal_all 3
+        {
+          "enemyID": 14,
+          "enemyname": "Bandit Medic",
+          "type": "monster",
+          "tag": ["Bandit", "Set2"],
+          "sprite": "SPR_Monsterplaceholder",
+          "level": 1,
+          "enemyhealthvalue": 30,
+          "enemyattackvalue": 0,
+          "enemyability": [{ "type": "heal_all", "value": 3 }]
+        }
+      ]
+    },
+
+    // ============================================================================================
+    //  FOREST: wolves, dragons and elves
+    //  Collection "enemyforestcollection1"  (16 enemies, was EnemyForestCollection01.json)
+    //  Not used by a battle yet: ready for a forest map's battleset.
+    // ============================================================================================
+    {
+      "collection": "enemyforestcollection1",
+      "enemy": [
+        // --- Wolves ---
+        // #1 Grey Wolf | HP 8 | ATK 4 | Lv 1  -  plain attacks
+        {
+          "enemyID": 1,
+          "enemyname": "Grey Wolf",
+          "type": "monster",
+          "tag": ["Wolf", "Forest"],
+          "sprite": "SPR_WolfGrey",
+          "level": 1,
+          "enemyhealthvalue": 8,
+          "enemyattackvalue": 4,
+          "enemyability": []
+        },
+        // #2 Black Wolf | HP 7 | ATK 5 | Lv 1  -  self_buff 2 for 2 turns
+        {
+          "enemyID": 2,
+          "enemyname": "Black Wolf",
+          "type": "monster",
+          "tag": ["Wolf", "Forest"],
+          "sprite": "SPR_WolfBlack",
+          "level": 1,
+          "enemyhealthvalue": 7,
+          "enemyattackvalue": 5,
+          "enemyability": [{ "type": "self_buff", "value": 2, "turns": 2 }]
+        },
+        // #3 Snow Wolf | HP 10 | ATK 3 | Lv 1  -  buff 2 for 2 turns
+        {
+          "enemyID": 3,
+          "enemyname": "Snow Wolf",
+          "type": "monster",
+          "tag": ["Wolf", "Forest"],
+          "sprite": "SPR_WolfSnow",
+          "level": 1,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "buff", "value": 2, "turns": 2 }]
+        },
+        // #4 Wolf Pack | HP 18 | ATK 3 | Lv 2  -  attack_all 2
+        {
+          "enemyID": 4,
+          "enemyname": "Wolf Pack",
+          "type": "monster",
+          "tag": ["Wolf", "Forest"],
+          "sprite": "SPR_WolfPack",
+          "level": 2,
+          "enemyhealthvalue": 18,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "attack_all", "value": 2 }]
+        },
+        // #5 Bloom Wolf | HP 12 | ATK 3 | Lv 2  -  heal_all 3
+        {
+          "enemyID": 5,
+          "enemyname": "Bloom Wolf",
+          "type": "monster",
+          "tag": ["Wolf", "Forest"],
+          "sprite": "SPR_WolfBloom",
+          "level": 2,
+          "enemyhealthvalue": 12,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "heal_all", "value": 3 }]
+        },
+        // #6 Three-Headed Hound | HP 30 | ATK 6 | Lv 3 | ELITE  -  attack_all 4
+        {
+          "enemyID": 6,
+          "enemyname": "Three-Headed Hound",
+          "type": "monster",
+          "tag": ["Wolf", "Forest"],
+          "sprite": "SPR_Cerberus",
+          "level": 3,
+          "enemyhealthvalue": 30,
+          "enemyattackvalue": 6,
+          "enemyability": [{ "type": "attack_all", "value": 4 }],
+          "elite": true
+        },
+        // #7 Fenrir | HP 36 | ATK 9 | Lv 4 | ELITE  -  destroy 1 (charges 2 turns)
+        {
+          "enemyID": 7,
+          "enemyname": "Fenrir",
+          "type": "monster",
+          "tag": ["Wolf", "Forest"],
+          "sprite": "SPR_Fenrir",
+          "level": 4,
+          "enemyhealthvalue": 36,
+          "enemyattackvalue": 9,
+          "enemyability": [{ "type": "destroy", "value": 1, "delay": 2 }],
+          "elite": true
+        },
+
+        // --- Dragons ---
+        // #8 Dragon | HP 40 | ATK 8 | Lv 5 | ELITE  -  moves: Roar, Fire Breath, Lay Egg; arrives by 'drop'
+        {
+          "enemyID": 8,
+          "enemyname": "Dragon",
+          "type": "monster",
+          "tag": ["Dragon", "Forest"],
+          "sprite": "SPR_Dragon",
+          "arrival": "drop",
+          "level": 5,
+          "enemyhealthvalue": 40,
+          "enemyattackvalue": 8,
+          "enemyability": [],
+          "elite": true,
+          "moves": [
+            {
+              "name": "Roar",
+              "anim": 1,
+              "attack": 5,
+              "ability": [{ "type": "self_buff", "value": 3, "turns": 2 }]
+            },
+            {
+              "name": "Fire Breath",
+              "anim": 2,
+              "attack": 6,
+              "ability": [{ "type": "attack_all", "value": 1 }]
+            },
+            {
+              "name": "Lay Egg",
+              "anim": 3,
+              "attack": 0,
+              "ability": [{ "type": "summon_enemy", "enemyID": 9, "collection": "enemyforestcollection1" }],
+              "weight": 0.5,
+              "when": "free_slot"
+            }
+          ]
+        },
+        // #9 Dragon Egg | HP 12 | ATK 0 | Lv 1  -  hatches after 4 turns into Dragon or Fenrir
+        {
+          "enemyID": 9,
+          "enemyname": "Dragon Egg",
+          "type": "monster",
+          "tag": ["Dragon", "Forest"],
+          "sprite": "SPR_DragonEgg",
+          "level": 1,
+          "enemyhealthvalue": 12,
+          "enemyattackvalue": 0,
+          "enemyability": [],
+          "hatch": {
+            "turns": 4,
+            "into": [
+              { "collection": "enemyforestcollection1", "enemyID": 8 },
+              { "collection": "enemyforestcollection1", "enemyID": 7 }
+            ]
+          }
+        },
+        // #15 Green Dragon | HP 36 | ATK 5 | Lv 5 | ELITE  -  moves: Roar, Toxic Breath, Lay Egg; arrives by 'drop'
+        {
+          "enemyID": 15,
+          "enemyname": "Green Dragon",
+          "type": "monster",
+          "tag": ["Dragon", "Forest"],
+          "sprite": "SPR_DragonGreen",
+          "arrival": "drop",
+          "level": 5,
+          "enemyhealthvalue": 36,
+          "enemyattackvalue": 5,
+          "enemyability": [],
+          "elite": true,
+          "moves": [
+            {
+              "name": "Roar",
+              "anim": 1,
+              "attack": 4,
+              "ability": [{ "type": "self_buff", "value": 2, "turns": 2 }]
+            },
+            {
+              "name": "Toxic Breath",
+              "anim": 2,
+              "attack": 5,
+              "ability": [{ "type": "attack_all", "value": 1 }]
+            },
+            {
+              "name": "Lay Egg",
+              "anim": 3,
+              "attack": 0,
+              "ability": [{ "type": "summon_enemy", "enemyID": 16, "collection": "enemyforestcollection1" }],
+              "weight": 0.5,
+              "when": "free_slot"
+            }
+          ]
+        },
+        // #16 Green Dragon Egg | HP 10 | ATK 0 | Lv 1  -  hatches after 4 turns into Green Dragon
+        {
+          "enemyID": 16,
+          "enemyname": "Green Dragon Egg",
+          "type": "monster",
+          "tag": ["Dragon", "Forest"],
+          "sprite": "SPR_DragonEggGreen",
+          "level": 1,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 0,
+          "enemyability": [],
+          "hatch": { "turns": 4, "into": [{ "collection": "enemyforestcollection1", "enemyID": 15 }] }
+        },
+
+        // --- Elves ---
+        // #10 Elf Archer | HP 9 | ATK 5 | Lv 2  -  plain attacks
+        {
+          "enemyID": 10,
+          "enemyname": "Elf Archer",
+          "type": "monster",
+          "tag": ["Elf", "Forest"],
+          "sprite": "SPR_ElfArcher",
+          "level": 2,
+          "enemyhealthvalue": 9,
+          "enemyattackvalue": 5,
+          "enemyability": []
+        },
+        // #11 Elf Spearmaiden | HP 12 | ATK 5 | Lv 2  -  plain attacks
+        {
+          "enemyID": 11,
+          "enemyname": "Elf Spearmaiden",
+          "type": "monster",
+          "tag": ["Elf", "Forest"],
+          "sprite": "SPR_ElfSpear",
+          "level": 2,
+          "enemyhealthvalue": 12,
+          "enemyattackvalue": 5,
+          "enemyability": []
+        },
+        // #12 Elf Shieldbearer | HP 22 | ATK 1 | Lv 2  -  self_buff 2 for 2 turns
+        {
+          "enemyID": 12,
+          "enemyname": "Elf Shieldbearer",
+          "type": "monster",
+          "tag": ["Elf", "Forest"],
+          "sprite": "SPR_ElfShields",
+          "level": 2,
+          "enemyhealthvalue": 22,
+          "enemyattackvalue": 1,
+          "enemyability": [{ "type": "self_buff", "value": 2, "turns": 2 }]
+        },
+        // #13 Elf Tree Mage | HP 10 | ATK 3 | Lv 3  -  attack_all 2
+        {
+          "enemyID": 13,
+          "enemyname": "Elf Tree Mage",
+          "type": "monster",
+          "tag": ["Elf", "Forest"],
+          "sprite": "SPR_ElfTree",
+          "level": 3,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "attack_all", "value": 2 }]
+        },
+        // #14 Elf Druid | HP 11 | ATK 2 | Lv 3  -  heal_all 3
+        {
+          "enemyID": 14,
+          "enemyname": "Elf Druid",
+          "type": "monster",
+          "tag": ["Elf", "Forest"],
+          "sprite": "SPR_ElfStaff",
+          "level": 3,
+          "enemyhealthvalue": 11,
+          "enemyattackvalue": 2,
+          "enemyability": [{ "type": "heal_all", "value": 3 }]
+        }
+      ]
+    },
+
+    // ============================================================================================
+    //  UNDEAD: skeletons, beasts and a vampire
+    //  Collection "enemyundeadcollection1"  (6 enemies, was EnemyUndeadCollection01.json)
+    //  Not used by a battle yet: ready for a graveyard / crypt map.
+    // ============================================================================================
+    {
+      "collection": "enemyundeadcollection1",
+      "enemy": [
+        // --- Skeletons ---
+        // #1 Skeleton | HP 8 | ATK 3 | Lv 1  -  plain attacks
+        {
+          "enemyID": 1,
+          "enemyname": "Skeleton",
+          "type": "monster",
+          "tag": ["Undead", "Skeleton"],
+          "sprite": "SPR_Skeleton",
+          "level": 1,
+          "enemyhealthvalue": 8,
+          "enemyattackvalue": 3,
+          "enemyability": []
+        },
+        // #4 Skeleton Mage | HP 10 | ATK 3 | Lv 2  -  attack_all 2; arrives by 'drop'
+        {
+          "enemyID": 4,
+          "enemyname": "Skeleton Mage",
+          "type": "monster",
+          "tag": ["Undead", "Skeleton"],
+          "sprite": "SPR_SkelMage",
+          "arrival": "drop",
+          "level": 2,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "attack_all", "value": 2 }]
+        },
+        // #5 Skeleton Samurai | HP 18 | ATK 7 | Lv 3  -  plain attacks
+        {
+          "enemyID": 5,
+          "enemyname": "Skeleton Samurai",
+          "type": "monster",
+          "tag": ["Undead", "Skeleton"],
+          "sprite": "SPR_SkelSamurai",
+          "level": 3,
+          "enemyhealthvalue": 18,
+          "enemyattackvalue": 7,
+          "enemyability": []
+        },
+
+        // --- Beasts ---
+        // #2 Undead Hound | HP 7 | ATK 4 | Lv 1  -  plain attacks
+        {
+          "enemyID": 2,
+          "enemyname": "Undead Hound",
+          "type": "monster",
+          "tag": ["Undead", "Beast"],
+          "sprite": "SPR_UndeadDog",
+          "level": 1,
+          "enemyhealthvalue": 7,
+          "enemyattackvalue": 4,
+          "enemyability": []
+        },
+        // #3 Giant Spider | HP 12 | ATK 4 | Lv 2  -  self_buff 2 for 2 turns
+        {
+          "enemyID": 3,
+          "enemyname": "Giant Spider",
+          "type": "monster",
+          "tag": ["Beast", "Spider"],
+          "sprite": "SPR_Spider",
+          "level": 2,
+          "enemyhealthvalue": 12,
+          "enemyattackvalue": 4,
+          "enemyability": [{ "type": "self_buff", "value": 2, "turns": 2 }]
+        },
+
+        // --- Vampires ---
+        // #6 Vampire | HP 26 | ATK 5 | Lv 4 | ELITE  -  heal_all 3
+        {
+          "enemyID": 6,
+          "enemyname": "Vampire",
+          "type": "monster",
+          "tag": ["Undead", "Vampire"],
+          "sprite": "SPR_Vampire",
+          "level": 4,
+          "enemyhealthvalue": 26,
+          "enemyattackvalue": 5,
+          "enemyability": [{ "type": "heal_all", "value": 3 }],
+          "elite": true
+        }
+      ]
+    },
+
+    // ============================================================================================
+    //  SAMURAI: ronin, monks and the stance bosses
+    //  Collection "enemysamuraicollection1"  (9 enemies, was EnemySamuraiCollection01.json)
+    //  Not used by a battle yet: ready for a samurai map.
+    // ============================================================================================
+    {
+      "collection": "enemysamuraicollection1",
+      "enemy": [
+        // #1 Rogue Ronin | HP 11 | ATK 5 | Lv 2  -  plain attacks
+        {
+          "enemyID": 1,
+          "enemyname": "Rogue Ronin",
+          "type": "monster",
+          "tag": ["Human", "Samurai"],
+          "sprite": "SPR_Ronin",
+          "level": 2,
+          "enemyhealthvalue": 11,
+          "enemyattackvalue": 5,
+          "enemyability": []
+        },
+        // #2 Crimson Kenshi | HP 13 | ATK 8 | Lv 3  -  plain attacks
+        {
+          "enemyID": 2,
+          "enemyname": "Crimson Kenshi",
+          "type": "monster",
+          "tag": ["Human", "Samurai", "Jodan"],
+          "sprite": "SPR_SamJodan",
+          "level": 3,
+          "enemyhealthvalue": 13,
+          "enemyattackvalue": 8,
+          "enemyability": []
+        },
+        // #3 Jingasa Guard | HP 15 | ATK 5 | Lv 3  -  self_buff 2 for 2 turns
+        {
+          "enemyID": 3,
+          "enemyname": "Jingasa Guard",
+          "type": "monster",
+          "tag": ["Human", "Samurai", "Chudan"],
+          "sprite": "SPR_SamChudan",
+          "level": 3,
+          "enemyhealthvalue": 15,
+          "enemyattackvalue": 5,
+          "enemyability": [{ "type": "self_buff", "value": 2, "turns": 2 }]
+        },
+        // #4 Basket Monk | HP 14 | ATK 4 | Lv 3  -  heal_all 2
+        {
+          "enemyID": 4,
+          "enemyname": "Basket Monk",
+          "type": "monster",
+          "tag": ["Human", "Samurai", "Gedan"],
+          "sprite": "SPR_SamGedan",
+          "level": 3,
+          "enemyhealthvalue": 14,
+          "enemyattackvalue": 4,
+          "enemyability": [{ "type": "heal_all", "value": 2 }]
+        },
+        // #5 Shadow Blade | HP 10 | ATK 7 | Lv 3  -  plain attacks
+        {
+          "enemyID": 5,
+          "enemyname": "Shadow Blade",
+          "type": "monster",
+          "tag": ["Human", "Samurai", "Waki"],
+          "sprite": "SPR_SamWaki",
+          "level": 3,
+          "enemyhealthvalue": 10,
+          "enemyattackvalue": 7,
+          "enemyability": []
+        },
+        // #6 Twin Fang | HP 12 | ATK 4 | Lv 3  -  attack_all 3
+        {
+          "enemyID": 6,
+          "enemyname": "Twin Fang",
+          "type": "monster",
+          "tag": ["Human", "Samurai", "Dual"],
+          "sprite": "SPR_SamDual",
+          "level": 3,
+          "enemyhealthvalue": 12,
+          "enemyattackvalue": 4,
+          "enemyability": [{ "type": "attack_all", "value": 3 }]
+        },
+        // #7 Iron Warden | HP 22 | ATK 3 | Lv 3  -  self_buff 2 for 2 turns
+        {
+          "enemyID": 7,
+          "enemyname": "Iron Warden",
+          "type": "monster",
+          "tag": ["Human", "Samurai", "Shield"],
+          "sprite": "SPR_SamShield",
+          "level": 3,
+          "enemyhealthvalue": 22,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "self_buff", "value": 2, "turns": 2 }]
+        },
+        // #8 Seven-Blade Master | HP 30 | ATK 6 | Lv 5 | ELITE  -  moves: Whirlwind, Sword Rain, Triple Cross, Thigh-Blade Kick, Seven-Blade Storm
+        {
+          "enemyID": 8,
+          "enemyname": "Seven-Blade Master",
+          "type": "monster",
+          "tag": ["Human", "Samurai"],
+          "sprite": "SPR_SevenBlade",
+          "level": 5,
+          "enemyhealthvalue": 30,
+          "enemyattackvalue": 6,
+          "enemyability": [],
+          "elite": true,
+          "moves": [
+            {
+              "name": "Whirlwind",
+              "anim": 1,
+              "attack": 4,
+              "ability": [{ "type": "attack_all", "value": 1 }]
+            },
+            { "name": "Sword Rain", "anim": 2, "attack": 6, "ability": [] },
+            { "name": "Triple Cross", "anim": 3, "attack": 9, "ability": [] },
+            {
+              "name": "Thigh-Blade Kick",
+              "anim": 4,
+              "attack": 3,
+              "ability": [{ "type": "silence", "value": 1 }]
+            },
+            { "name": "Seven-Blade Storm", "anim": 5, "attack": 12, "ability": [], "weight": 0.5 }
+          ]
+        },
+        // #9 Kensei of Seven Stances | HP 60 | ATK 6 | Lv 6 | ELITE  -  stances: Flurry, Jodan, Chudan, Gedan, Waki, Dual, Shield
+        {
+          "enemyID": 9,
+          "enemyname": "Kensei of Seven Stances",
+          "type": "monster",
+          "tag": ["Human", "Samurai", "Boss"],
+          "sprite": "SPR_SamBossFlurry",
+          "level": 6,
+          "enemyhealthvalue": 60,
+          "enemyattackvalue": 6,
+          "enemyability": [],
+          "elite": true,
+          "stances": [
+            { "name": "Flurry", "sprite": "SPR_SamBossFlurry", "attack": 6, "ability": [] },
+            { "name": "Jodan", "sprite": "SPR_SamBossJodan", "attack": 10, "ability": [] },
+            {
+              "name": "Chudan",
+              "sprite": "SPR_SamBossChudan",
+              "attack": 7,
+              "ability": [{ "type": "self_buff", "value": 2, "turns": 2 }]
+            },
+            {
+              "name": "Gedan",
+              "sprite": "SPR_SamBossGedan",
+              "attack": 6,
+              "ability": [{ "type": "heal_all", "value": 4 }]
+            },
+            { "name": "Waki", "sprite": "SPR_SamBossWaki", "attack": 9, "ability": [] },
+            {
+              "name": "Dual",
+              "sprite": "SPR_SamBossDual",
+              "attack": 5,
+              "ability": [{ "type": "attack_all", "value": 3 }]
+            },
+            {
+              "name": "Shield",
+              "sprite": "SPR_SamBossShield",
+              "attack": 4,
+              "ability": [{ "type": "self_buff", "value": 3, "turns": 2 }]
+            }
+          ]
+        }
+      ]
+    },
+
+    // ============================================================================================
+    //  TOWN: thieves, merchants and dancers
+    //  Collection "enemytowncollection1"  (3 enemies, was EnemyTownCollection01.json)
+    //  Not used by a battle yet: ready for a town map.
+    // ============================================================================================
+    {
+      "collection": "enemytowncollection1",
+      "enemy": [
+        // --- Thieves ---
+        // #1 Sly Thief | HP 9 | ATK 4 | Lv 2  -  discard_hand 1 (charges 2 turns)
+        {
+          "enemyID": 1,
+          "enemyname": "Sly Thief",
+          "type": "monster",
+          "tag": ["Human", "Thief"],
+          "sprite": "SPR_Thief",
+          "level": 2,
+          "enemyhealthvalue": 9,
+          "enemyattackvalue": 4,
+          "enemyability": [{ "type": "discard_hand", "value": 1, "delay": 2 }]
+        },
+
+        // --- Merchants ---
+        // #2 Travelling Merchant | HP 12 | ATK 3 | Lv 2  -  buff 2 for 2 turns
+        {
+          "enemyID": 2,
+          "enemyname": "Travelling Merchant",
+          "type": "monster",
+          "tag": ["Human", "Merchant"],
+          "sprite": "SPR_Merchant",
+          "level": 2,
+          "enemyhealthvalue": 12,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "buff", "value": 2, "turns": 2 }]
+        },
+
+        // --- Dancers ---
+        // #3 Fan Dancer | HP 16 | ATK 5 | Lv 3 | ELITE  -  moves: Fan Glide, Tornado, Spin Dance
+        {
+          "enemyID": 3,
+          "enemyname": "Fan Dancer",
+          "type": "monster",
+          "tag": ["Human", "Dancer"],
+          "sprite": "SPR_FanDancer",
+          "level": 3,
+          "enemyhealthvalue": 16,
+          "enemyattackvalue": 5,
+          "enemyability": [],
+          "elite": true,
+          "moves": [
+            { "name": "Fan Glide", "anim": 1, "attack": 5, "ability": [] },
+            { "name": "Tornado", "anim": 2, "attack": 3, "ability": [{ "type": "attack_all", "value": 1 }] },
+            { "name": "Spin Dance", "anim": 3, "attack": 0, "ability": [{ "type": "silence", "value": 1 }] }
+          ]
+        }
+      ]
+    },
+
+    // ============================================================================================
+    //  ABILITY TEST: one enemy per ability (ids 101-112)
+    //  Collection "enemyAbilityTest"  (12 enemies, was AbilityTestMonsters.json)
+    //  Used by: AbilityTestBattle.json (ability_test_all). For testing, not for real maps.
+    // ============================================================================================
+    {
+      "collection": "enemyAbilityTest",
+      "enemy": [
+        // #101 Test Basic Attack | HP 5 | ATK 3 | Lv 1  -  plain attacks
+        {
+          "enemyID": 101,
+          "enemyname": "Test Basic Attack",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinSoldier",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 3,
+          "enemyability": []
+        },
+        // #102 Test Attack All | HP 5 | ATK 3 | Lv 1  -  attack_all 3
+        {
+          "enemyID": 102,
+          "enemyname": "Test Attack All",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinSoldier",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "attack_all", "value": 3 }]
+        },
+        // #103 Test Self Buff | HP 5 | ATK 3 | Lv 1  -  self_buff 3 for 2 turns
+        {
+          "enemyID": 103,
+          "enemyname": "Test Self Buff",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinSoldier",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "self_buff", "value": 3, "turns": 2 }]
+        },
+        // #104 Test Buff Ally | HP 5 | ATK 0 | Lv 1  -  buff 3 for 2 turns
+        {
+          "enemyID": 104,
+          "enemyname": "Test Buff Ally",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinCommander",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 0,
+          "enemyability": [{ "type": "buff", "value": 3, "turns": 2 }]
+        },
+        // #105 Test Destroy | HP 5 | ATK 0 | Lv 1  -  destroy 1
+        {
+          "enemyID": 105,
+          "enemyname": "Test Destroy",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinCommander",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 0,
+          "enemyability": [{ "type": "destroy", "value": 1 }]
+        },
+        // #106 Test Heal | HP 5 | ATK 0 | Lv 1  -  heal 3
+        {
+          "enemyID": 106,
+          "enemyname": "Test Heal",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinMage",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 0,
+          "enemyability": [{ "type": "heal", "value": 3 }]
+        },
+        // #107 Test Heal All | HP 5 | ATK 0 | Lv 1  -  heal_all 3
+        {
+          "enemyID": 107,
+          "enemyname": "Test Heal All",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinMage",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 0,
+          "enemyability": [{ "type": "heal_all", "value": 3 }]
+        },
+        // #108 Test Shroud | HP 5 | ATK 0 | Lv 1  -  shroud 3
+        {
+          "enemyID": 108,
+          "enemyname": "Test Shroud",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinMage",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 0,
+          "enemyability": [{ "type": "shroud", "value": 3 }]
+        },
+        // #109 Test Discard Hand | HP 5 | ATK 3 | Lv 1  -  discard_hand 1 (charges 2 turns)
+        {
+          "enemyID": 109,
+          "enemyname": "Test Discard Hand",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinSoldier",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "discard_hand", "delay": 2, "value": 1 }]
+        },
+        // #110 Test Discard Extra Deck | HP 5 | ATK 3 | Lv 1  -  discard_extra_deck 1 (charges 2 turns)
+        {
+          "enemyID": 110,
+          "enemyname": "Test Discard Extra Deck",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinSoldier",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 3,
+          "enemyability": [{ "type": "discard_extra_deck", "delay": 2, "value": 1 }]
+        },
+        // #111 Test Add Deck | HP 5 | ATK 0 | Lv 1  -  add_deck 1 (charges 2 turns)
+        {
+          "enemyID": 111,
+          "enemyname": "Test Add Deck",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinMage",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 0,
+          "enemyability": [{ "type": "add_deck", "delay": 2, "card_id": -1, "value": 1 }]
+        },
+        // #112 Test Summon | HP 5 | ATK 0 | Lv 1  -  summons #1 (enemyCollection01) (charges 2 turns)
+        {
+          "enemyID": 112,
+          "enemyname": "Test Summon",
+          "type": "monster",
+          "tag": ["Test", "Ability"],
+          "sprite": "SPR_Monsterplaceholder",
+          "animation": "GoblinMage",
+          "level": 1,
+          "enemyhealthvalue": 5,
+          "enemyattackvalue": 0,
+          "enemyability": [
+            { "type": "summon_enemy", "delay": 2, "enemyID": 1, "collection": "enemyCollection01" }
+          ]
+        }
+      ]
+    }
+  ]
+}

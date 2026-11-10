@@ -10,6 +10,8 @@ function load_MonsterSet_ResolvePath(_filename) {
     if (file_exists(_filename)) return _filename;
 
     var _alts = [
+        "enemies/" + _filename,
+        "datafiles/enemies/" + _filename,
         "datafiles/test set/" + _filename,
         "datafiles/" + _filename
     ];
@@ -19,6 +21,9 @@ function load_MonsterSet_ResolvePath(_filename) {
     return _filename;
 }
 
+/// Load an enemy file. Two layouts:
+///   { "collections": [ { "collection": ..., "enemy": [...] }, ... ] }   (enemies/animatedcreatures.json)
+///   { "collection": ..., "enemy": [...] }                                (one collection per file)
 function load_MonsterSet(_filename) {
     monsters_EnsureDatabase();
 
@@ -28,20 +33,27 @@ function load_MonsterSet(_filename) {
     }
 
     var _set = data_ReadJsonFile(_path);
+    if (!is_struct(_set)) return;
 
-    if (!variable_struct_exists(_set, "enemy") || !is_array(_set.enemy)) {
+    if (variable_struct_exists(_set, "collections") && is_array(_set.collections)) {
+        for (var c = 0; c < array_length(_set.collections); c++) {
+            monster_LoadCollection(_set.collections[c]);
+        }
         return;
     }
+    monster_LoadCollection(_set);
+}
 
-    if (!variable_struct_exists(_set, "collection") || string(_set.collection) == "") {
-        return;
-    }
+/// Add one { "collection": ..., "enemy": [...] } block to the enemy database
+function monster_LoadCollection(_set) {
+    if (!is_struct(_set)) return;
+    if (!variable_struct_exists(_set, "enemy") || !is_array(_set.enemy)) return;
+    if (!variable_struct_exists(_set, "collection") || string(_set.collection) == "") return;
 
     var _new_enemies = _set.enemy;
     for (var i = 0; i < array_length(_new_enemies); i++) {
         array_push(global.monster_DB.enemies, monster_BuildDefinition(_set.collection, _new_enemies[i]));
     }
-
 }
 
 /// Optional enemy JSON fields, copied as-is when present:
@@ -125,12 +137,9 @@ function SCR_LoadAllMonsters() {
     monsters_EnsureDatabase();
     global.monster_DB.enemies = [];
 
-    load_MonsterSet("EnemyCollection01.json");
-    load_MonsterSet("EnemyForestCollection01.json");      // collection "enemyforestcollection1"
-    load_MonsterSet("EnemyUndeadCollection01.json");      // collection "enemyundeadcollection1"
-    load_MonsterSet("EnemySamuraiCollection01.json");      // collection "enemysamuraicollection1"
-    load_MonsterSet("EnemyTownCollection01.json");      // collection "enemytowncollection1"
-    load_MonsterSet("AbilityTestMonsters.json");
+    // every example enemy: Grasslands, Forest, Undead, Samurai, Town and the ability testers
+    load_MonsterSet("enemies/animatedcreatures.json");
+    // more enemy files go in datafiles/enemies/ too: load_MonsterSet("enemies/<file>.json");
 
     if (array_length(global.monster_DB.enemies) <= 0) {
         monsters_LoadBuiltinFallback();

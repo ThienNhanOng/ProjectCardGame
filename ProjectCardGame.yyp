@@ -99,12 +99,7 @@
   "IncludedFiles":[
     {"$GMIncludedFile":"","%Name":"AbilityTestBattle.json","CopyToMask":-1,"filePath":"datafiles","name":"AbilityTestBattle.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"AbilityTestCards.json","CopyToMask":-1,"filePath":"datafiles","name":"AbilityTestCards.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"AbilityTestMonsters.json","CopyToMask":-1,"filePath":"datafiles","name":"AbilityTestMonsters.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"EnemyCollection01.json","CopyToMask":-1,"filePath":"datafiles","name":"EnemyCollection01.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"EnemyForestCollection01.json","CopyToMask":-1,"filePath":"datafiles","name":"EnemyForestCollection01.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"EnemySamuraiCollection01.json","CopyToMask":-1,"filePath":"datafiles","name":"EnemySamuraiCollection01.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"EnemyTownCollection01.json","CopyToMask":-1,"filePath":"datafiles","name":"EnemyTownCollection01.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"EnemyUndeadCollection01.json","CopyToMask":-1,"filePath":"datafiles","name":"EnemyUndeadCollection01.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"animatedcreatures.json","CopyToMask":-1,"filePath":"datafiles/enemies","name":"animatedcreatures.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Grasslands_Battleset01_starter.json","CopyToMask":-1,"filePath":"datafiles","name":"Grasslands_Battleset01_starter.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Grasslands_WorldMap01.json","CopyToMask":-1,"filePath":"datafiles","name":"Grasslands_WorldMap01.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Grasslands_WorldMap02.json","CopyToMask":-1,"filePath":"datafiles","name":"Grasslands_WorldMap02.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},

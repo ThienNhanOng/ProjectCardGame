@@ -26,13 +26,15 @@ All game data JSON files live in **`datafiles/`**. Traits are implemented as GML
 
    - **Player cards** → `scripts/scr_card_data/scr_card_data.gml` → `load_Collection("YourFile.json")`
 
-   - **Enemies** → `scripts/scr_monster_data/scr_monster_data.gml` → `load_MonsterSet("YourFile.json")`
+   - **Enemies** → add them to `datafiles/enemies/animatedcreatures.json` (no loader change), or a new file in `datafiles/enemies/` + `load_MonsterSet("enemies/YourFile.json")` in `scripts/scr_monster_data`
 
    - **Battles** → put them in a battleset and name it in a map JSON (`"battleset"`). See [Battles](#battles-battlesets)
 
    - **World maps** → see [World maps](#world-maps-making-a-new-map)
 
 4. Use unique **`id`** (cards) or **`enemyID`** (enemies) within each collection
+
+5. `//` comments are allowed in every data file (on their own line or after a value); the game strips them before reading. A `//` inside a "string" is kept
 
 
 
@@ -1295,37 +1297,35 @@ During summon the player clicks matching hand cards to discard them. This step c
 
 
 
-## Enemies (`MonsterSet*.json`)
+## Enemies (`datafiles/enemies/`)
 
-
+All enemies live in **`datafiles/enemies/animatedcreatures.json`**: every example creature in one file, one block per
+area (Grasslands, Forest, Undead, Samurai, Town, Ability test), with `//` comments over each area, each family and each
+enemy (`#id Name | HP | ATK | Lv - what it does`).
 
 ### File shape
 
-
-
 ```json
-
 {
-
-  "collection": "enemySet_01",
-
-  "enemy": [
-
-    { ... enemy entries ... }
-
+  "collections": [
+    // ===== GRASSLANDS: goblins and bandits =====
+    {
+      "collection": "enemyCollection01",
+      "enemy": [
+        // #1 Goblin Raider | HP 6 | ATK 6 | Lv 1  -  plain attacks
+        { "enemyID": 1, "enemyname": "Goblin Raider", ... }
+      ]
+    },
+    { "collection": "enemyforestcollection1", "enemy": [ ... ] }
   ]
-
 }
-
 ```
 
-
-
-- **`collection`** must match the `collection` string used in battle wave JSON (e.g. `"enemySet_01"`)
-
-- Loaded by `load_MonsterSet()` in `OBJ_GameController` Create, via `SCR_LoadAllMonsters()`
-
-
+- A battle picks an enemy by **`collection` + `enemyID`** (battleset wave: `{ "collection": "enemyCollection01", "enemyID": 4 }`), so keep collection names as they are and `enemyID`s unique inside a collection. Order inside a collection doesn't matter.
+- **Add an enemy:** copy one inside the right collection and give it a new `enemyID`. **Add an area:** add another `{ "collection", "enemy" }` block.
+- **More enemy files:** put them in `datafiles/enemies/`, register them as Included Files, and add `load_MonsterSet("enemies/<file>.json")` to `SCR_LoadAllMonsters()` in `scripts/scr_monster_data`. A file can also be a single `{ "collection": ..., "enemy": [...] }` block.
+- Loaded by `load_MonsterSet()` in `OBJ_GameController` Create, via `SCR_LoadAllMonsters()`.
+- Old collection names `enemySet_01..03`, `enemyGoblins_01`, `enemyOrcs_01` (old test battles) are read as `enemyCollection01`. The old `datafiles/test set/MonsterSet*.json` files aren't loaded.
 
 ### Enemy entry
 
@@ -1920,7 +1920,7 @@ First pick → card 8, second → card 9 (chance values ignored).
 
 | Legacy card formats | `datafiles/old/cardSet_01.json`, `cardSet_02.json` |
 
-| Enemy set (loaded) | `datafiles/EnemyCollection01.json` (also Forest / Undead / Samurai / Town) |
+| Every enemy (all areas) | `datafiles/enemies/animatedcreatures.json` |
 | Old enemy sets | `datafiles/test set/MonsterSet01.json` |
 
 | Elite enemies (old) | `datafiles/test set/MonsterSet03.json` |

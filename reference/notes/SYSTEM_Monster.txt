@@ -21,7 +21,7 @@ RESPONSIBILITIES
 - Dispatch enemyability JSON on enemy turn
 
 DEPENDENCIES
-- monster_DB / EnemyCollection01.json
+- global.monster_DB / datafiles/enemies/animatedcreatures.json (every enemy)
 - scr_battle_turn calls ability execute
 - trait_Execute / card_* effects shared with player cards
 
