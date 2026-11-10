@@ -2,7 +2,7 @@
 
 
 
-How to create player cards, enemies, battles, and wire traits in this project.
+How to create player cards, enemies, battles, battle backgrounds and world maps, and wire traits in this project.
 
 
 
@@ -28,7 +28,9 @@ All game data JSON files live in **`datafiles/`**. Traits are implemented as GML
 
    - **Enemies** → `scripts/scr_monster_data/scr_monster_data.gml` → `load_MonsterSet("YourFile.json")`
 
-   - **Battle wave** → referenced from `scripts/SCR_Monster_Init/SCR_Monster_Init.gml` (or set `global.battle_config_file` before battle init)
+   - **Battles** → put them in a battleset and name it in a map JSON (`"battleset"`). See [Battles](#battles-battlesets)
+
+   - **World maps** → see [World maps](#world-maps-making-a-new-map)
 
 4. Use unique **`id`** (cards) or **`enemyID`** (enemies) within each collection
 
@@ -145,6 +147,7 @@ Test sets (`MonsterTestset`, `TestActionset`, `TestWeaponset`) remain in the pro
 | `tag` | All | Array of strings (e.g. `["Warrior"]`) |
 
 | `sprite` | All | Sprite asset name |
+| `field_sprite` | Monster, spirit | Optional. The character that stands on the field when the card is played (e.g. `"SPR_Unit_Recruiter2"`), on a stone circle. Origin at the feet, facing right. Without it the card itself is shown on the field |
 
 | `own` | Collection init | Copies granted at deckbuilder start. Omit for unobtainable cards |
 
@@ -1451,63 +1454,202 @@ Attack: 5
 
 
 
-## Battles (`Battle*.json`)
+## Battles (battlesets)
 
-
-
-Defines which enemies spawn and how many enemy slots are active.
-
-
+A **battleset** is one JSON file holding many battles. Each map names its battleset (map JSON `"battleset"`), and every
+node on the map names a battle in it by its `"battle"` id.
 
 ```json
-
 {
-
-  "battle": "battle01",
-
-  "active_slots": 3,
-
-  "wave": [
-
-    { "collection": "enemySet_01", "enemyID": 1 },
-
-    { "collection": "enemySet_01", "enemyID": 2 }
-
+  "battles": [
+    {
+      "battle": "battle01",
+      "active_slots": 1,
+      "background": "SPR_BattleBG_Swamp",
+      "wave": [
+        { "collection": "enemyCollection01", "enemyID": 1 },
+        { "collection": "enemyCollection01", "enemyID": 1 }
+      ]
+    }
   ]
-
 }
-
 ```
 
-
-
 | Field | Notes |
-
 |-------|-------|
-
-| `battle` | Battle id label (debug / UI) |
-
+| `battle` | The battle's id. Map nodes and replay pools use it (`"battle01"`) |
 | `active_slots` | How many wave spots the battle uses (1–5): the back row's 3 first, then the second row's 2. The first row (3 more, nearest you) is only for summons |
+| `wave` | Spawn queue. Each entry is `{ "collection", "enemyID" }` from a loaded enemy set. Enemies past `active_slots` wait in the queue and walk in at the enemy turn (or at once with `tag_in`) |
+| `background` | Optional. The battlefield sprite for this battle only. See [Battle backgrounds](#battle-backgrounds-and-where-units-stand) |
 
-| `wave` | Spawn queue — each entry references a loaded monster set |
-
-
-
-Loaded by `battle_LoadConfig()` in `scripts/scr_battle_session/scr_battle_session.gml`.
-
-
-
-Default file: **`Battle01.json`**, set in `scripts/SCR_Monster_Init/SCR_Monster_Init.gml`. Override with `global.battle_config_file = "Battle02.json"` before monster init.
-
-
-
-**Important:** `wave[].collection` must match the `"collection"` field in the corresponding `MonsterSet*.json`, and `enemyID` must exist in that set.
-
-
+- Example: `datafiles/Grasslands_Battleset01_starter.json`. Loaded (and cached) by `battle_LoadBattleset()` / `battle_GetBattlesetBattle()` in `scripts/scr_battle_session`.
+- `wave[].collection` must match the `"collection"` of a loaded enemy set, and `enemyID` must exist in it.
+- From code: `worldmap_StartBattle("battle03")` starts a battle from the current map's battleset.
+- Old single-battle files (`Battle01.json`: one battle at the top level, no `"battles"` array) still work as the fallback when a battle is started with no map (`global.battle_config_file`, read in `scr_monster_manager`).
 
 ---
 
+## Battle backgrounds and where units stand
 
+Every unit stands on the ground, **below y = 300**. The background picture has to put its ground there too, so nobody looks
+like they're standing in the sky. All 12 battle backgrounds already do this, and new ones should match.
+
+```
+ y = 0    ┌──────────────────────────── 1280 px wide ─────────────────────────────┐
+          │  SKY: prompts, battle log, unit names, tops of tall sprites           │
+ y ≈ 260  │ ~ ~ ~ ~ ~ horizon: the art turns from sky / far hills into flat ground │
+ y = 300  │ ─ ─ ─ ─ top of the highest stone circle (nothing stands above this) ─ │
+ y = 315  │   feet of the top row of units                                        │
+          │   GROUND: units, stone circles, the open middle and the Playing card  │
+ y = 472  │   feet of the bottom row of units                                     │
+ y = 476  │   (dark fade behind the health bar and mana)                          │
+ y = 534  ├──────────────────── bottom bar (hand, decks, End Turn) ────────────────┤
+ y = 562  │   the picture ends here; the bar hides its last 28 px                 │
+ y = 700  └───────────────────────────────────────────────────────────────────────┘
+```
+
+**Rules for a battle background:**
+
+| Rule | Value |
+|------|-------|
+| Size | **1280 × 562** px (same as every `SPR_BattleBG_*`) |
+| Sprite origin | **0, 0** (top-left) |
+| Where it's drawn | Always at **x 0, y 0** on `Room_battle`'s `Background` layer. Not stretched or moved. The code has no offset setting, so put the ground in the right place in the picture itself |
+| Horizon (sky → ground) | Around **y 250–270** (all current backgrounds: ~y 260). Never lower than **y 290**, or the top row of units ends up standing on the horizon or the sky |
+| Ground | Flat, walkable ground from the horizon down to y 534. Keep it fairly plain between **x 180–1120, y 290–500**: that's where units, circles and HP bars go |
+| Below y 534 | Hidden under the bottom bar. Put nothing important there |
+| Sky | Keep the top-right corner readable: the battle log sits there |
+
+**Where units stand (feet).** Code: `battle_LayoutPlayerFeet` / `battle_LayoutEnemyFeet` in `scripts/scr_battle_layout`.
+
+| Side | Row | Spots → feet (x, y) |
+|------|-----|---------------------|
+| You | front (0-2) | 0 → (440, 315), 1 → (440, 393), 2 → (440, 472) |
+| You | back (3-4, opened by `openzone`) | 3 → (250, 354), 4 → (250, 433) |
+| Enemy | first, nearest you (5-7, summons only) | 6 → (800, 315), 5 → (800, 390), 7 → (800, 465) |
+| Enemy | second (3-4) | 3 → (915, 352), 4 → (915, 428) |
+| Enemy | third, back (0-2, the wave fills these first) | 1 → (1030, 315), 0 → (1030, 390), 2 → (1030, 465) |
+
+- A stone circle's top is 12 px above the feet, so feet at y 315 put the highest circle's top at y ~303. If you move a spot, keep its feet at **y 315 or lower**.
+- Sprites may stick up above y 300 (heads, weapons, names). Only the feet and circle stay below it.
+- Character sprites: origin **at the feet**, drawn **facing right** (the game mirrors enemies). See [Animated enemies](#animated-enemies).
+
+**Which background a battle uses** (first one found):
+
+1. The battle's `"background"` in its battleset.
+2. The map's `"battle_background"` in the map JSON (one look for the whole map).
+3. `SPR_BattleBG_GrassPlains` (`BATTLE_DEFAULT_BACKGROUND` in `scr_battle_layout`).
+
+The name must be a sprite in the project, or the default is used.
+
+**Adding a new background:** make a 1280 × 562 picture with the horizon around y 260. In the IDE, create a sprite named
+`SPR_BattleBG_<Name>` with origin 0, 0. Then put its name in a map's `"battle_background"` or a battle's `"background"`.
+Ready-made: BambooGrove, CrystalCave, DeepForest, Desert, FlowerMeadow, GrassPlains, GrassPlainsDusk, Graveyard,
+RockyCanyon, Snowfield, Swamp, Volcano.
+
+---
+
+## World maps (making a new map)
+
+A map is a **room** (the picture and the nodes you can walk to) plus a **map JSON** (its name, battleset, battle look,
+story order and random side events). `Room_Worldmap1` + `Grasslands_WorldMap01.json` is the example to copy.
+
+### 1. The map JSON
+
+Create `datafiles/<Area>_WorldMap<NN>.json` and register it as an Included File, like any data file
+(see [Quick checklist](#quick-checklist-new-json-file)).
+
+```json
+{
+  "map_id": "grasslands_03",
+  "map_name": "Map 3",
+  "battleset": "Grasslands_Battleset01_starter.json",
+  "battle_background": "SPR_BattleBG_FlowerMeadow",
+  "side_events": { "chance": 0.5 },
+  "event_flow": [1, 2, 3],
+  "events": [
+    { "id": 1, "label": "Trail Start", "battle": "battle01", "replay_pool": ["battle01", "battle02"] },
+    { "id": 2, "label": "Old Bridge",  "battle": "battle02", "replay_pool": ["battle02", "battle03"] },
+    { "id": 3, "label": "Boss Gate",   "battle": "battle05", "replay_pool": ["battle05"] }
+  ]
+}
+```
+
+| Field | Notes |
+|-------|-------|
+| `map_id` | Short id for the map (debug display; also the name shown if `map_name` is empty). Progress and saves are keyed by the JSON file name, so don't rename the file once players have saves |
+| `map_name` | Shown at the bottom-left of the map and in save slots |
+| `battleset` | The battleset file this map's battles come from (see [Battles](#battles-battlesets)) |
+| `battle_background` | Battlefield picture for every battle on this map, unless a battle sets its own `"background"` |
+| `side_events` | Random side branches after story wins. All settings: `reference/guides/HOWTO_WorldMap_Events.md`. Leave it out for no side events |
+| `event_flow` | Story order of the event ids. Story node *n* opens when the one before it is cleared |
+| `events` | One entry per story node: `id`, `label`, `battle` (id in the battleset), `replay_pool` (battles picked from when you replay a cleared node), optional `battleset` (override), optional rewards (`reward_entries`, `reward_gift_count`, `reward_randomize`) |
+
+### 2. The room
+
+1. In the IDE, **duplicate `Room_Worldmap1`** (right-click → Duplicate) and rename it, e.g. `Room_Worldmap3`.
+   This keeps the layers you need (`instance` / `Instances`, `Background_Layers` / `Backgrounds_1`, `events`) and the
+   `OBJ_WorldMapController` instance, which the map needs. Delete the copied `OBJ_Map1_Marker..` instances.
+2. Room size stays **1280 × 700**.
+3. Put the map picture on the **`Backgrounds_1`** layer (layer properties → sprite). Both current maps place it at layer
+   **x 0, y -64** (Map 2 also ticks *Stretch*). Set the layer's x / y in the layer properties so the picture covers the
+   room the way you want.
+4. Keep the bottom of the screen clear for the HUD: map name and "Cleared" text at the bottom-left (y > 640), the
+   travel hint along the bottom middle (y > 665), and the **Collection** button at the bottom-right (~x 1063–1193,
+   y 588–624). Keep nodes above **y ~570** and away from that button.
+
+### 3. The nodes (markers)
+
+1. **Player start:** place one `OBJ_PlayerMarker` where the player begins (node 0, the start point).
+2. **Story nodes:** for each story node, create an object `OBJ_Map3_Marker01`, `02`, ... with **parent
+   `OBJ_EventMarker`** (never place `OBJ_EventMarker` itself). Place one of each in the room, on the path in the picture.
+3. Give each marker a **Create** event:
+
+   ```gml
+   event_inherited();
+   eventmarker_apply_config(1, "Trail Start", "battle01",
+       "Grasslands_Battleset01_starter.json", "battle01,battle02");
+   eventmarker_set_dialog_pre(dialog_Map3_Marker01_PreBattle);   // optional
+   eventmarker_set_dialog_pre_once(true);                          // optional
+   eventmarker_apply_reward(1, true);                              // optional: 1 card on first clear
+   eventmarker_reward_add(9, 100);
+   ```
+
+   The first number is the node's **story order** (1, 2, 3 ...). Markers are linked in that order:
+   start → 1 → 2 → 3. Anything left blank (`""`) in the marker is taken from the JSON event with the same position in
+   `event_flow`, so you can either set everything in the marker or keep markers short and put the details in the JSON.
+4. The path lines, glow, labels and "Press E" are drawn for you. The marker's room position *is* the node.
+
+### 4. Hook the room to its JSON
+
+Add the room to `worldmap_GetRoomConfigFile()` in `scripts/scr_worldmap_progress`:
+
+```gml
+case Room_Worldmap3: return "Grasslands_WorldMap03.json";
+```
+
+### 5. Get there from another map
+
+On the last node of the previous map (its marker's Create event):
+
+```gml
+eventmarker_set_room_goto("Room_Worldmap3", 1);   // after the first win here, go to Map 3, standing on its node 1
+```
+
+Pass `-1` instead of `1` to start at `OBJ_PlayerMarker`. Pass `true` as a third argument to go straight there on
+**E** without a battle. Saves remember which map room you're in, so Continue and Quick Load bring you back to it.
+
+### Checklist
+
+- [ ] Map JSON in `datafiles/`, registered as an Included File, battles exist in its battleset
+- [ ] Room duplicated from `Room_Worldmap1`, picture on `Backgrounds_1`, nodes clear of the bottom HUD
+- [ ] `OBJ_PlayerMarker` + one `OBJ_MapN_MarkerNN` per story node (parent `OBJ_EventMarker`), order 1, 2, 3 ...
+- [ ] `OBJ_WorldMapController` in the room (the dialog controller is created for you if it's missing)
+- [ ] `case Room_WorldmapN:` added to `worldmap_GetRoomConfigFile`
+- [ ] A way in: `eventmarker_set_room_goto("Room_WorldmapN", ...)` on the previous map
+- [ ] Battle background chosen (`battle_background`) and it follows [the ground rule](#battle-backgrounds-and-where-units-stand)
+
+---
 
 ## Card system scripts (IDE layout)
 
@@ -1614,7 +1756,7 @@ saves/<account>/slot1.json ... slot4.json
 
 
 
-Battle room then loads `Battle01.json` (or override) into the enemy spawn queue.
+A map node starts a battle by looking up its id in the map's battleset (`global.battle_runtime_config`); with no map, the battle room falls back to `Battle01.json` (or `global.battle_config_file`).
 
 
 
@@ -1775,15 +1917,19 @@ First pick → card 8, second → card 9 (chance values ignored).
 
 | Active weapon test set | `datafiles/test set/TestWeaponset.json` |
 
-| Legacy player card set | `datafiles/CardSet01.json` |
 
 | Legacy card formats | `datafiles/old/cardSet_01.json`, `cardSet_02.json` |
 
-| Enemy set | `datafiles/MonsterSet01.json` |
+| Enemy set (loaded) | `datafiles/EnemyCollection01.json` (also Forest / Undead / Samurai / Town) |
+| Old enemy sets | `datafiles/test set/MonsterSet01.json` |
 
-| Elite enemies | `datafiles/MonsterSet03.json` |
+| Elite enemies (old) | `datafiles/test set/MonsterSet03.json` |
 
-| Battle wave | `datafiles/Battle01.json` |
+| Battleset (battles for a map) | `datafiles/Grasslands_Battleset01_starter.json` |
+| World map | `datafiles/Grasslands_WorldMap01.json` + `rooms/Room_Worldmap1` |
+| Single battle (fallback) | `datafiles/test set/Battle01.json` |
+| Battle layout & backgrounds | `scripts/scr_battle_layout/scr_battle_layout.gml` |
+| Map room → JSON | `scripts/scr_worldmap_progress/SCR_WorldMap_Progress.gml` (`worldmap_GetRoomConfigFile`) |
 
 | Load player cards | `scripts/scr_card_data/scr_card_data.gml` |
 

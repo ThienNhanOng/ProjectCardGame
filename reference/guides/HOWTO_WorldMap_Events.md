@@ -4,6 +4,10 @@
 
 Overworld progression: move player, interact with markers, launch battles, earn rewards, return after victory.
 
+**Making a new map, step by step** (map JSON, room, markers, hooking it up, linking from the previous map), and the
+**battle background rules** (where the ground must be so units stand on it): see `datafiles/README.md` →
+*World maps (making a new map)* and *Battle backgrounds and where units stand*.
+
 ## Main scripts
 
 - `scr_worldmap_controller` — map room init, HUD, collection button

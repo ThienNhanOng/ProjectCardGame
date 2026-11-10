@@ -16,6 +16,27 @@ This folder documents the **engine and tools** used to build the game. Actual ga
 | [DEBUG.md](DEBUG.md) | How to re-enable debug overlays and console logs |
 | [DEBUG_ARCHIVE.gml](DEBUG_ARCHIVE.gml) | Commented-out debug snippets removed from the game |
 
+## How do I make …?
+
+| To make | Where it's documented |
+|---------|-----------------------|
+| A player card (monster, weapon, action, spirit) | [../datafiles/README.md](../datafiles/README.md#player-cards-cardsetjson) → *Player cards*, *Examples by type* |
+| Card art / the character a card stands on the field as | [../datafiles/README.md](../datafiles/README.md#common-fields) → `sprite`, `field_sprite` |
+| An ability (trait) on a card | [../datafiles/README.md](../datafiles/README.md#traits-in-json) → *Traits in JSON* |
+| A brand-new trait type (new GML effect) | [../datafiles/README.md](../datafiles/README.md#adding-a-new-trait-type) |
+| A keyword (`frontline`, `tag_in`) | [../datafiles/README.md](../datafiles/README.md#keywords) |
+| Card costs, tributes, resources | [../datafiles/README.md](../datafiles/README.md#ability--card-cost--tributes) |
+| An enemy (stats, moves, stances, summons) | [../datafiles/README.md](../datafiles/README.md#enemies-monstersetjson) |
+| An animated enemy sprite | [../datafiles/README.md](../datafiles/README.md#animated-enemies) |
+| A battle (enemy wave, how many spots) | [../datafiles/README.md](../datafiles/README.md#battles-battlesets) |
+| A battle background (and where the ground must be) | [../datafiles/README.md](../datafiles/README.md#battle-backgrounds-and-where-units-stand) |
+| A world map (room, JSON, nodes, linking maps) | [../datafiles/README.md](../datafiles/README.md#world-maps-making-a-new-map) |
+| Random side branches on a map | [guides/HOWTO_WorldMap_Events.md](guides/HOWTO_WorldMap_Events.md) |
+| Card rewards for clearing a map node | [../datafiles/README.md](../datafiles/README.md#map-marker-card-rewards-world-map) |
+| Dialog / a scene before or after a battle | [guides/HOWTO_Dialog.md](guides/HOWTO_Dialog.md) |
+| Save slots, accounts, the home screen | [../datafiles/README.md](../datafiles/README.md#home-screen-saves-and-accounts) |
+| Debug overlays and logs | [DEBUG.md](DEBUG.md) |
+
 ## Systems index
 
 | # | System | Summary note | How-to guide | UML |
@@ -42,7 +63,7 @@ Preview `.puml` files with the [PlantUML extension](https://marketplace.visualst
 ```
 OBJ_EventMarker
 ├── OBJ_Map1_Marker01 … OBJ_Map1_Marker05
-└── OBJ_Map2_Marker01
+└── OBJ_Map2_Marker01 … OBJ_Map2_Marker08
 
 (All other objects: no inheritance parent)
 ```
@@ -50,11 +71,12 @@ OBJ_EventMarker
 ## Room flow (player journey)
 
 ```
-Room_collection → Room_Worldmap1 → Room_battle → Room_Worldmap1 → …
+Room_home → Room_collection (new game: build a deck) → Room_Worldmap1 → Room_battle → Room_Worldmap1 → … → Room_Worldmap2 → …
+Esc on a map or in the deck builder → Room_home (Continue goes back)
 ```
 
 ## Related docs outside this folder
 
-- `datafiles/README.md` — JSON field reference for cards, enemies, battles, traits
+- `datafiles/README.md` — how to make cards, enemies, battles, battle backgrounds, world maps, traits; saves
 - `notes/Map1Markers guide/` — legacy marker setup guide
 - `notes/Dialog System guide/` — legacy dialog guide
